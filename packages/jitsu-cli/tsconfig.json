@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "lib": ["ES6", "ES2015", "ESNext"],
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "importHelpers": true,
+    "removeComments": true
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "__test_data__",
+    "test",
+    "templates"
+  ]
+}
