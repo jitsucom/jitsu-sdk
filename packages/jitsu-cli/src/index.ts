@@ -31,7 +31,7 @@ function displayHelp(cmd?: string) {
         } else {
             console.error(chalk.bold(`SYNOPSIS`))
             console.error("")
-            console.error(chalk.bold(`  jitsu ${cmd}`) + " " + command.description)
+            console.error(chalk.bold(`  jitsu ${cmd}`) + " - " + command.description)
             if (command.help) {
                 console.error("")
                 console.error(command.help.trim().split("\n").map(ln => `${ln}`).join('\n'))
@@ -40,7 +40,6 @@ function displayHelp(cmd?: string) {
         }
     }
 }
-
 
 function captureCommand(command: string, args: string[]): string[] | undefined {
     let commandParts = command.split(" ");
@@ -55,8 +54,11 @@ function captureCommand(command: string, args: string[]): string[] | undefined {
     return args.slice(commandParts.length)
 }
 
-function exitWithError(error: string) {
+function exitWithError(error: string, details?: string) {
     console.error(`${chalk.bold.red("Error!")} - ${error}`)
+    if (details) {
+        console.error(details)
+    }
     process.exit(1)
 }
 
@@ -88,7 +90,7 @@ export async function index(): Promise<any> {
                     process.exit(0)
                     return;
                 } else {
-                    exitWithError(commandResult.message || 'unknown error')
+                    exitWithError(commandResult.message || 'unknown error', commandResult.details)
                 }
             }
         }

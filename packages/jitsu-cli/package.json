@@ -1,5 +1,5 @@
 {
-  "name": "jitsu-cli",
+  "name": "@jitsu/jitsu-cli",
   "private": true,
   "bin": {
     "jitsu": "./build/jitsu.js"
@@ -9,18 +9,21 @@
     "start": "ts-node src/index.ts"
   },
   "devDependencies": {
-    "@types/node": "^16.11.7",
     "lerna": "^4.0.0",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.4.4"
+    "ts-node": "^10.4.0"
   },
   "dependencies": {
+    "@jitsu/jitsu-types": "^0.0.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-multi-entry": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.0.6",
     "@types/prismjs": "^1.16.6",
     "chalk": "^4.1.2",
     "commander": "^8.3.0",
     "ora": "^6.0.1",
     "prismjs": "^1.25.0",
     "rollup": "^2.60.0",
+    "rollup-plugin-typescript2": "^0.31.0",
     "terminal-link": "^3.0.0",
     "tslib": "^2.3.1"
   }

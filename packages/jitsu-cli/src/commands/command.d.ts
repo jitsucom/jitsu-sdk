@@ -1,7 +1,6 @@
 export type CommandResult = {
-    success: boolean
-    message?: string
-}
+    success: true
+} | { success: false, message: string, details?: string }
 
 export type CommandName = 'destination build'
 

@@ -1,12 +1,17 @@
 import {Command, CommandResult} from "../command";
 import chalk from "chalk";
 import {chalkCode} from "../../lib/chalk-code-highlight";
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 import path from "path";
 import getLog from "../../lib/log";
 import {appendError} from "../../lib/errors";
+import multi from '@rollup/plugin-multi-entry';
 import * as fs from "fs";
+import rollupTypescript from 'rollup-plugin-typescript2';
+import {rollup} from "rollup";
 
-const npmExample=chalkCode.json`
+const npmExample = chalkCode.json`
     {
       "name": "jitsu-destination-adapter",
       "main": "dist/index.js"
@@ -16,7 +21,7 @@ const npmExample=chalkCode.json`
     }
 `;
 
-const typescriptExample=chalkCode.typescript`
+const typescriptExample = chalkCode.typescript`
     const transform: DestinationAdapter = () => {}
     const meta: DestinationAdapter = {}
 `;
@@ -54,28 +59,75 @@ ${chalk.bold('OPTIONS')}
 `;
 
 const buildCommand: Command = {
-    description: "Builds a Jitsu destination project",
+    description: "builds a Jitsu destination project",
     help,
     async exec(args: string[]): Promise<CommandResult> {
-        let fullPath = path.resolve(process.cwd() + "/" + (args?.[0] || ''));
-        getLog().info("🔨 Building project in " + chalk.bold(fullPath));
-        if (!fs.existsSync(fullPath)) {
-            throw new Error(`Path ${fullPath} does not exist`)
+        let projectBase = path.resolve(process.cwd() + "/" + (args?.[0] || ''));
+        getLog().info("🔨 Building project in " + chalk.bold(projectBase));
+        if (!fs.existsSync(projectBase)) {
+            throw new Error(`Path ${projectBase} does not exist`)
         }
-        let packageFile = path.resolve(fullPath, 'package.json');
+        let packageFile = path.resolve(projectBase, 'package.json');
         if (!fs.existsSync(packageFile)) {
-            return {success: false, message: 'Can\'t find package.json in ' + fullPath}
+            return {success: false, message: 'Can\'t find package.json in ' + projectBase}
         }
         let packageJson;
         try {
             packageJson = JSON.parse(fs.readFileSync(packageFile, 'utf8'))
         } catch (e) {
-            throw new Error(appendError(`Failed to parse package.json at ${fullPath}`, e))
+            throw new Error(appendError(`Failed to parse package.json at ${projectBase}`, e))
         }
         let distFile = packageJson.main || 'dist/index.js';
-        getLog().info("📦 Bundle will be written to " + chalk.bold(path.resolve(distFile)))
+        let fullOutputPath = path.resolve(projectBase, distFile);
+        getLog().info("📦 Bundle will be written to " + chalk.bold(fullOutputPath))
+        let tsConfigPath = path.resolve(projectBase, "tsconfig.json");
+        const typescriptEnabled = fs.existsSync(path.resolve(tsConfigPath));
+        if (typescriptEnabled) {
+            getLog().info(`ℹ️ Found ${chalk.bold('tsconfig.json')}, typescript will be enabled`)
+        }
+        getLog().info("Building project")
+        try {
+            let indexFile = path.resolve(projectBase, "src/index.ts");
+            const bundle = await rollup({
 
-        return {success: true };
+                input: [
+                    indexFile
+                ],
+                plugins: [
+                    typescriptEnabled && rollupTypescript({tsconfig: tsConfigPath}),
+                    multi(),
+                    resolve(),
+                    commonjs()
+                ]
+            })
+            getLog().info("Generating bundle")
+            let output = await bundle.generate({
+                generatedCode: "es5",
+                format: "cjs"
+            });
+            getLog().info("Validating build");
+            let evalRes = eval(`(function(exports){${output.output[0].code}})`);
+            let exports = {};
+            evalRes(exports);
+            if (!exports['adapter']) {
+                return {success: false, message: `${chalk.bold(indexFile)} should export ${chalk.italic('adapter')} symbol. It exports: ` + Object.keys(exports).join(", ")}
+            }
+            fs.mkdirSync(path.dirname(fullOutputPath), {recursive: true})
+            fs.writeFileSync(fullOutputPath, output.output[0].code)
+
+        } catch (e: any) {
+            if (e.id && e.loc && e.frame) {
+                return {
+                    success: false, message: 'Build failed: ' + e.message
+                        + `\n\n  See: ${e.loc.file}:${e.loc.line}\n\n`
+                        + `${e.frame.split("\n").map(ln => "  " + chalk.bgRed(" ") + " " + ln).join("\n")}`
+                }
+            }
+            return {success: false, message: appendError('Build failed', e), details: e?.stack}
+        }
+
+
+        return {success: true};
     }
 }
 
