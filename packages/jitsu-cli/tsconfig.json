@@ -15,7 +15,7 @@
   "exclude": [
     "node_modules",
     "dist",
-    "__test_data__",
+    "test_projects",
     "test",
     "templates"
   ]

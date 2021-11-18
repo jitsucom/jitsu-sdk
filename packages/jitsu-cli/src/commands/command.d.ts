@@ -3,7 +3,7 @@ export type CommandResult = {
     message?: string
 }
 
-export type CommandName = 'dst-build'
+export type CommandName = 'destination build'
 
 export type Command = {
     exec: (args: string[]) => Promise<CommandResult>

@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import commands from "./commands/commands";
-import {Command} from "./commands/command";
+import {Command, CommandResult} from "./commands/command";
+import getLog from "./lib/log";
 
 function isHelpOption(arg: string) {
     return arg === '-help' || arg === '--help' || arg === 'help' || arg === '-?' || arg === '--?';
@@ -28,10 +29,12 @@ function displayHelp(cmd?: string) {
             console.error(chalk.bold.red('Error!') + " Command " + chalk.bold(cmd) + " not found!")
             process.exit(1)
         } else {
-            console.error('  ' + chalk.bold(`jitsu ${cmd}`) + " " + command.description)
+            console.error(chalk.bold(`SYNOPSIS`))
+            console.error("")
+            console.error(chalk.bold(`  jitsu ${cmd}`) + " " + command.description)
             if (command.help) {
                 console.error("")
-                console.error(command.help)
+                console.error(command.help.trim().split("\n").map(ln => `${ln}`).join('\n'))
             }
             console.error("")
         }
@@ -39,26 +42,62 @@ function displayHelp(cmd?: string) {
 }
 
 
+function captureCommand(command: string, args: string[]): string[] | undefined {
+    let commandParts = command.split(" ");
+    if (commandParts.length > args.length) {
+        return undefined;
+    }
+    for (let i = 0 ; i < commandParts.length; i++) {
+        if (commandParts[i] !== args[i]) {
+            return undefined;
+        }
+    }
+    return args.slice(commandParts.length)
+}
 
-export function index(): Promise<any> {
+function exitWithError(error: string) {
+    console.error(`${chalk.bold.red("Error!")} - ${error}`)
+    process.exit(1)
+}
+
+export async function index(): Promise<any> {
     const args = [...process.argv.slice(2)];
     if (args.length === 0 || (isHelpOption(args[0]) && args.length == 1)) {
         displayHelp();
-    } else if (args.length == 2 && isHelpOption(args[0])) {
-        displayHelp(args[1])
-    } else if (args.length == 2 && isHelpOption(args[1])) {
-        displayHelp(args[0])
-    } else {
-        // @ts-ignore
-        let command: Command = commands[args[1]];
-        if (!command) {
-            console.error(chalk.bold.red('Error!') + " Command " + chalk.bold(args[1]) + " not found!")
-            process.exit(1)
-        }
-
-
+        process.exit(0)
+        return;
     }
-    return Promise.resolve();
+
+    for (const [commandName, cmd] of Object.entries(commands)) {
+        let commandArgs = captureCommand(commandName, args);
+        if (commandArgs) {
+            if (commandArgs.length > 0 && isHelpOption(commandArgs[0])) {
+                displayHelp(commandName);
+                process.exit(0)
+                return;
+            } else {
+                let commandResult: CommandResult;
+                try {
+                    commandResult = await cmd.exec(commandArgs);
+                } catch (e: any) {
+                    exitWithError(e?.message || 'unknown error');
+                    return;
+                }
+                if (commandResult.success) {
+                    getLog().info("Completed!")
+                    process.exit(0)
+                    return;
+                } else {
+                    exitWithError(commandResult.message || 'unknown error')
+                }
+            }
+        }
+    }
+
+    let error = ` unknown command ${chalk.bold(args.join(" "))}. Run ${chalk.bold("jitsu help")} to see available options`;
+    exitWithError(error);
+    return;
+
 }
 
 index();
