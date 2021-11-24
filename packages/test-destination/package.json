@@ -1,19 +1,24 @@
 {
-  "name": "jitsu-test-destination",
+  "name": "@jitsu/test-destination",
   "version": "0.0.0",
   "main": "dist/test-destination.js",
   "scripts": {
-    "build": "jitsu destination build"
+    "build": "jitsu destination build",
+    "test": "jest --silent=false",
+    "coverage": "jest --coverage"
   },
   "devDependencies": {
+    "@types/jest": "^27.0.3",
     "@types/lodash": "^4.14.177",
     "@types/node": "^16.11.7",
+    "jest": "^27.3.1",
     "lerna": "^4.0.0",
-    "ts-node": "^10.4.0"
+    "ts-jest": "^27.0.7",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
   },
   "dependencies": {
     "@jitsu/jitsu-types": "^0.0.0",
-    "lodash": "latest",
     "typescript": "^4.5.2"
   }
 }

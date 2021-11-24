@@ -1,11 +1,8 @@
-import * as _ from "lodash";
-import {DestinationAdapter, DestinationDescriptor} from "@jitsu/jitsu-types/src/destination";
 import tsFunction from "./lib";
 
-const adapter: DestinationAdapter = (event) => {
-    _.set(event, "a.b.c", tsFunction("2"))
-    return [];
-}
+import {DestinationAdapter, DestinationDescriptor} from "@jitsu/jitsu-types/src/destination";
+
+const adapter: DestinationAdapter = tsFunction
 
 const descriptor: DestinationDescriptor = {
     configurationParameters: [],

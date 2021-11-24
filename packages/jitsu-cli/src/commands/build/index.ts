@@ -3,6 +3,8 @@ import chalk from "chalk";
 import {chalkCode} from "../../lib/chalk-code-highlight";
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import {uglify} from 'rollup-plugin-uglify';
+
 import path from "path";
 import getLog from "../../lib/log";
 import {appendError} from "../../lib/errors";
@@ -97,7 +99,8 @@ const buildCommand: Command = {
                     typescriptEnabled && rollupTypescript({tsconfig: tsConfigPath}),
                     multi(),
                     resolve(),
-                    commonjs()
+                    commonjs(),
+                    uglify()
                 ]
             })
             getLog().info("Generating bundle")

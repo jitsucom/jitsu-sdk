@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ES5",
     "module": "ES2015",
@@ -7,8 +8,8 @@
       "ES2015",
       "ESNext"
     ],
-    "outDir": "dist",
-    "rootDir": "src",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "strict": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -21,6 +22,10 @@
     "dist",
     "test_projects",
     "test",
+    "tests",
     "templates"
+  ],
+  "include": [
+    "./src"
   ]
 }

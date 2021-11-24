@@ -1,11 +1,14 @@
 {
   "name": "@jitsu/jitsu-cli",
+  "version": "0.0.0",
   "private": true,
   "bin": {
-    "jitsu": "./build/jitsu.js"
+    "jitsu": "./bin/jitsu"
   },
   "scripts": {
-    "build": "tsc -p .",
+    "build": "yarn clean:some && tsc -p .",
+    "global": "yarn global",
+    "clean:some": "rm -rf ./build",
     "start": "ts-node src/index.ts"
   },
   "devDependencies": {
@@ -24,6 +27,7 @@
     "prismjs": "^1.25.0",
     "rollup": "^2.60.0",
     "rollup-plugin-typescript2": "^0.31.0",
+    "rollup-plugin-uglify": "^6.0.4",
     "terminal-link": "^3.0.0",
     "tslib": "^2.3.1"
   }

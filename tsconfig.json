@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    "paths": {
+      "@jitsu/jitsu-types": ["./packages/jitsu-types"],
+      "@jitsu/jitsu-types/*": ["./packages/jitsu-types/*"],
+      "tslib" : ["./node_modules/tslib/tslib.d.ts"]
+    },
     "target": "ES6",
     "module": "commonjs",
     "lib": [

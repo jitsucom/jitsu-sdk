@@ -25,7 +25,7 @@ export type Conversion = {
     currency?: string                 //currency
     shipping_cost?: number            //shipping cost
     tax?: number                      //tax cost
-
+    [propName: string]: any
 }
 
 /**
@@ -63,4 +63,5 @@ export type JitsuEvent = {
 
     conversion?: Conversion
     src_payload?: any
+    [propName: string]: any
 }
