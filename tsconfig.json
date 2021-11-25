@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
     "paths": {
-      "@jitsu/jitsu-types": ["./packages/jitsu-types"],
-      "@jitsu/jitsu-types/*": ["./packages/jitsu-types/*"],
       "tslib" : ["./node_modules/tslib/tslib.d.ts"]
     },
     "target": "ES6",
@@ -18,6 +16,7 @@
     "noImplicitAny": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "moduleResolution": "Node",
     "resolveJsonModule": true,
     "importHelpers": true,
     "removeComments": true

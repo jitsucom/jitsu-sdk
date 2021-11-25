@@ -1,6 +1,6 @@
-import {testDestination} from "@jitsu/jitsu-types/src/test";
 import {adapter} from "../src/index";
 import {DestinationContext} from "@jitsu/jitsu-types/src/destination";
+import {testDestination} from "@jitsu/jitsu-types";
 
 /**
  * Represents context data of configured destination instance

@@ -83,7 +83,8 @@ const buildCommand: Command = {
         let fullOutputPath = path.resolve(projectBase, distFile);
         getLog().info("📦 Bundle will be written to " + chalk.bold(fullOutputPath))
         let tsConfigPath = path.resolve(projectBase, "tsconfig.json");
-        const typescriptEnabled = fs.existsSync(path.resolve(tsConfigPath));
+
+        const typescriptEnabled = fs.existsSync(tsConfigPath);
         if (typescriptEnabled) {
             getLog().info(`ℹ️ Found ${chalk.bold('tsconfig.json')}, typescript will be enabled`)
         }
@@ -97,7 +98,7 @@ const buildCommand: Command = {
                     indexFile
                 ],
                 plugins: [
-                    typescriptEnabled && rollupTypescript({tsconfig: tsConfigPath}),
+                    typescriptEnabled && rollupTypescript({cwd: projectBase}),
                     multi(),
                     resolve(),
                     commonjs()

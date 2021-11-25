@@ -17,7 +17,7 @@ export declare type DestinationContext = {
     /**
      * Values set for <b>configurationParameters</b> during destination instance setup
      */
-    [key: string]: string
+    [key: string]: any
 
 }
 
