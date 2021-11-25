@@ -86,8 +86,12 @@ export async function index(): Promise<any> {
                     return;
                 }
                 if (commandResult.success) {
-                    getLog().info("Completed!")
-                    process.exit(0)
+                    process.on("exit", () => {
+                        if (!process.exitCode) {
+                            getLog().info("Completed!")
+                            process.exit(0)
+                        }
+                    } )
                     return;
                 } else {
                     exitWithError(commandResult.message || 'unknown error', commandResult.details)

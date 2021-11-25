@@ -1543,6 +1543,13 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
+"@types/jest-cli@^24.3.0":
+  version "24.3.0"
+  resolved "https://registry.yarnpkg.com/@types/jest-cli/-/jest-cli-24.3.0.tgz#f8201a0d81e52747850e2217e1af636228b4ab36"
+  integrity sha512-1Rt38hBjSUhedce8G+0h1uNS7t/EtcsAHJzvp7w/mm0aSlt9B52WaQ5EM3dUb4BmDhobaIqJzuoGxG3FeHav4Q==
+  dependencies:
+    jest-cli "*"
+
 "@types/jest@^27.0.3":
   version "27.0.3"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-27.0.3.tgz#0cf9dfe9009e467f70a342f0f94ead19842a783a"
@@ -1550,11 +1557,6 @@
   dependencies:
     jest-diff "^27.0.0"
     pretty-format "^27.0.0"
-
-"@types/lodash@^4.14.177":
-  version "4.14.177"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.177.tgz#f70c0d19c30fab101cad46b52be60363c43c4578"
-  integrity sha512-0fDwydE2clKe9MNfvXHBHF9WEahRuj+msTuQqOmAApNORFvhMYZKNGGJdCzuhheVjMps/ti0Ak/iJPACMaevvw==
 
 "@types/minimatch@^3.0.3":
   version "3.0.5"
@@ -3734,7 +3736,7 @@ jest-circus@^27.3.1:
     stack-utils "^2.0.3"
     throat "^6.0.1"
 
-jest-cli@^27.3.1:
+jest-cli@*, jest-cli@^27.3.1:
   version "27.3.1"
   resolved "https://registry.yarnpkg.com/jest-cli/-/jest-cli-27.3.1.tgz#b576f9d146ba6643ce0a162d782b40152b6b1d16"
   integrity sha512-WHnCqpfK+6EvT62me6WVs8NhtbjAS4/6vZJnk7/2+oOr50cwAzG4Wxt6RXX0hu6m1169ZGMlhYYUNeKBXCph/Q==

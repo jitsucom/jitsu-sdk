@@ -1,13 +1,24 @@
-import tsFunction from "./lib";
+import transformFunction from "./transform";
 
 import {DestinationAdapter, DestinationDescriptor} from "@jitsu/jitsu-types/src/destination";
 
-const adapter: DestinationAdapter = tsFunction
+const adapter: DestinationAdapter = transformFunction
 
 const descriptor: DestinationDescriptor = {
-    configurationParameters: [],
-    description: "Test destination",
-    name: "Test destination"
+    type: "test",
+    displayName: "Test destination",
+    description: "Example project. Can be used as a template for new destinations." +
+        "Transformation logic is located in transform.ts file",
+    configurationParameters: [
+        {
+            id: "baseUrl",
+            type: "string",
+            required: true,
+            displayName: "Base URL",
+            documentation: "Base URL of API server",
+        }
+    ],
+
 }
 
 

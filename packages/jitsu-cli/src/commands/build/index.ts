@@ -3,7 +3,6 @@ import chalk from "chalk";
 import {chalkCode} from "../../lib/chalk-code-highlight";
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import {uglify} from 'rollup-plugin-uglify';
 
 import path from "path";
 import getLog from "../../lib/log";
@@ -12,6 +11,7 @@ import multi from '@rollup/plugin-multi-entry';
 import * as fs from "fs";
 import rollupTypescript from 'rollup-plugin-typescript2';
 import {rollup} from "rollup";
+import {run as jest} from 'jest-cli';
 
 const npmExample = chalkCode.json`
     {
@@ -87,6 +87,7 @@ const buildCommand: Command = {
         if (typescriptEnabled) {
             getLog().info(`ℹ️ Found ${chalk.bold('tsconfig.json')}, typescript will be enabled`)
         }
+
         getLog().info("Building project")
         try {
             let indexFile = path.resolve(projectBase, "src/index.ts");
@@ -99,8 +100,7 @@ const buildCommand: Command = {
                     typescriptEnabled && rollupTypescript({tsconfig: tsConfigPath}),
                     multi(),
                     resolve(),
-                    commonjs(),
-                    uglify()
+                    commonjs()
                 ]
             })
             getLog().info("Generating bundle")
@@ -128,7 +128,12 @@ const buildCommand: Command = {
             }
             return {success: false, message: appendError('Build failed', e), details: e?.stack}
         }
-
+        getLog().info("🛂 Running tests")
+        let jestArgs = [ "--passWithNoTests", "--projects", projectBase]
+        if (typescriptEnabled) {
+            jestArgs.push("--preset", "ts-jest")
+        }
+        await jest(jestArgs)
 
         return {success: true};
     }

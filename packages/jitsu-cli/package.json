@@ -12,6 +12,7 @@
     "start": "ts-node src/index.ts"
   },
   "devDependencies": {
+    "@types/jest-cli": "^24.3.0",
     "lerna": "^4.0.0",
     "ts-node": "^10.4.0"
   },
@@ -23,12 +24,16 @@
     "@types/prismjs": "^1.16.6",
     "chalk": "^4.1.2",
     "commander": "^8.3.0",
+    "jest": "^27.3.1",
+    "jest-cli": "^27.3.1",
     "ora": "^6.0.1",
     "prismjs": "^1.25.0",
     "rollup": "^2.60.0",
     "rollup-plugin-typescript2": "^0.31.0",
     "rollup-plugin-uglify": "^6.0.4",
     "terminal-link": "^3.0.0",
+    "ts-jest": "^27.0.7",
+    "ts-node": "^10.4.0",
     "tslib": "^2.3.1"
   }
 }

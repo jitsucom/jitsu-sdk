@@ -1,18 +1,73 @@
-import {JitsuEvent} from "@jitsu/jitsu-types/src/event";
+import {testDestination} from "@jitsu/jitsu-types/src/test";
 import {adapter} from "../src/index";
-import {DestinationMessage} from "@jitsu/jitsu-types/src/destination";
+import {DestinationContext} from "@jitsu/jitsu-types/src/destination";
 
-describe('test-destination', function() {
-    // [[ name, {event }, { expected result} ]]
-    const testData:[[string, JitsuEvent, DestinationMessage]] = [
-        ["basic",
-            {page_title: "Test Title", local_tz_offset: 180} as JitsuEvent,
-            {method: "POST", path: "/test", body: {page_title: "TEST TITLE", local_tz_offset: 180}}
+/**
+ * Represents context data of configured destination instance
+ */
+const testContext: DestinationContext = {
+    destinationId: "abc123",
+    destinationType: "mydest",
+    baseUrl: "https://example.com/api"
+}
+
+testDestination({
+        name: "basic",
+        context: testContext,
+        transform: ($, context) => adapter($, context),
+        event: {
+            event_type: "page_view",
+            page_title: "Test Title",
+            local_tz_offset: 180
+        },
+        expectedResult: {
+            method: "POST",
+            url: "https://example.com/api/page",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: {event_type: "page_view", page_title: "Test Title", local_tz_offset: 180, destinationId: "abc123"}
+        }
+    }
+)
+
+testDestination({
+        name: "multiplexing",
+        context: testContext,
+        transform: ($, context) => adapter($, context),
+        event: {
+            event_type: "conversion",
+            products: [
+                {id: 1, price: 11.3},
+                {id: 2, price: 7.3},
+            ]
+        },
+        expectedResult: [
+            {
+                method: "POST",
+                url: "https://example.com/api/purchase",
+                headers: {"Content-Type": "application/json"},
+                body: {event_type: "purchase", product_id: 1, price: 11.3}
+            },
+            {
+                method: "POST",
+                url: "https://example.com/api/purchase",
+                headers: {"Content-Type": "application/json"},
+                body: {event_type: "purchase", product_id: 2, price: 7.3}
+            },
         ]
-    ]
+    }
+)
 
-    test.each(testData)('%s', (name, event, expectedResult) =>  {
-        const result = adapter(event)
-        //console.log(result)
-        expect(result).toEqual(expectedResult);
-    })});
+testDestination({
+        "name": "skipping",
+        context: testContext,
+        transform: ($, context) => adapter($, context),
+        "event": {
+            event_type: "not_interesting",
+            page_title: "Test Title2",
+            local_tz_offset: 180
+        },
+        "expectedResult": null
+    }
+)
