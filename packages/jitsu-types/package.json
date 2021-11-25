@@ -1,6 +1,10 @@
 {
   "name": "@jitsu/jitsu-types",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc -p ."
+  },
   "dependencies": {
     "@types/jest": "^27.0.3"
   }
