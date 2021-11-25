@@ -6,7 +6,7 @@
     "build": "jitsu destination build"
   },
   "dependencies": {
-    "@jitsu/jitsu-types": "^0.0.0",
+    "@jitsu/jitsu-types": "^0.0.1",
     "typescript": "^4.5.2"
   }
 }

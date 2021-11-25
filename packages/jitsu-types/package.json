@@ -1,9 +1,6 @@
 {
   "name": "@jitsu/jitsu-types",
-  "version": "0.0.0",
-  "scripts": {
-    "build": "tsc -p ."
-  },
+  "version": "0.0.1",
   "dependencies": {
     "@types/jest": "^27.0.3"
   }
