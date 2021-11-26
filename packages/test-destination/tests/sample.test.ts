@@ -1,11 +1,11 @@
-import {adapter} from "../src/index";
-import {DestinationContext} from "@jitsu/jitsu-types/src/destination";
+import {adapter} from "../src";
+import {JitsuContext} from "@jitsu/jitsu-types/src/destination";
 import {testDestination} from "@jitsu/jitsu-types";
 
 /**
  * Represents context data of configured destination instance
  */
-const testContext: DestinationContext = {
+const testContext: JitsuContext = {
     destinationId: "abc123",
     destinationType: "mydest",
     baseUrl: "https://example.com/api"

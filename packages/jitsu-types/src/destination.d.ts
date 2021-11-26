@@ -5,7 +5,7 @@ import {ConfigurationParameter} from "./parameters";
  * Context data containing destinationId, destinationType
  * and provided values for DestinationDescriptor's configurationParameters
  */
-export declare type DestinationContext = {
+export declare type JitsuContext = {
     /**
      * Unique Id of configured destination instance on Jitsu server
      */
@@ -28,7 +28,7 @@ export declare type DestinationMessage = {
     body: any
 }
 
-export declare type DestinationAdapter = (event: JitsuEvent, context: DestinationContext, ...extraArgs: any[]) => DestinationMessage[] | DestinationMessage | null;
+export declare type DestinationAdapter = (event: JitsuEvent, context: JitsuContext, ...extraArgs: any[]) => DestinationMessage[] | DestinationMessage | null;
 
 export declare type DestinationDescriptor = {
     /**
@@ -51,13 +51,5 @@ export declare type DestinationDescriptor = {
      * List of configuration parameters
      */
     configurationParameters: ConfigurationParameter[]
-    /**
-     * Transformation code that will be set by default for new destinations.
-     * Jitsu server gives <b>adapter</b> function new name derived from destination id = <code>lowerCamelCase("to" + type)</code>
-     * If not provided default transform code simply passes event to adapter function. E.g. for destination with id <i>"slack"</i>
-     * defaultTransform will be:
-     * <code>return toSlack($, context)</code>
-     */
-    defaultTransform?: string
 
 }

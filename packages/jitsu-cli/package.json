@@ -16,7 +16,6 @@
     "ts-node": "^10.4.0"
   },
   "dependencies": {
-    "@jitsu/jitsu-types": "^0.0.1",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-multi-entry": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.6",

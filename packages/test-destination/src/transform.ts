@@ -1,7 +1,7 @@
 import {JitsuEvent} from "@jitsu/jitsu-types/src/event";
-import {DestinationContext, DestinationMessage} from "@jitsu/jitsu-types/src/destination";
+import {JitsuContext, DestinationMessage} from "@jitsu/jitsu-types/src/destination";
 
-export default function transformFunction(event: JitsuEvent, context: DestinationContext): DestinationMessage[] | DestinationMessage | null {
+export default function transformFunction(event: JitsuEvent, context: JitsuContext): DestinationMessage[] | DestinationMessage | null {
     switch (event.event_type) {
         case "page_view":
             return {
