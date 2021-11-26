@@ -1,8 +1,8 @@
 import {CommandName, Command} from "./command";
-import buildCommand from "./build";
+import destinationCommand from "./destination";
 
 const commands: Record<CommandName, Command> = {
-    "destination build": buildCommand,
+    "destination": destinationCommand,
 }
 
 export default commands;

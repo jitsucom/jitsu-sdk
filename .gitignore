@@ -3,3 +3,4 @@ node_modules
 packages/test-destination/coverage
 packages/jitsu-cli/build
 packages/test-destination/dist
+packages/jitsu-types/build

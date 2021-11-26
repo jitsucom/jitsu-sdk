@@ -1,6 +1,9 @@
 import transformFunction from "./transform";
 
-import {DestinationAdapter, DestinationDescriptor} from "@jitsu/jitsu-types/src/destination";
+import {
+    DestinationAdapter,
+    DestinationDescriptor,
+} from "@jitsu/jitsu-types/src/destination";
 
 const adapter: DestinationAdapter = transformFunction
 
@@ -18,7 +21,6 @@ const descriptor: DestinationDescriptor = {
             documentation: "Base URL of API server",
         }
     ],
-
 }
 
 
