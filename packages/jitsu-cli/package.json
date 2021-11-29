@@ -8,10 +8,14 @@
     "build": "yarn clean:some && tsc -p .",
     "global": "yarn global",
     "clean:some": "rm -rf ./build",
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/main.ts",
+    "test": "jest"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.16.0",
     "@types/jest-cli": "^24.3.0",
+    "child_process": "^1.0.2",
     "lerna": "^4.0.0",
     "ts-node": "^10.4.0"
   },

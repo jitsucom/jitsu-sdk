@@ -7,9 +7,10 @@
   },
   "devDependencies": {
     "@types/node": "^16.11.7",
+    "jest": "^27.3.1",
     "lerna": "^4.0.0",
-    "typescript": "^4.5.2",
-    "prettier": "latest"
+    "prettier": "latest",
+    "typescript": "^4.5.2"
   },
   "workspaces": [
     "packages/*"

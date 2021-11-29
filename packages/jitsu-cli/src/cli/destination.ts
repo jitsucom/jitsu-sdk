@@ -1,12 +1,12 @@
-import { Command, CommandResult } from "../command"
+import { CommandRegistry, CommandResult } from "../lib/command/types"
 import chalk from "chalk"
-import { chalkCode } from "../../lib/chalk-code-highlight"
+import { chalkCode } from "../lib/chalk-code-highlight"
 import resolve from "@rollup/plugin-node-resolve"
 import commonjs from "@rollup/plugin-commonjs"
 
 import path from "path"
-import getLog from "../../lib/log"
-import { appendError } from "../../lib/errors"
+import getLog from "../lib/log"
+import { appendError } from "../lib/errors"
 import multi from "@rollup/plugin-multi-entry"
 import * as fs from "fs"
 import rollupTypescript from "rollup-plugin-typescript2"
@@ -56,7 +56,7 @@ const usage = `jitsu destination build <directory> — build project located in 
    jitsu destination test  <directory> — run tests for project in <directory>. If <directory> is not provided current directory is used.
    jitsu destination help              — show help`
 
-const help = `
+export const help = `
 
 ${chalk.bold("DESCRIPTION")}
 
@@ -86,40 +86,32 @@ ${chalk.bold("OPTIONS")}
    ${usage}
 `
 
-const buildCommand: Command = {
-  description: "builds a Jitsu destination project",
-  help,
-  async exec(args: string[]): Promise<CommandResult> {
-    const subCommand = args?.[0] || ""
-    switch (subCommand) {
-      case "build":
-        return await build(args.slice(1))
-      case "test":
-        return await test(args.slice(1))
-      case "":
-        return {
-          success: false,
-          message: `Please provide command:
+export const destinationCommands: CommandRegistry<"test" | "build" | "create"> = {
+  test: {
+    async exec(args: string[]): Promise<CommandResult> {
+      return await test(args)
+    },
+    description: "Execute test on destination",
+    help: "Tests should be located in ./tests folder and follow *.test.ts pattern",
 
-   jitsu destination <command> [arguments]
-    
-   ${usage}
-`,
-        }
-      default:
-        return {
-          success: false,
-          message: `Unknown command: ${subCommand}
-Usage:
+  },
+  build: {
+    async exec(args: string[]): Promise<CommandResult> {
+      return await build(args)
+    },
+    description: "Builds destination",
+    help: "",
 
-   jitsu destination <command> [arguments]
-    
-   ${usage}
-`,
-        }
-    }
+  },
+  create: {
+    async exec(args: string[]): Promise<CommandResult> {
+      return await build(args)
+    },
+    description: "",
+    help: "",
   },
 }
+
 
 async function build(args: string[]): Promise<CommandResult> {
   const directory = args?.[0] || ""
@@ -161,7 +153,9 @@ async function build(args: string[]): Promise<CommandResult> {
       format: "cjs",
     })
     getLog().info("Validating build")
-    let evalRes = eval(`(function(exports){${output.output[0].code}})`)
+    let evalRes = eval(`(function(exports) {
+      ${output.output[0].code}
+    })`)
     let exports = {}
     evalRes(exports)
     if (!exports["adapter"]) {
@@ -212,4 +206,3 @@ async function test(args: string[]): Promise<CommandResult> {
   return { success: true }
 }
 
-export default buildCommand
