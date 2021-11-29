@@ -15,10 +15,11 @@ async function cmd(args?: string): Promise<{ exitCode: number, stderr: string }>
   let exitCode: number
   try {
     exitCode = await run(args ? args.split(" ") : [])
+    let header = `   jitsu ${args || ""}, code: ${exitCode} `
     console.info([
-      `-------: jitsu ${args || ""}, code: ${exitCode}`,
-      ...consoleOutput.map(ln => `| ${ln}`),
-      "--------",
+      chalk.bgBlue.white(header),
+      ...consoleOutput.map(ln => chalk.bgBlue('  ') + ` ${ln}`),
+      chalk.bgBlue(' '.repeat(header.length)),
     ].join("\n"))
   } finally {
     console.error = originalConsole
@@ -70,6 +71,11 @@ async function exec(cmd: string, opts: { dir?: string } = {}) {
   return cmdResult.status
 }
 
+// test("jitsu destination create", async () => {
+//   let projectBase = path.resolve(__dirname, "../../../test-projects/create-result")
+//   let result = await cmd("destination create " + projectBase);
+// });
+
 test("jitsu destination build & test", async () => {
   let projectBase = path.resolve(__dirname, "../../../test-projects/destination")
   let dist = path.resolve(projectBase, "dist/test-destination.js")
@@ -78,6 +84,8 @@ test("jitsu destination build & test", async () => {
   }
   expect(await exec(`npm i && npm i ${path.resolve(__dirname, "..")}`, { dir: projectBase })).toBe(0)
   expect(await exec(`npm run build`, { dir: projectBase })).toBe(0)
+  let content = fs.readFileSync(dist).toString()
+  expect(content.length).toBeGreaterThan(1);
   expect(await exec(`npm run test`, { dir: projectBase })).toBe(0)
 })
 
