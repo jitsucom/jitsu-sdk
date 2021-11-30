@@ -4,6 +4,7 @@ import { CommandRegistry } from "./lib/command/types"
 import { executeCommand, subcommands } from "./lib/command"
 import { destinationCommands, help } from "./cli/destination"
 import * as Process from "process"
+import getLog from "./lib/log"
 
 const commands: CommandRegistry<'destination'> = {
   destination: subcommands(destinationCommands, {
@@ -29,6 +30,7 @@ export async function run(args: string[]): Promise<number> {
     binPrefix: "jitsu",
   })
   if (result.success) {
+    getLog().info("✨ Done")
     return 0
   } else {
     return exitWithError(result.message, result.details)

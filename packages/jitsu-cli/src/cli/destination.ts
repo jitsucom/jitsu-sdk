@@ -3,7 +3,7 @@ import chalk from "chalk"
 import { chalkCode } from "../lib/chalk-code-highlight"
 import resolve from "@rollup/plugin-node-resolve"
 import commonjs from "@rollup/plugin-commonjs"
-
+import commander from "commander"
 import path from "path"
 import getLog from "../lib/log"
 import { appendError } from "../lib/errors"
@@ -12,6 +12,10 @@ import * as fs from "fs"
 import rollupTypescript from "rollup-plugin-typescript2"
 import { rollup } from "rollup"
 import { run as jest } from "jest-cli"
+import { write } from "./template"
+import { destinationProjectTemplate } from "./destination_template"
+import inquirer from "inquirer"
+import validateNpmPackage from "validate-npm-package-name"
 
 const npmExample = chalkCode.json`
     {
@@ -88,30 +92,91 @@ ${chalk.bold("OPTIONS")}
 
 export const destinationCommands: CommandRegistry<"test" | "build" | "create"> = {
   test: {
-    async exec(args: string[]): Promise<CommandResult> {
-      return await test(args)
-    },
+    exec: test,
     description: "Execute test on destination",
     help: "Tests should be located in ./tests folder and follow *.test.ts pattern",
-
   },
   build: {
-    async exec(args: string[]): Promise<CommandResult> {
-      return await build(args)
-    },
+    exec: build,
     description: "Builds destination",
     help: "",
-
   },
   create: {
-    async exec(args: string[]): Promise<CommandResult> {
-      return await build(args)
-    },
-    description: "",
+    exec: create,
+    description: "Creates an empty project",
     help: "",
   },
 }
 
+function removeEmptyVals() {
+
+}
+
+async function create(args: string[]): Promise<CommandResult> {
+  const program = new commander.Command()
+  program
+    .option("--name <project_name>", "project name", "")
+    .option("--dir <project_dir>", "project dir", "")
+  program.parse(args)
+  let cliOpts = program.opts()
+  if (cliOpts.name) {
+    let isValid = validateNpmPackage(cliOpts.name)
+    if (!isValid.validForNewPackages) {
+      return { success: false, message: `Can't use ${cliOpts.name} as package name: ${isValid.errors}` }
+    }
+  }
+
+  let packageName = cliOpts.name || (await inquirer.prompt([
+    {
+      type: "input",
+      name: "package",
+      message: "Please, provide project name:",
+      validate: input => {
+        let isValid = validateNpmPackage(input)
+        if (!isValid.validForNewPackages) {
+          return `Can't use ${input} as package name: ${isValid.errors}`
+        }
+        return true
+      },
+    },
+  ])).package
+
+  let projectDir = cliOpts.dir || (await inquirer.prompt([
+    {
+      type: "input",
+      name: "directory",
+      message: "Project directory:",
+      default: path.resolve(".", packageName),
+      validate: input => {
+        let projectBase = path.resolve(input)
+        if (fs.existsSync(projectBase)) {
+          if (!fs.lstatSync(projectBase).isDirectory() || fs.readdirSync(projectBase).length > 0) {
+            return `${input} should be an non-existent or empty directory`
+          }
+        }
+        return true
+      },
+    },
+  ])).package
+
+  projectDir = path.resolve(projectDir)
+
+  getLog().info("Creating new jitsu project in " + chalk.bold(projectDir))
+  if (fs.existsSync(projectDir)) {
+    if (!fs.lstatSync(projectDir).isDirectory() || fs.readdirSync(projectDir).length > 0) {
+      return { success: false, message: `${projectDir} should be an empty directory` }
+    }
+  } else {
+    getLog().info("Project directory doesn't exist, creating it!")
+    fs.mkdirSync(projectDir, { recursive: true })
+  }
+
+  write(projectDir, destinationProjectTemplate, {
+    packageName: packageName,
+  })
+
+  return { success: true }
+}
 
 async function build(args: string[]): Promise<CommandResult> {
   const directory = args?.[0] || ""
@@ -137,7 +202,7 @@ async function build(args: string[]): Promise<CommandResult> {
 
   const typescriptEnabled = fs.existsSync(tsConfigPath)
   if (typescriptEnabled) {
-    getLog().info(`ℹ️ Found ${chalk.bold("tsconfig.json")}, typescript will be enabled`)
+    getLog().info(`Found ${chalk.bold("tsconfig.json")}, typescript will be enabled`)
   }
 
   getLog().info("Building project")
@@ -205,4 +270,3 @@ async function test(args: string[]): Promise<CommandResult> {
 
   return { success: true }
 }
-

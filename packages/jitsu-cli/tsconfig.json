@@ -8,7 +8,8 @@
     "outDir": "./build"
   },
   "include": [
-    "./src"
+    "./src",
+    "package.json"
   ],
 
 }

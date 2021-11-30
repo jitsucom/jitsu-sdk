@@ -18,7 +18,9 @@ async function cmd(args?: string): Promise<{ exitCode: number, stderr: string }>
     let header = `   jitsu ${args || ""}, code: ${exitCode} `
     console.info([
       chalk.bgBlue.white(header),
-      ...consoleOutput.map(ln => chalk.bgBlue('  ') + ` ${ln}`),
+      chalk.bgBlue(' '),
+      ...consoleOutput.map(ln => chalk.bgBlue(' ') + ` ${ln}`),
+      chalk.bgBlue(' '),
       chalk.bgBlue(' '.repeat(header.length)),
     ].join("\n"))
   } finally {
@@ -48,12 +50,6 @@ test("jitsu destination help", async () => {
   expect(result.exitCode).toBe(0)
 })
 
-async function wait(childProcess): Promise<number> {
-  return new Promise((resolve, reject) => {
-    childProcess.on("exit", (exitCode) => resolve(exitCode))
-  })
-}
-
 function summary(cmd, cmdResult) {
   let stderrStr = cmdResult.stderr?.toString()
   let stdoutStr = cmdResult.stdout?.toString()
@@ -71,10 +67,18 @@ async function exec(cmd: string, opts: { dir?: string } = {}) {
   return cmdResult.status
 }
 
-// test("jitsu destination create", async () => {
-//   let projectBase = path.resolve(__dirname, "../../../test-projects/create-result")
-//   let result = await cmd("destination create " + projectBase);
-// });
+test("jitsu destination create", async () => {
+  let projectBase = path.resolve(__dirname, "../../../test-projects/create-result")
+  if (fs.existsSync(projectBase)) {
+    fs.rmSync(projectBase, {recursive: true})
+  }
+  let result = await cmd(`destination create --name testprj --dir ${projectBase}`);
+  expect(result.exitCode).toBe(0);
+  expect(await exec(`npm i && npm i ${path.resolve(__dirname, "..")}`, { dir: projectBase })).toBe(0)
+  expect(await exec(`npm run build`, { dir: projectBase })).toBe(0)
+  expect(await exec(`npm run test`, { dir: projectBase })).toBe(0)
+
+});
 
 test("jitsu destination build & test", async () => {
   let projectBase = path.resolve(__dirname, "../../../test-projects/destination")
