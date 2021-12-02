@@ -87,15 +87,15 @@ export const executeCommand = async (
   args: string[],
   helpOpts: HelpOptions
 ): Promise<CommandResult> => {
+  let newVersion = await hasNewerVersion()
+  if (newVersion) {
+    console.log(getUpgradeMessage(newVersion))
+  }
   if (args.length === 0 || isHelpOption(args[0])) {
     displayHelp(commands, helpOpts)
     return { success: true }
   } else if (args.length > 0 && isVersionOption(args[0])) {
     console.error(`Jitsu CLI v${jitsuCliVersion}`)
-    let newVersion = await hasNewerVersion()
-    if (newVersion) {
-      console.log(getUpgradeMessage(newVersion))
-    }
     return { success: true }
   }
   for (const [commandName, cmd] of Object.entries(commands)) {

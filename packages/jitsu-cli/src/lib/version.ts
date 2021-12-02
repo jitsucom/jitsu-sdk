@@ -9,9 +9,21 @@ export const jitsuPackageName = pkg.name
 let newVersion = undefined;
 
 export function getUpgradeMessage(newVersion: string) {
-  return `New version of jitsu is available: ${newVersion}. Run ${chalk.bold(
+  return box(`🚀 New version of Jitsu CLI is available: ${newVersion}.\n   Run ${chalk.bold(
     "npm install -g " + jitsuPackageName
-  )} or ${chalk.bold("npm upgrade -g yarn global upgrade " + jitsuPackageName)} `
+  )} or ${chalk.bold("yarn global install " + jitsuPackageName)}`)
+}
+function padRight(str: string, minLen: number, symbol: string = " ") {
+  return str.length >= minLen ? str : str + symbol.repeat(minLen - str.length)
+}
+export function box(msg: string) {
+  let lines = msg.split("\n")
+  return [
+    '──'.repeat(80),
+      ...lines.map(ln => ` ${ln}`),
+    '──'.repeat(80),
+    ].join("\n")
+
 }
 
 export async function hasNewerVersion(): Promise<string | undefined> {
