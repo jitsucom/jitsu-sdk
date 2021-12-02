@@ -4,8 +4,8 @@
   "scripts": {
     "prettier:check": "prettier --check --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
     "prettier:write": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
-    "bootstrap": "lerna boostsrap",
-    "publish": "lerna version && lerna publish"
+    "lerna:boot": "lerna bootstrap",
+    "lerna:publish": "lerna version && lerna publish"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",

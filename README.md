@@ -31,7 +31,7 @@ Destinations implemeted with this SDK:
 ### How to publish new version
 
 * `npm login`. You need to do it only once
-* `yarn bootstrap`, then `yarn publish`
+* `yarn lerna:boot`, then `yarn lerna:publish`
 
 
 
