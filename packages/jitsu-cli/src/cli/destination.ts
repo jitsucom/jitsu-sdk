@@ -108,16 +108,15 @@ export const destinationCommands: CommandRegistry<"test" | "build" | "create"> =
   },
 }
 
-function removeEmptyVals() {
-
-}
+function removeEmptyVals() {}
 
 async function create(args: string[]): Promise<CommandResult> {
   const program = new commander.Command()
-  program
-    .option("--name <project_name>", "project name", "")
-    .option("--dir <project_dir>", "project dir", "")
-  program.parse(args)
+  program.option("-d, --dir <project_dir>", "project dir");
+  program.option("-n, --name <project_name>", "project name");
+  program.option("-j, --jitsu-version <jitsu_version>", "Jitsu Version");
+  //We need those two 'dummies', commander expect to see all argv's here
+  program.parse(['dummy', 'dummy', ...args])
   let cliOpts = program.opts()
   if (cliOpts.name) {
     let isValid = validateNpmPackage(cliOpts.name)
@@ -126,38 +125,46 @@ async function create(args: string[]): Promise<CommandResult> {
     }
   }
 
-  let packageName = cliOpts.name || (await inquirer.prompt([
-    {
-      type: "input",
-      name: "package",
-      message: "Please, provide project name:",
-      validate: input => {
-        let isValid = validateNpmPackage(input)
-        if (!isValid.validForNewPackages) {
-          return `Can't use ${input} as package name: ${isValid.errors}`
-        }
-        return true
-      },
-    },
-  ])).package
+  let packageName =
+    cliOpts.name ||
+    (
+      await inquirer.prompt([
+        {
+          type: "input",
+          name: "package",
+          message: "Please, provide project name:",
+          validate: input => {
+            let isValid = validateNpmPackage(input)
+            if (!isValid.validForNewPackages) {
+              return `Can't use ${input} as package name: ${isValid.errors}`
+            }
+            return true
+          },
+        },
+      ])
+    ).package
 
-  let projectDir = cliOpts.dir || (await inquirer.prompt([
-    {
-      type: "input",
-      name: "directory",
-      message: "Project directory:",
-      default: path.resolve(".", packageName),
-      validate: input => {
-        let projectBase = path.resolve(input)
-        if (fs.existsSync(projectBase)) {
-          if (!fs.lstatSync(projectBase).isDirectory() || fs.readdirSync(projectBase).length > 0) {
-            return `${input} should be an non-existent or empty directory`
-          }
-        }
-        return true
-      },
-    },
-  ])).package
+  let projectDir =
+    cliOpts.dir ||
+    (
+      await inquirer.prompt([
+        {
+          type: "input",
+          name: "directory",
+          message: "Project directory:",
+          default: path.resolve(".", packageName),
+          validate: input => {
+            let projectBase = path.resolve(input)
+            if (fs.existsSync(projectBase)) {
+              if (!fs.lstatSync(projectBase).isDirectory() || fs.readdirSync(projectBase).length > 0) {
+                return `${input} should be an non-existent or empty directory`
+              }
+            }
+            return true
+          },
+        },
+      ])
+    ).package
 
   projectDir = path.resolve(projectDir)
 
@@ -173,6 +180,7 @@ async function create(args: string[]): Promise<CommandResult> {
 
   write(projectDir, destinationProjectTemplate, {
     packageName: packageName,
+    jitsuVersion: cliOpts.jitsuVersion
   })
 
   return { success: true }

@@ -38,12 +38,14 @@ testDestination({
   },
   "src/adapter.ts": vars => {
     return `
-import {DestinationMessage, JitsuContext} from "@jitsu/jitsu-types/src/destination";
+import {DestinationAdapter, DestinationMessage, JitsuContext} from "@jitsu/jitsu-types/src/destination";
 import {JitsuEvent} from "@jitsu/jitsu-types/src/event";
 
-export default function jitsuAdapter(event: JitsuEvent, dstContext: JitsuContext) {
+const jitsuAdapter: DestinationAdapter = (event: JitsuEvent, dstContext: JitsuContext) => {
   return {url: 'https://test.com', method: 'POST', body: {a: (event.a || 0) + 1}} 
 }
+
+export default jitsuAdapter;
 `
   },
   "src/index.ts": vars =>
@@ -75,10 +77,22 @@ export {descriptor, adapter}
       test: "jitsu destination test",
     },
     dependencies: {
-      "@jitsu/jitsu-cli": `^${pkg.version}`,
-      "@jitsu/jitsu-types": `^${pkg.version}`,
+      "@jitsu/jitsu-cli": `${vars.jitsuVersion || "^" + pkg.version}`,
+      "@jitsu/jitsu-types": `${vars.jitsuVersion || "^" + pkg.version}`,
       tslib: "^2.3.1",
       typescript: "^4.5.2",
     },
   }),
+  "tsconfig.json": vars => ({
+    "compilerOptions": {
+      "module": "ESNext",
+      "moduleResolution": "Node",
+      "esModuleInterop": true,
+      "outDir": "./dist",
+      "rootDir": "./src"
+    },
+    "include": [
+      "./src"
+    ],
+  })
 }

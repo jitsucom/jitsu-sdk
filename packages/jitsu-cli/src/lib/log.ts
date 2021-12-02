@@ -12,14 +12,14 @@ export default function getLog(): Log {
     spinInfo(args: string): void {},
     info(msg?: string, ...args: any[]): void {
       if (!msg) {
-        console.error("")
+        console.info("")
         return
       }
       let consoleMsg = chalk.cyan("[info  ]") + " - " + msg
       if (args.length > 0) {
         console.info(consoleMsg, args)
       } else {
-        console.error(consoleMsg)
+        console.info(consoleMsg)
       }
     },
   }

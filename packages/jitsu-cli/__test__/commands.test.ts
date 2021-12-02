@@ -3,12 +3,14 @@ import * as fs from "fs"
 import path from "path"
 import { spawn, spawnSync } from "child_process"
 import chalk from "chalk"
+import getLog from "../src/lib/log"
 
 
 async function cmd(args?: string): Promise<{ exitCode: number, stderr: string }> {
-  let originalConsole = console.error
+  let originalError = console.error
+  let originalInfo = console.info
   let consoleOutput: any[] = []
-  console.error = jest.fn((args) => {
+  console.error = console.info = jest.fn((args) => {
     let line = Array.isArray(args) ? args.join(" ") : args
     consoleOutput.push(...line.split("\n"))
   })
@@ -16,7 +18,7 @@ async function cmd(args?: string): Promise<{ exitCode: number, stderr: string }>
   try {
     exitCode = await run(args ? args.split(" ") : [])
     let header = `   jitsu ${args || ""}, code: ${exitCode} `
-    console.info([
+    originalInfo([
       chalk.bgBlue.white(header),
       chalk.bgBlue(' '),
       ...consoleOutput.map(ln => chalk.bgBlue(' ') + ` ${ln}`),
@@ -24,7 +26,8 @@ async function cmd(args?: string): Promise<{ exitCode: number, stderr: string }>
       chalk.bgBlue(' '.repeat(header.length)),
     ].join("\n"))
   } finally {
-    console.error = originalConsole
+    console.error = originalError
+    console.info = originalInfo
   }
   return { exitCode, stderr: consoleOutput.map(ln => `| ${ln}`).join("\n") }
 }
@@ -62,6 +65,7 @@ function summary(cmd, cmdResult) {
 }
 
 async function exec(cmd: string, opts: { dir?: string } = {}) {
+  getLog().info(`Running ${cmd} in dir ${opts.dir || path.resolve(process.cwd())}`)
   let cmdResult = await spawnSync(cmd, { cwd: opts.dir || ".", shell: true })
   summary(cmd, cmdResult)
   return cmdResult.status
@@ -72,9 +76,11 @@ test("jitsu destination create", async () => {
   if (fs.existsSync(projectBase)) {
     fs.rmSync(projectBase, {recursive: true})
   }
-  let result = await cmd(`destination create --name testprj --dir ${projectBase}`);
+  let result = await cmd(`destination create -d ${projectBase} -n testprj -j latest`);
   expect(result.exitCode).toBe(0);
-  expect(await exec(`npm i && npm i ${path.resolve(__dirname, "..")}`, { dir: projectBase })).toBe(0)
+  expect(await exec(`npm i ${path.resolve(__dirname, "..")}`, { dir: projectBase })).toBe(0)
+  expect(await exec(`npm i ${path.resolve(__dirname, "../../jitsu-types")}`, { dir: projectBase })).toBe(0)
+  expect(await exec(`npm i`, { dir: projectBase })).toBe(0)
   expect(await exec(`npm run build`, { dir: projectBase })).toBe(0)
   expect(await exec(`npm run test`, { dir: projectBase })).toBe(0)
 
@@ -90,6 +96,7 @@ test("jitsu destination build & test", async () => {
   expect(await exec(`npm run build`, { dir: projectBase })).toBe(0)
   let content = fs.readFileSync(dist).toString()
   expect(content.length).toBeGreaterThan(1);
+  getLog().info("Running npm run test")
   expect(await exec(`npm run test`, { dir: projectBase })).toBe(0)
 })
 
