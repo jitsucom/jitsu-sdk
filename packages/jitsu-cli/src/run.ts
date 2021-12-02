@@ -5,6 +5,7 @@ import { executeCommand, subcommands } from "./lib/command"
 import { destinationCommands, help } from "./cli/destination"
 import * as Process from "process"
 import getLog from "./lib/log"
+import { jitsuCliVersion } from "./lib/version"
 
 const commands: CommandRegistry<'destination'> = {
   destination: subcommands(destinationCommands, {
@@ -26,7 +27,7 @@ function exitWithError(error: string, details?: string) {
 
 export async function run(args: string[]): Promise<number> {
   let result = await executeCommand(commands, args, {
-    description: "Run a CLI interface of " + chalk.bold("Jitsu") + " (👉 https://jitsu.com)",
+    description: "CLI interface of " + chalk.bold("Jitsu") + `(👉 https://jitsu.com), version ${jitsuCliVersion}`,
     binPrefix: "jitsu",
   })
   if (result.success) {

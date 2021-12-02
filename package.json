@@ -3,7 +3,9 @@
   "private": true,
   "scripts": {
     "prettier:check": "prettier --check --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
-    "prettier:write": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore packages"
+    "prettier:write": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
+    "bootstrap": "lerna boostsrap",
+    "publish": "lerna publish"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",

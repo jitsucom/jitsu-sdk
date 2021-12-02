@@ -1,5 +1,5 @@
 import { ProjectTemplate } from "./template"
-import pkg from "../../package.json"
+import { jitsuCliVersion } from "../lib/version"
 
 export type DestinationTemplateVars = {
   license: "MIT" | "Other"
@@ -77,8 +77,8 @@ export {descriptor, adapter}
       test: "jitsu destination test",
     },
     dependencies: {
-      "@jitsu/jitsu-cli": `${vars.jitsuVersion || "^" + pkg.version}`,
-      "@jitsu/jitsu-types": `${vars.jitsuVersion || "^" + pkg.version}`,
+      "@jitsu/jitsu-cli": `${vars.jitsuVersion || "^" + jitsuCliVersion}`,
+      "@jitsu/jitsu-types": `${vars.jitsuVersion || "^" + jitsuCliVersion}`,
       tslib: "^2.3.1",
       typescript: "^4.5.2",
     },

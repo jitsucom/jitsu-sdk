@@ -1,6 +1,7 @@
-import { Command,  CommandRegistry, CommandResult, HelpOptions } from "./types"
+import { Command, CommandRegistry, CommandResult, HelpOptions } from "./types"
 import getLog from "../log"
 import chalk from "chalk"
+import { getUpgradeMessage, hasNewerVersion, jitsuCliVersion } from "../version"
 
 function captureCommand(command: string, args: string[]): string[] | undefined {
   let commandParts = command.split(" ")
@@ -19,10 +20,18 @@ function isHelpOption(arg: string) {
   return arg === "-help" || arg === "--help" || arg === "help" || arg === "-?" || arg === "--?"
 }
 
-function displayHelp(commands: CommandRegistry, helpOpts: { binPrefix: string; description: string, customHelp?: string }, cmd?: string) {
+function isVersionOption(arg: string) {
+  return arg === "-version" || arg === "--version" || arg === "version" || arg === "-v" || arg === "--?"
+}
+
+function displayHelp(
+  commands: CommandRegistry,
+  helpOpts: { binPrefix: string; description: string; customHelp?: string },
+  cmd?: string
+) {
   if (helpOpts.customHelp) {
-    console.error(helpOpts.customHelp);
-    return;
+    console.error(helpOpts.customHelp)
+    return
   }
   if (!cmd) {
     console.error("")
@@ -35,7 +44,7 @@ function displayHelp(commands: CommandRegistry, helpOpts: { binPrefix: string; d
         .map(cmd => {
           return `  ${helpOpts.binPrefix} ${cmd} <options>`
         })
-        .join("\n"),
+        .join("\n")
     )
     console.error("")
     console.error(`To get help run ${chalk.bold(helpOpts.binPrefix + " <command> help")}:`)
@@ -45,7 +54,7 @@ function displayHelp(commands: CommandRegistry, helpOpts: { binPrefix: string; d
         .map(cmd => {
           return `  ${helpOpts.binPrefix} ${cmd} help`
         })
-        .join("\n"),
+        .join("\n")
     )
     console.error("")
   } else {
@@ -65,7 +74,7 @@ function displayHelp(commands: CommandRegistry, helpOpts: { binPrefix: string; d
             .trim()
             .split("\n")
             .map(ln => `${ln}`)
-            .join("\n"),
+            .join("\n")
         )
       }
       console.error("")
@@ -73,9 +82,20 @@ function displayHelp(commands: CommandRegistry, helpOpts: { binPrefix: string; d
   }
 }
 
-export const executeCommand = async (commands: CommandRegistry, args: string[], helpOpts: HelpOptions): Promise<CommandResult> => {
+export const executeCommand = async (
+  commands: CommandRegistry,
+  args: string[],
+  helpOpts: HelpOptions
+): Promise<CommandResult> => {
   if (args.length === 0 || isHelpOption(args[0])) {
     displayHelp(commands, helpOpts)
+    return { success: true }
+  } else if (args.length > 0 && isVersionOption(args[0])) {
+    console.error(`Jitsu CLI v${jitsuCliVersion}`)
+    let newVersion = await hasNewerVersion()
+    if (newVersion) {
+      console.log(getUpgradeMessage(newVersion))
+    }
     return { success: true }
   }
   for (const [commandName, cmd] of Object.entries(commands)) {
@@ -93,7 +113,9 @@ export const executeCommand = async (commands: CommandRegistry, args: string[], 
       }
     }
   }
-  let error = `unknown command '${chalk.bold(args.join(" "))}'. Run ${chalk.bold(helpOpts.binPrefix + " help")} to see available options`
+  let error = `unknown command '${chalk.bold(args.join(" "))}'. Run ${chalk.bold(
+    helpOpts.binPrefix + " help"
+  )} to see available options`
   return { success: false, message: error }
 }
 

@@ -24,7 +24,14 @@ Destinations implemeted with this SDK:
 * [Mixpanel Destination](https://github.com/jitsucom/jitsu-mixpanel)
 * June.so (not published yet)
 
+<hr />
+
 ## Maintainer Guide
 
 ### How to publish new version
+
+* `npm login`. You need to do it only once
+* `yarn bootstrap`, then `yarn publish`
+
+
 
