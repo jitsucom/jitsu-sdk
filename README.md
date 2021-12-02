@@ -13,8 +13,18 @@ only destination development works (`jitsu destination build`, `jitsu destinatio
 npx jitsu destination create
 ```
 
-Will create an empty project _(todo)_
+Will create an empty project. Then run:
 
-Examples:
-* [Mixpanel Destination](https://github.com/jitsucom/jitsu-mixpanel) 
+* `yarn build` to build a destination
+* `yarn test` to run tests
+
+`yarn build` and `yarn test` are just wrappers around `jitsu destination build` and `jitsu destination test`
+
+Destinations implemeted with this SDK:
+* [Mixpanel Destination](https://github.com/jitsucom/jitsu-mixpanel)
+* June.so (not published yet)
+
+## Maintainer Guide
+
+### How to publish new version
 
