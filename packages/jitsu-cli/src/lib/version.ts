@@ -10,7 +10,7 @@ let newVersion = undefined;
 
 export function getUpgradeMessage(newVersion: string) {
   return `New version of jitsu is available: ${newVersion}. Run ${chalk.bold(
-    "npm upgrade -g " + jitsuPackageName
+    "npm install -g " + jitsuPackageName
   )} or ${chalk.bold("npm upgrade -g yarn global upgrade " + jitsuPackageName)} `
 }
 
