@@ -6,7 +6,7 @@
     "prettier:write": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
     "lerna:verify": "lerna run build && lerna run test",
     "lerna:boot": "lerna bootstrap",
-    "lerna:publish": "lerna run build && lerna run test && lerna version && lerna publish"
+    "lerna:publish": "lerna version && lerna publish from-package"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",
