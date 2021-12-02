@@ -1,7 +1,7 @@
-import { JitsuEvent } from "./event"
-import { JitsuContext, DestinationMessage } from "./destination"
+import { JitsuEvent } from "@jitsu/jitsu-types/src/event"
+import { JitsuContext, DestinationMessage } from "@jitsu/jitsu-types/src/destination"
 
-type DestinatioTestParams = {
+type DestinationTestParams = {
   name: string
   context: JitsuContext
   transform: ($: JitsuEvent, context: JitsuContext) => DestinationMessage[] | DestinationMessage | null
@@ -9,7 +9,7 @@ type DestinatioTestParams = {
   expectedResult: DestinationMessage[] | DestinationMessage | null
 }
 
-export function testDestination({ name, context, transform, event, expectedResult }: DestinatioTestParams) {
+export function testDestination({ name, context, transform, event, expectedResult }: DestinationTestParams) {
   test(name, () => {
     const result = transform(event, context)
     expect(result).toEqual(expectedResult)

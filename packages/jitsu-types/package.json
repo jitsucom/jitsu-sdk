@@ -3,7 +3,6 @@
   "version": "0.0.8",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc -p ."
   },
   "dependencies": {
     "@types/jest": "^27.0.3"

@@ -15,7 +15,7 @@
 
 "@jitsu/jitsu-cli@file:../../packages/jitsu-cli":
   "resolved" "file:../../packages/jitsu-cli"
-  "version" "0.0.7"
+  "version" "0.0.8"
   dependencies:
     "@rollup/plugin-commonjs" "^21.0.1"
     "@rollup/plugin-multi-entry" "^4.1.0"

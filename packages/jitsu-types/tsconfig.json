@@ -5,7 +5,8 @@
       "dom"
     ],
     "rootDir": "./src",
-    "outDir": "./build"
+    "outDir": "./build",
+    "declaration": true
   },
   "include": [
     "./src"
