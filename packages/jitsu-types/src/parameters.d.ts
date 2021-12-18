@@ -1,3 +1,23 @@
+export type PluginMeta = {
+  /**
+   * Plugin (destination or source) id
+   */
+  type: string
+  /**
+   * Display name
+   */
+  displayName: string
+  /**
+   * Description. Can contain HTML
+   */
+  description: string
+  /**
+   * Can be either URL to PNG or SVG image or HTML string containing SVG
+   */
+  icon?: string
+}
+
+
 export type ConfigurationParameter = {
   /**
    * Id (corresponds to key in yaml config)

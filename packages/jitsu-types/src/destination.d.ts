@@ -1,5 +1,5 @@
 import { JitsuEvent } from "./event"
-import { ConfigurationParameter } from "./parameters"
+import { ConfigurationParameter, PluginMeta } from "./parameters"
 
 /**
  * Context data containing destinationId, destinationType
@@ -33,23 +33,7 @@ export declare type DestinationAdapter = (
   ...extraArgs: any[]
 ) => DestinationMessage[] | DestinationMessage | null
 
-export declare type DestinationDescriptor = {
-  /**
-   * Destination type id
-   */
-  type: string
-  /**
-   * Destination display name
-   */
-  displayName: string
-  /**
-   * Description. Can contain HTML
-   */
-  description: string
-  /**
-   * Can be either URL to PNG or SVG image or HTML string containing SVG
-   */
-  icon?: string
+export declare type DestinationDescriptor =  PluginMeta & {
   /**
    * List of configuration parameters
    */
