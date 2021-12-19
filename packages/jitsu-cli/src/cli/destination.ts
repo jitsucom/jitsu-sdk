@@ -53,7 +53,7 @@ const typescriptExample = chalkCode.typescript`
     ],
     }
     
-    export {descriptor, adapter}
+    export {descriptor, adapter, connectionTest}
 `
 
 const usage = `jitsu destination build <directory> — build project located in <directory>. If <directory> is not provided current directory is used.
