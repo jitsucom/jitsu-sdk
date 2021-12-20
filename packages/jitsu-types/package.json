@@ -1,8 +1,10 @@
 {
   "name": "@jitsu/types",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Types for Jitsu (👉 https://jitsu.com)",
-  "files": ["*.d.ts"],
+  "files": [
+    "*.d.ts"
+  ],
   "scripts": {},
   "repository": {
     "type": "git",
@@ -11,7 +13,5 @@
   },
   "bugs": {
     "url": "https://github.com/jitsucom/jitsu/issues"
-  },
-  "dependencies": {
   }
 }
