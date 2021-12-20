@@ -33,6 +33,8 @@ Destinations implemeted with this SDK:
 
 ## Maintainer Guide
 
+### Testing and building
+
 ### How to publish new version
 
 * `npm login`. You need to do it only once

@@ -42,7 +42,7 @@ function displayHelp(
     console.error(
       Object.keys(commands)
         .map(cmd => {
-          return `  ${helpOpts.binPrefix} ${cmd} <options>`
+          return `  ${helpOpts.binPrefix} ${cmd} <options> - ${commands[cmd].description}`
         })
         .join("\n")
     )

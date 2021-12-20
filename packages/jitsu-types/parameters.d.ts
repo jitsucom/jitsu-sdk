@@ -1,3 +1,5 @@
+type ConfigParameterType = "string" | "int" | "json" | "boolean" | "password"
+
 export type ConfigurationParameter = {
   /**
    * Id (corresponds to key in yaml config)
@@ -6,7 +8,7 @@ export type ConfigurationParameter = {
   /**
    * Type of parameter
    */
-  type: "string" | "int" | "json" | "boolean" | "password"
+  type: ConfigParameterType
   /**
    * Display name (for UI)
    */

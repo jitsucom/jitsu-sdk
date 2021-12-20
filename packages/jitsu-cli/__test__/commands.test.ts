@@ -43,13 +43,13 @@ test("jitsu help", async () => {
   expect(result.exitCode).toBe(0)
 })
 
-test("jitsu destination", async () => {
-  let result = await cmd("destination")
+test("jitsu extension", async () => {
+  let result = await cmd("extension")
   expect(result.exitCode).toBe(0)
 })
 
-test("jitsu destination help", async () => {
-  let result = await cmd("destination help")
+test("jitsu extension help", async () => {
+  let result = await cmd("extension help")
   expect(result.exitCode).toBe(0)
 })
 
@@ -71,32 +71,18 @@ async function exec(cmd: string, opts: { dir?: string } = {}) {
   return cmdResult.status
 }
 
-test("jitsu destination create", async () => {
+test("jitsu extension create -t destination", async () => {
   let projectBase = path.resolve(__dirname, "../../../test-projects/create-result")
   if (fs.existsSync(projectBase)) {
     fs.rmSync(projectBase, {recursive: true})
   }
-  let result = await cmd(`destination create -d ${projectBase} -n testprj -j latest`);
+  let result = await cmd(`extension create -d ${projectBase} -n testprj -j latest -t destination`);
   expect(result.exitCode).toBe(0);
-  expect(await exec(`npm i ${path.resolve(__dirname, "..")}`, { dir: projectBase })).toBe(0)
-  expect(await exec(`npm i ${path.resolve(__dirname, "../../jitsu-types")}`, { dir: projectBase })).toBe(0)
+  expect(await exec(`npm i ${path.resolve(__dirname, "../../jitsu-types")} ${path.resolve(__dirname, "..")}`, { dir: projectBase })).toBe(0)
   expect(await exec(`npm i`, { dir: projectBase })).toBe(0)
   expect(await exec(`npm run build`, { dir: projectBase })).toBe(0)
   expect(await exec(`npm run test`, { dir: projectBase })).toBe(0)
-
 });
 
-test("jitsu destination build & test", async () => {
-  let projectBase = path.resolve(__dirname, "../../../test-projects/destination")
-  let dist = path.resolve(projectBase, "dist/test-destination.js")
-  if (fs.existsSync(dist)) {
-    fs.unlinkSync(dist)
-  }
-  expect(await exec(`npm i && npm i ${path.resolve(__dirname, "..")}`, { dir: projectBase })).toBe(0)
-  expect(await exec(`npm run build`, { dir: projectBase })).toBe(0)
-  let content = fs.readFileSync(dist).toString()
-  expect(content.length).toBeGreaterThan(1);
-  getLog().info("Running npm run test")
-  expect(await exec(`npm run test`, { dir: projectBase })).toBe(0)
-})
+
 

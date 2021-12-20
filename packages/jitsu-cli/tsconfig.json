@@ -5,11 +5,12 @@
       "dom"
     ],
     "rootDir": ".",
-    "outDir": "./build"
+    "outDir": "./lib",
+    "declaration": true
   },
   "include": [
     "./src",
     "package.json"
-  ],
+  ]
 
 }
