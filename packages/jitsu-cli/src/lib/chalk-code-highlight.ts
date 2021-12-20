@@ -37,10 +37,10 @@ export function chalkCode(code: string, lang: Grammar, colorScheme: ColorScheme 
     .join("")
 }
 
-chalkCode.typescript = (code: TemplateStringsArray, colorScheme: ColorScheme = defaultColorScheme) => {
-  return chalkCode(code.join("\n"), Prism.languages.typescript, colorScheme)
+chalkCode.typescript = (code: (TemplateStringsArray | string), colorScheme: ColorScheme = defaultColorScheme) => {
+  return chalkCode(typeof code === "string" ? code : code.join("\n") , Prism.languages.typescript, colorScheme)
 }
 
-chalkCode.json = (code: TemplateStringsArray, colorScheme: ColorScheme = defaultColorScheme) => {
-  return chalkCode(code.join("\n"), Prism.languages.json, colorScheme)
+chalkCode.json = (code: (TemplateStringsArray | string), colorScheme: ColorScheme = defaultColorScheme) => {
+  return chalkCode(typeof code === "string" ? code : code.join("\n") , Prism.languages.json, colorScheme)
 }

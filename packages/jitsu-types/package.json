@@ -1,9 +1,17 @@
 {
-  "name": "@jitsu/jitsu-types",
-  "version": "0.0.10",
-  "main": "build/index.js",
+  "name": "@jitsu/types",
+  "version": "0.1.0",
+  "description": "Types for Jitsu (👉 https://jitsu.com)",
+  "files": [
+    "*.d.ts"
+  ],
   "scripts": {},
-  "dependencies": {
-    "@types/jest": "^27.0.3"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jitsucom/jitsu-sdk",
+    "directory": "packages/jitsu-types"
+  },
+  "bugs": {
+    "url": "https://github.com/jitsucom/jitsu/issues"
   }
 }

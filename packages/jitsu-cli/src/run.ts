@@ -2,15 +2,15 @@ import chalk from "chalk"
 
 import { CommandRegistry } from "./lib/command/types"
 import { executeCommand, subcommands } from "./lib/command"
-import { destinationCommands, help } from "./cli/destination"
+import { extensionCommands, help } from "./cli/extension"
 import * as Process from "process"
 import getLog from "./lib/log"
 import { jitsuCliVersion } from "./lib/version"
 
-const commands: CommandRegistry<'destination'> = {
-  destination: subcommands(destinationCommands, {
-    description: "A set of commands for building Jitsu destination",
-    binPrefix: "jitsu destination",
+const commands: CommandRegistry<'extension'> = {
+  extension: subcommands(extensionCommands, {
+    description: "A set of commands for building Jitsu extension",
+    binPrefix: "jitsu extension",
     customHelp: help
   }),
 }
