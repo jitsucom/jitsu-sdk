@@ -1,6 +1,9 @@
 {
   "name": "@jitsu/cli",
   "version": "0.2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": " CLI interface of Jitsu (👉 https://jitsu.com),",
   "repository": {
     "type": "git",
