@@ -4,10 +4,12 @@
   "scripts": {
     "prettier:check": "prettier --check --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
     "prettier:write": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
-    "lerna:verify": "lerna run build && lerna run test",
+    "build": "lerna run build && lerna run test",
+    "build-only": "lerna run build",
     "lerna": "lerna",
     "lerna:boot": "lerna bootstrap",
-    "lerna:publish": "lerna version && lerna publish from-package"
+    "ci": "yarn build && lerna publish --canary --yes",
+    "link-all": "lerna exec -- yarn link"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",

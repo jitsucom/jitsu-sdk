@@ -35,10 +35,18 @@ Destinations implemeted with this SDK:
 
 ### Testing and building
 
+* `yarn build` runs all subpackages build and tests. **Run before all tests**
+* `yarn build-only` runs only build, without test
+* `yarn link` runs `npm link` in all packages (run `yarn link`). It's usefull when you want to debug 
+your changes with extension
+  * Run `yarn link @jitsu/cli @jitsu/types` in the extension folder
+  * Run `yarn unlink @jitsu/cli @jitsu/types && yarn install --force` once you're done
+* `yarn ci` builds the project and publishes canary version. It's intended to run within github actions
+
 ### How to publish new version
 
-* `npm login`. You need to do it only once
-* `yarn lerna:boot`, then `yarn lerna:publish`
+* `npm login`. You need to do it only once.
+* `yarn lerna publish`
 
 
 
