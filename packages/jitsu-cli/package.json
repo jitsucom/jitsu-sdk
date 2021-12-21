@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+
   "description": " CLI interface of Jitsu (👉 https://jitsu.com),",
   "repository": {
     "type": "git",
