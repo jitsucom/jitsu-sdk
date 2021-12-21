@@ -12,3 +12,5 @@ package.json
 tailwind.config.js
 tsconfig.json
 tsconfig.paths.json
+packages/jitsu-cli/lib
+packages/jitsu-types/lib
