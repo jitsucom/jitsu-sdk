@@ -8,7 +8,8 @@
     "build-only": "lerna run build",
     "lerna": "lerna",
     "lerna:boot": "lerna bootstrap",
-    "ci": "yarn build && lerna publish --canary --yes",
+    "ci:check-env-var": "[ -z \"$NPM_TOKEN\" ] && echo \"❌ NPM_TOKEN env var must be set to run CI pipeline\" && exit 1 || exit 0",
+    "ci": "yarn ci:check-env-var && yarn build && echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc && lerna publish --canary --yes && rm .npmrc  ",
     "link-all": "lerna exec -- yarn link"
   },
   "devDependencies": {
