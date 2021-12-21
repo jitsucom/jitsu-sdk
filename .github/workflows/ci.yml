@@ -1,0 +1,29 @@
+name: Frontend CI
+
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  frontend-build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+          # Make sure the value of GITHUB_TOKEN will not be persisted in repo's config
+          persist-credentials: false
+      - run: yarn install
+        name: "Installing packages (yarn install)"
+        working-directory: ./configurator/frontend
+      - run: yarn ci
+        if: ${{ success() }}
+        name: "Building packages"
+        working-directory: ./configurator/frontend
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # or a specific color like 'good' or '#ff00ff'
