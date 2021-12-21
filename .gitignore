@@ -4,3 +4,5 @@ test-projects/test-destination/coverage
 packages/jitsu-cli/build
 test-projects/test-destination/dist
 packages/jitsu-types/build
+test-projects
+yarn-error.log
