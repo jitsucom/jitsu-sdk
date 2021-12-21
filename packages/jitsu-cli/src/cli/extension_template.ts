@@ -1,12 +1,12 @@
-import { ProjectTemplate } from "../lib/template"
-import { jitsuCliVersion } from "../lib/version"
+import { ProjectTemplate } from "../lib/template";
+import { jitsuCliVersion } from "../lib/version";
 
 export type DestinationTemplateVars = {
-  license?: "MIT" | "Other"
-  packageName: string
-  type: "destination" | "transform"
-  jitsuVersion?: string
-}
+  license?: "MIT" | "Other";
+  packageName: string;
+  type: "destination" | "transform";
+  jitsuVersion?: string;
+};
 
 export const packageJsonTemplate = ({ packageName, type, jitsuVersion = undefined }: DestinationTemplateVars) => ({
   name: `${packageName}`,
@@ -26,13 +26,11 @@ export const packageJsonTemplate = ({ packageName, type, jitsuVersion = undefine
     "@jitsu/cli": `${jitsuVersion || "^" + jitsuCliVersion}`,
     tslib: "^2.3.1",
   },
-})
-
-
+});
 
 let destinationTest = ({ type = "destination" }) => {
   if (type !== "destination") {
-    return undefined
+    return undefined;
   }
   return `
     import { JitsuDestinationContext } from "@jitsu/types/extension"
@@ -57,8 +55,8 @@ let destinationTest = ({ type = "destination" }) => {
         body: { a: 2 },
       },
     })
-`
-}
+`;
+};
 
 let destinationCode = () => {
   return `
@@ -70,8 +68,8 @@ let destinationCode = () => {
     };
 
     export default destination;
-`
-}
+`;
+};
 
 let transformCode = () => {
   return `
@@ -84,9 +82,8 @@ let transformCode = () => {
     }
 
     export default jitsuAdapter;
-`
-}
-
+`;
+};
 
 let descriptor = {};
 
@@ -107,7 +104,7 @@ descriptor["destination"] = (vars: DestinationTemplateVars) => `
   export { descriptor, destination };
 `;
 
-descriptor['transform'] = (vars: DestinationTemplateVars) =>
+descriptor["transform"] = (vars: DestinationTemplateVars) =>
   `
   import {DestinationAdapter, DestinationDescriptor} from "@jitsu/types/destination";
   import jitsuAdapter from "./adapter";
@@ -125,12 +122,12 @@ descriptor['transform'] = (vars: DestinationTemplateVars) =>
   }
 
   export {descriptor, adapter}
-`
+`;
 export const extensionProjectTemplate: ProjectTemplate<DestinationTemplateVars> = {
   "__test__/destination.test.ts": destinationTest,
-  "src/destination.ts": (vars) => vars.type == 'destination' && destinationCode(),
-  "src/transform.ts": (vars) => vars.type == 'transform' && transformCode(),
-  "src/index.ts": (vars) => descriptor[vars.type](vars),
+  "src/destination.ts": vars => vars.type == "destination" && destinationCode(),
+  "src/transform.ts": vars => vars.type == "transform" && transformCode(),
+  "src/index.ts": vars => descriptor[vars.type](vars),
   "package.json": packageJsonTemplate,
   "tsconfig.json": {
     compilerOptions: {
@@ -142,4 +139,4 @@ export const extensionProjectTemplate: ProjectTemplate<DestinationTemplateVars> 
     },
     include: ["./src", "__test__"],
   },
-}
+};

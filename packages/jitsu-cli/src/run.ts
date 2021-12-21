@@ -1,26 +1,24 @@
-import chalk from "chalk"
+import chalk from "chalk";
 
-import { CommandRegistry } from "./lib/command/types"
-import { executeCommand, subcommands } from "./lib/command"
-import { extensionCommands, help } from "./cli/extension"
-import * as Process from "process"
-import getLog from "./lib/log"
-import { jitsuCliVersion } from "./lib/version"
+import { CommandRegistry } from "./lib/command/types";
+import { executeCommand, subcommands } from "./lib/command";
+import { extensionCommands, help } from "./cli/extension";
+import * as Process from "process";
+import getLog from "./lib/log";
+import { jitsuCliVersion } from "./lib/version";
 
-const commands: CommandRegistry<'extension'> = {
+const commands: CommandRegistry<"extension"> = {
   extension: subcommands(extensionCommands, {
     description: "A set of commands for building Jitsu extension",
     binPrefix: "jitsu extension",
-    customHelp: help
+    customHelp: help,
   }),
-}
-
-
+};
 
 function exitWithError(error: string, details?: string) {
-  console.error(`${chalk.bold.red("Error!")} - ${error}`)
+  console.error(`${chalk.bold.red("Error!")} - ${error}`);
   if (details) {
-    console.error(details)
+    console.error(details);
   }
   return 1;
 }
@@ -29,11 +27,11 @@ export async function run(args: string[]): Promise<number> {
   let result = await executeCommand(commands, args, {
     description: "CLI interface of " + chalk.bold("Jitsu") + `(👉 https://jitsu.com), version ${jitsuCliVersion}`,
     binPrefix: "jitsu",
-  })
+  });
   if (result.success) {
-    getLog().info("✨ Done")
-    return 0
+    getLog().info("✨ Done");
+    return 0;
   } else {
-    return exitWithError(result.message, result.details)
+    return exitWithError(result.message, result.details);
   }
 }

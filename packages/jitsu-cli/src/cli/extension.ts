@@ -99,10 +99,10 @@ async function create(args: string[]): Promise<CommandResult> {
           name: "package",
           message: [
             `What is the type of extension?`,
-            ` ${chalk.bold('destination')} adds a new type of HTTP-based destination to Jitsu`,
-            ` ${chalk.bold('transform')}   adds a transformation logic`,
+            ` ${chalk.bold("destination")} adds a new type of HTTP-based destination to Jitsu`,
+            ` ${chalk.bold("transform")}   adds a transformation logic`,
           ].join("\n"),
-          choices: ['destination', 'transform'],
+          choices: ["destination", "transform"],
         },
       ])
     ).package;
@@ -163,7 +163,7 @@ async function create(args: string[]): Promise<CommandResult> {
   write(projectDir, extensionProjectTemplate, {
     packageName: packageName,
     jitsuVersion: cliOpts.jitsuVersion,
-    type: packageType
+    type: packageType,
   });
 
   return { success: true };

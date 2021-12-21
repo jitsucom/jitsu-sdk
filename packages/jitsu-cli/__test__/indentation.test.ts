@@ -1,9 +1,7 @@
-import { removeIndentation } from "../src/lib/indent"
-
-
+import { removeIndentation } from "../src/lib/indent";
 
 test("jitsu indentation", async () => {
-  const text= `
+  const text = `
   a:
   
     b:
@@ -11,7 +9,6 @@ test("jitsu indentation", async () => {
 
   let aligned = removeIndentation(text).split("\n");
   expect(aligned.length).toBe(3);
-  expect(aligned[0]).toBe("a:")
-  expect(aligned[2]).toBe("  b:")
-
-})
+  expect(aligned[0]).toBe("a:");
+  expect(aligned[2]).toBe("  b:");
+});

@@ -1,6 +1,7 @@
 # Jitsu CLI
 
-#### Quick start 
+#### Quick start
+
 ```
 npx @jitsu/cli --help
 ```

@@ -1,7 +1,5 @@
-import { JitsuEvent } from "./event"
-import { ConfigurationParameter } from "./parameters"
-
-
+import { JitsuEvent } from "./event";
+import { ConfigurationParameter } from "./parameters";
 
 /**
  * Jitsu plugin structure. This datatype isn't used anywhere but rather demonstrates the structure of
@@ -17,34 +15,34 @@ export declare type JitsuExtensionExport = {
   /**
    * Descriptor of the plugin
    */
-  descriptor: ExtensionDescriptor,
+  descriptor: ExtensionDescriptor;
   /**
    * Extension can export transformation logic. The transformation logic
    * is applied before event is sent to destination
    */
-  transform?: TransformationFunction,
+  transform?: TransformationFunction;
   /**
    * If destination symbol is exported, the extension will be treated as a destination extension.
    * It means that the extension is a complete control of how data should be landed to destination.
    */
-  destination?: DestinationFunction,
+  destination?: DestinationFunction;
   /**
    * Optional configuration validator. Validator could call HTTP interface to validate
    * credentials, or other extension settings
    */
-  validator?: ConfigValidator
-}
+  validator?: ConfigValidator;
+};
 
 /**
  * Destination configuration built out of ExtensionDescriptor.configurationParameters
  */
 
-type ExtensionConfiguration = { [key: string]: any }
+type ExtensionConfiguration = { [key: string]: any };
 
 /**
  * A loose definition of set. Includes singleton, array or null / undefined (meaning empty set)
  */
-type ObjectSet<T> = T | T[] | undefined | null
+type ObjectSet<T> = T | T[] | undefined | null;
 
 /**
  * Transformation function. The extension can export one in order to define transformation function.
@@ -54,7 +52,7 @@ type ObjectSet<T> = T | T[] | undefined | null
  * Type-wise, the signature looks different: for convenience it could return either single event, or undefined (meaning
  * no events should be transformed).
  */
-export declare type TransformationFunction<E = JitsuEvent> = (event: E) => ObjectSet<E>
+export declare type TransformationFunction<E = JitsuEvent> = (event: E) => ObjectSet<E>;
 
 /**
  * Context data containing destinationId, destinationType
@@ -64,32 +62,32 @@ export declare type JitsuDestinationContext = {
   /**
    * Unique Id of configured destination instance on Jitsu server
    */
-  destinationId: string
+  destinationId: string;
   /**
    * Destination type id
    */
-  destinationType: string
+  destinationType: string;
   /**
    * Configuration if destination (values of DestinationDescriptor.configurationParameters)
    */
-  config: ExtensionConfiguration
-}
+  config: ExtensionConfiguration;
+};
 
 /**
  * The result of DestinationFunction: http request, that will be issued asynchronously
  */
 export declare type DestinationMessage = {
-  url: string
-  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH"
-  headers?: { [key: string]: string }
-  body: any
-}
+  url: string;
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+  headers?: { [key: string]: string };
+  body: any;
+};
 /**
  * See ConfigValidator
  *  - `true`   is equivalent of {ok: true}
  *  - `string` is equivalent of {ok: false, message: string}
  */
-type ConfigValidationResult = { ok: true; message?: string } | { ok: false; message: string } | boolean | string
+type ConfigValidationResult = { ok: true; message?: string } | { ok: false; message: string } | boolean | string;
 
 /**
  * Verifies configuration. Should return {ok: true} or just `true` if connection
@@ -97,7 +95,7 @@ type ConfigValidationResult = { ok: true; message?: string } | { ok: false; mess
  *
  * Can use fetch to connect to external APIs
  */
-export declare type ConfigValidator = (config: ExtensionConfiguration) => Promise<ConfigValidationResult>
+export declare type ConfigValidator = (config: ExtensionConfiguration) => Promise<ConfigValidationResult>;
 
 /**
  * Destination function. The adapter accepts JitsuEvent and returns a set of HTTP request.
@@ -109,7 +107,7 @@ export declare type ConfigValidator = (config: ExtensionConfiguration) => Promis
 export declare type DestinationFunction<E = JitsuEvent> = (
   event: E,
   context: JitsuDestinationContext
-) => ObjectSet<DestinationMessage>
+) => ObjectSet<DestinationMessage>;
 
 /**
  * Describes the extension
@@ -118,22 +116,21 @@ export declare type ExtensionDescriptor = {
   /**
    * Extension id. If extension is published as NPM package, it should match NPM package name
    */
-  id: string
+  id: string;
   /**
    * Extension display name
    */
-  displayName: string
+  displayName: string;
   /**
    *  Extension description. Can contain HTML
    */
-  description: string
+  description: string;
   /**
    * Can be either URL to PNG or SVG image or HTML string containing SVG
    */
-  icon?: string
+  icon?: string;
   /**
    * List of configuration parameters
    */
-  configurationParameters: ConfigurationParameter[]
-}
-
+  configurationParameters: ConfigurationParameter[];
+};

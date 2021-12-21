@@ -4,7 +4,7 @@
   "scripts": {
     "prettier:check": "prettier --check --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
     "prettier:write": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
-    "build": "lerna run build && lerna run test",
+    "build": "yarn prettier:check && lerna run build && lerna run test",
     "build-only": "lerna run build",
     "lerna": "lerna",
     "lerna:boot": "lerna bootstrap",

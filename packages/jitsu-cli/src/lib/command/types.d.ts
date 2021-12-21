@@ -1,22 +1,17 @@
 type CommandSucceeded = {
-  success: true
-}
+  success: true;
+};
 
-type CommandFailed = { success: false; message: string; details?: string }
+type CommandFailed = { success: false; message: string; details?: string };
 
-export type CommandResult =
-  | CommandSucceeded
-  | CommandFailed
-
+export type CommandResult = CommandSucceeded | CommandFailed;
 
 export type Command = {
-  exec: (args: string[]) => Promise<CommandResult>
-  description: string
-  help: string
-}
+  exec: (args: string[]) => Promise<CommandResult>;
+  description: string;
+  help: string;
+};
 
-export type CommandRegistry<C extends string = string> = Record<C, Command>
+export type CommandRegistry<C extends string = string> = Record<C, Command>;
 
-export type HelpOptions = { description: string, binPrefix: string, customHelp?: string }
-
-
+export type HelpOptions = { description: string; binPrefix: string; customHelp?: string };
