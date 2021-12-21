@@ -1,8 +1,6 @@
-.idea/
-node_modules
-test-projects/test-destination/coverage
-packages/jitsu-cli/build
-test-projects/test-destination/dist
-packages/jitsu-types/build
+*.idea
+*node_modules
+packages/jitsu-cli/lib
+packages/jitsu-types/lib
 test-projects
-yarn-error.log
+*yarn-error.log
