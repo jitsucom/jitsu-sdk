@@ -1,10 +1,10 @@
 type ConfigParameterType = "string" | "int" | "json" | "boolean" | "password";
 
-export type ConfigurationParameter = {
+export type ConfigurationParameter<T = string> = {
   /**
    * Id (corresponds to key in yaml config)
    */
-  id: string;
+  id: T;
   /**
    * Type of parameter
    */

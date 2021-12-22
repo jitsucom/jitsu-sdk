@@ -17,6 +17,7 @@ import { extensionProjectTemplate, packageJsonTemplate } from "./extension_templ
 import inquirer from "inquirer";
 import validateNpmPackage from "validate-npm-package-name";
 import { align } from "../lib/indent";
+import { jitsuCliVersion, jitsuPackageName } from "../lib/version";
 
 const usage = `
    jitsu extension build <directory> — build project located in <directory>. If <directory> is not provided current directory is used.
@@ -199,6 +200,9 @@ async function build(args: string[]): Promise<CommandResult> {
   getLog().info("Building project");
   try {
     let indexFile = path.resolve(projectBase, "src/index.ts");
+    if (!fs.existsSync(indexFile)) {
+      return { success: false, message: `Project should have src/index.ts file. Can't find it at ${indexFile}` };
+    }
     const bundle = await rollup({
       input: [indexFile],
       plugins: [typescriptEnabled && rollupTypescript({ cwd: projectBase }), multi(), resolve(), commonjs()],
@@ -209,8 +213,10 @@ async function build(args: string[]): Promise<CommandResult> {
       format: "cjs",
     });
     getLog().info("Validating build");
+    let code = output.output[0].code;
+    code += `\nexports.buildInfo = {sdkVersion: "${jitsuCliVersion}", sdkPackage: "${jitsuPackageName}", buildTimestamp: "${new Date().toISOString()}"}`;
     let evalRes = eval(`(function(exports) {
-      ${output.output[0].code}
+      ${code}
     })`);
     let exports = {};
     evalRes(exports);
@@ -223,7 +229,7 @@ async function build(args: string[]): Promise<CommandResult> {
       };
     }
     fs.mkdirSync(path.dirname(fullOutputPath), { recursive: true });
-    fs.writeFileSync(fullOutputPath, output.output[0].code);
+    fs.writeFileSync(fullOutputPath, code);
   } catch (e: any) {
     if (e.id && e.loc && e.frame) {
       return {

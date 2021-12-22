@@ -3,6 +3,21 @@ import { ConfigurationParameter } from "./parameters";
 import { Config } from "prettier";
 
 /**
+ * Information about extension build. It's added automatically
+ * to module export during build time
+ */
+export declare type ExtensionBuildInfo = {
+  /**
+   * SDK version (@jitsu/cli package version)
+   */
+  sdkVersion: string;
+  /**
+   * ISO 8601 timestamp of the build
+   */
+  buildTimestamp: string;
+};
+
+/**
  * Jitsu plugin structure. This datatype isn't used anywhere but rather demonstrates the structure of
  * export of every plugin.
  *
@@ -32,6 +47,11 @@ export declare type JitsuExtensionExport = {
    * credentials, or other extension settings
    */
   validator?: ConfigValidator;
+
+  /**
+   * Automatically added to module export by `jitsu extension build`
+   */
+  buildInfo: ExtensionBuildInfo;
 };
 
 /**
@@ -107,7 +127,7 @@ export declare type DestinationFunction<E = DefaultJitsuEvent, Config = Record<s
 /**
  * Describes the extension
  */
-export declare type ExtensionDescriptor = {
+export declare type ExtensionDescriptor<Config = Record<string, any>> = {
   /**
    * Extension id. If extension is published as NPM package, it should match NPM package name
    */
@@ -127,5 +147,5 @@ export declare type ExtensionDescriptor = {
   /**
    * List of configuration parameters
    */
-  configurationParameters: ConfigurationParameter[];
+  configurationParameters: ConfigurationParameter<keyof Config>[];
 };
