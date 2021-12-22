@@ -61,9 +61,9 @@ let destinationTest = ({ type = "destination" }) => {
 let destinationCode = () => {
   return `
     import { DestinationFunction, DestinationMessage, JitsuDestinationContext } from "@jitsu/types/extension";
-    import { JitsuEvent } from "@jitsu/types/event";
+    import { DefaultJitsuEvent } from "@jitsu/types/event";
 
-    const destination: DestinationFunction = (event: JitsuEvent, dstContext: JitsuDestinationContext) => {
+    const destination: DestinationFunction = (event: DefaultJitsuEvent, dstContext: JitsuDestinationContext) => {
       return { url: "https://test.com", method: "POST", body: { a: (event.a || 0) + 1 } };
     };
 
@@ -74,10 +74,10 @@ let destinationCode = () => {
 let transformCode = () => {
   return `
     import {Destination, DestinationMessage, JitsuDestinationContext} from "@jitsu/types/destination";
-    import {JitsuEvent} from "@jitsu/types/event";
+    import {DefaultJitsuEvent} from "@jitsu/types/event";
     
     //duplicate events 
-    const transform: TransformationFunction = (event: JitsuEvent) => {
+    const transform: TransformationFunction = (event: DefaultJitsuEvent) => {
       return [event, {...event, eventn_ctx_event_id: event.eventn_ctx_event_id + "_2"}] 
     }
 

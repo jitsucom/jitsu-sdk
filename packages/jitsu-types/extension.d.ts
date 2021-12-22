@@ -1,5 +1,6 @@
-import { JitsuEvent } from "./event";
+import { DefaultJitsuEvent } from "./event";
 import { ConfigurationParameter } from "./parameters";
+import { Config } from "prettier";
 
 /**
  * Jitsu plugin structure. This datatype isn't used anywhere but rather demonstrates the structure of
@@ -34,12 +35,6 @@ export declare type JitsuExtensionExport = {
 };
 
 /**
- * Destination configuration built out of ExtensionDescriptor.configurationParameters
- */
-
-type ExtensionConfiguration = { [key: string]: any };
-
-/**
  * A loose definition of set. Includes singleton, array or null / undefined (meaning empty set)
  */
 type ObjectSet<T> = T | T[] | undefined | null;
@@ -52,13 +47,13 @@ type ObjectSet<T> = T | T[] | undefined | null;
  * Type-wise, the signature looks different: for convenience it could return either single event, or undefined (meaning
  * no events should be transformed).
  */
-export declare type TransformationFunction<E = JitsuEvent> = (event: E) => ObjectSet<E>;
+export declare type TransformationFunction<E = DefaultJitsuEvent> = (event: E) => ObjectSet<E>;
 
 /**
  * Context data containing destinationId, destinationType
  * and provided values for DestinationDescriptor's configurationParameters
  */
-export declare type JitsuDestinationContext = {
+export declare type JitsuDestinationContext<Config = Record<string, any>> = {
   /**
    * Unique Id of configured destination instance on Jitsu server
    */
@@ -70,7 +65,7 @@ export declare type JitsuDestinationContext = {
   /**
    * Configuration if destination (values of DestinationDescriptor.configurationParameters)
    */
-  config: ExtensionConfiguration;
+  config: Config;
 };
 
 /**
@@ -95,18 +90,18 @@ type ConfigValidationResult = { ok: true; message?: string } | { ok: false; mess
  *
  * Can use fetch to connect to external APIs
  */
-export declare type ConfigValidator = (config: ExtensionConfiguration) => Promise<ConfigValidationResult>;
+export declare type ConfigValidator<Config = Record<string, any>> = (config: Config) => Promise<ConfigValidationResult>;
 
 /**
  * Destination function. The adapter accepts JitsuEvent and returns a set of HTTP request.
  *
  * Avoid using `fetch` if possible. Just return
- * @param JitsuEvent incoming event
- * @param JitsuDestination context of the processing
+ * @param event incoming event
+ * @param context context of the processing
  */
-export declare type DestinationFunction<E = JitsuEvent> = (
+export declare type DestinationFunction<E = DefaultJitsuEvent, Config = Record<string, any>> = (
   event: E,
-  context: JitsuDestinationContext
+  context: JitsuDestinationContext<Config>
 ) => ObjectSet<DestinationMessage>;
 
 /**

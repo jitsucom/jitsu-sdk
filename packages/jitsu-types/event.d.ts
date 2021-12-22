@@ -54,9 +54,9 @@ export type Conversion = {
 };
 
 /**
- * Event object
+ * Default structure of Jitsu event object
  */
-export type JitsuEvent = {
+export type DefaultJitsuEvent = {
   event_type: string; //event type
   source_ip?: string; //IP address. Do not set this field on a client side, it will be rewritten on the server
   anon_ip?: string; //First 3 octets of an IP address. Same as IP - will be set on a server
