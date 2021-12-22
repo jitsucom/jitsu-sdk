@@ -67,7 +67,7 @@ type ObjectSet<T> = T | T[] | undefined | null;
  * Type-wise, the signature looks different: for convenience it could return either single event, or undefined (meaning
  * no events should be transformed).
  */
-export declare type TransformationFunction<E = DefaultJitsuEvent> = (event: E) => ObjectSet<E>;
+export declare type TransformationFunction<E = DefaultJitsuEvent> = (event: E) => ObjectSet<any>;
 
 /**
  * Context data containing destinationId, destinationType

@@ -170,6 +170,22 @@ async function create(args: string[]): Promise<CommandResult> {
   return { success: true };
 }
 
+function validateTsConfig(tsConfigPath: string) {
+
+  let tsConfig: any;
+  try {
+    tsConfig = JSON.parse(fs.readFileSync(tsConfigPath, "utf8"));
+  } catch (e: any) {
+    throw new Error(`${chalk.bold(tsConfigPath)} - syntax error: ${e.message}`)
+  }
+  if (tsConfig?.compilerOptions?.target !== 'es5') {
+    throw new Error(`${chalk.bold(tsConfigPath)} error: compilerOptions.target should be set to es5!`)
+  }
+  if (tsConfig?.compilerOptions?.module !== 'ESNext') {
+    throw new Error(`${chalk.bold(tsConfigPath)} error: compilerOptions.module should be set to ESNext!`)
+  }
+}
+
 async function build(args: string[]): Promise<CommandResult> {
   const directory = args?.[0] || "";
   let projectBase = path.isAbsolute(directory) ? directory : path.resolve(process.cwd() + "/" + directory);
@@ -195,7 +211,10 @@ async function build(args: string[]): Promise<CommandResult> {
   const typescriptEnabled = fs.existsSync(tsConfigPath);
   if (typescriptEnabled) {
     getLog().info(`Found ${chalk.bold("tsconfig.json")}, typescript will be enabled`);
+  } else {
+    return {success: false, message: `${chalk.bold('tsconfig.json')} is not found in the root of the project. Pure JS extensions are not supported yet`}
   }
+  validateTsConfig(tsConfigPath);
 
   getLog().info("Building project");
   try {
@@ -220,11 +239,18 @@ async function build(args: string[]): Promise<CommandResult> {
     })`);
     let exports = {};
     evalRes(exports);
-    if (!exports["destination"]) {
+    if (!exports["destination"] && !exports["transform"]) {
       return {
         success: false,
         message:
-          `${chalk.bold(indexFile)} should export ${chalk.italic("destination")} symbol. It exports: ` +
+          `${chalk.bold(indexFile)} should export ${chalk.italic("destination")} or ${chalk.italic("transform")} symbol. It exports: ` +
+          Object.keys(exports).join(", "),
+      };
+    } else if (exports["destination"] && exports["transform"]) {
+      return {
+        success: false,
+        message:
+          `${chalk.bold(indexFile)} exports both ${chalk.italic("destination")} and ${chalk.italic("transform")} symbol. It should export either of them` +
           Object.keys(exports).join(", "),
       };
     }
@@ -254,11 +280,13 @@ async function test(args: string[]): Promise<CommandResult> {
   let projectBase = path.isAbsolute(directory) ? directory : path.resolve(process.cwd() + "/" + directory);
   getLog().info("🛂 Running tests for " + chalk.bold(projectBase));
   let tsConfigPath = path.resolve(projectBase, "tsconfig.json");
-
   const typescriptEnabled = fs.existsSync(tsConfigPath);
   if (typescriptEnabled) {
     getLog().info(`ℹ️ Found ${chalk.bold("tsconfig.json")}, typescript will be enabled`);
+  } else {
+    return {success: false, message: `${chalk.bold('tsconfig.json')} is not found in the root of the project. Pure JS extensions are not supported yet`}
   }
+  validateTsConfig(tsConfigPath);
   let jestArgs = ["--passWithNoTests", "--projects", projectBase];
   if (typescriptEnabled) {
     jestArgs.push("--preset", "ts-jest");
