@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/pipeline-helpers",
-  "version": "0.4.0",
+  "version": "0.4.1-alpha.1+2cd9b45",
   "description": "Utility functions designed to outsource some processing logic from Server to JS",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
   "homepage": "https://github.com/jitsucom/jitsu-sdk#readme",
@@ -27,5 +27,6 @@
     "@rollup/plugin-json": "^4.1.0",
     "@segment/analytics-next": "^1.32.1",
     "@types/jquery": "^3.5.10"
-  }
+  },
+  "gitHead": "2cd9b45d9dfe065766d23dd030154d314206af09"
 }

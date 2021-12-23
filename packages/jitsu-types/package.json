@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/types",
-  "version": "0.3.1-alpha.0",
+  "version": "0.4.1-alpha.1+2cd9b45",
   "publishConfig": {
     "access": "public"
   },
@@ -16,5 +16,6 @@
   },
   "bugs": {
     "url": "https://github.com/jitsucom/jitsu/issues"
-  }
+  },
+  "gitHead": "2cd9b45d9dfe065766d23dd030154d314206af09"
 }

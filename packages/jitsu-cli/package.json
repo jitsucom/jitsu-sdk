@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/cli",
-  "version": "0.4.0",
+  "version": "0.4.1-alpha.1+2cd9b45",
   "publishConfig": {
     "access": "public"
   },
@@ -63,5 +63,6 @@
     "tslib": "^2.3.1",
     "typescript": "^4.5.2",
     "validate-npm-package-name": "^3.0.0"
-  }
+  },
+  "gitHead": "2cd9b45d9dfe065766d23dd030154d314206af09"
 }
