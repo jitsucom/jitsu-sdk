@@ -14,3 +14,5 @@ tsconfig.json
 tsconfig.paths.json
 packages/jitsu-cli/lib
 packages/jitsu-types/lib
+packages/pipeline-helpers/lib
+packages/segment-transform/dist

@@ -37,7 +37,6 @@
     "@types/jest-cli": "^24.3.0",
     "@types/validate-npm-package-name": "^3.0.3",
     "child_process": "^1.0.2",
-    "jest": "^27.4.5",
     "lerna": "^4.0.0",
     "ts-node": "^10.4.0"
   },
@@ -57,7 +56,6 @@
     "prismjs": "^1.25.0",
     "rollup": "^2.60.0",
     "rollup-plugin-typescript2": "^0.31.0",
-    "rollup-plugin-uglify": "^6.0.4",
     "semver": "^7.3.5",
     "terminal-link": "^3.0.0",
     "ts-jest": "^27.0.7",

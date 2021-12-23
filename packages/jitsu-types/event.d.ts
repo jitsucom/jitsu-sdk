@@ -53,6 +53,7 @@ export type Conversion = {
   [propName: string]: any;
 };
 
+export type UtmTags = "source" | "medium" | "campaign" | "term" | "content" | "name";
 /**
  * Default structure of Jitsu event object
  */
@@ -84,7 +85,7 @@ export type DefaultJitsuEvent = {
 
   doc_encoding?: string;
 
-  utm?: Record<string, string>; //utm tags (without utm prefix, e.g key will be "source", not utm_source. See
+  utm?: Partial<Record<UtmTags, string>>; //utm tags (without utm prefix, e.g key will be "source", not utm_source. See
   click_id?: Record<string, string>; //all external click ids (passed through URL). See CLICK_IDS for supported all supported click ids
 
   conversion?: Conversion;

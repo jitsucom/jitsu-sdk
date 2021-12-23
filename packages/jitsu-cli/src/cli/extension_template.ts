@@ -141,6 +141,7 @@ export const extensionProjectTemplate: ProjectTemplate<DestinationTemplateVars> 
   "tsconfig.json": {
     compilerOptions: {
       module: "ESNext",
+      target: "es5",
       moduleResolution: "Node",
       esModuleInterop: true,
       outDir: "./dist",

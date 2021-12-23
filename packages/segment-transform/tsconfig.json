@@ -6,7 +6,7 @@
     "lib": [
       "dom"
     ],
-    "rootDir": "./src",
+    "rootDir": "./",
     "outDir": "./build",
     "declaration": true
   },

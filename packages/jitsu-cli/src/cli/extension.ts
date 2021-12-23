@@ -147,8 +147,8 @@ async function create(args: string[]): Promise<CommandResult> {
           },
         },
       ])
-    ).package;
-
+    ).directory;
+  console.log("----> " + projectDir);
   projectDir = path.resolve(projectDir);
 
   getLog().info("Creating new jitsu project in " + chalk.bold(projectDir));
@@ -171,18 +171,17 @@ async function create(args: string[]): Promise<CommandResult> {
 }
 
 function validateTsConfig(tsConfigPath: string) {
-
   let tsConfig: any;
   try {
     tsConfig = JSON.parse(fs.readFileSync(tsConfigPath, "utf8"));
   } catch (e: any) {
-    throw new Error(`${chalk.bold(tsConfigPath)} - syntax error: ${e.message}`)
+    throw new Error(`${chalk.bold(tsConfigPath)} - syntax error: ${e.message}`);
   }
-  if (tsConfig?.compilerOptions?.target !== 'es5') {
-    throw new Error(`${chalk.bold(tsConfigPath)} error: compilerOptions.target should be set to es5!`)
+  if (tsConfig?.compilerOptions?.target !== "es5") {
+    throw new Error(`${chalk.bold(tsConfigPath)} error: compilerOptions.target should be set to es5!`);
   }
-  if (tsConfig?.compilerOptions?.module !== 'ESNext') {
-    throw new Error(`${chalk.bold(tsConfigPath)} error: compilerOptions.module should be set to ESNext!`)
+  if (tsConfig?.compilerOptions?.module !== "ESNext") {
+    throw new Error(`${chalk.bold(tsConfigPath)} error: compilerOptions.module should be set to ESNext!`);
   }
 }
 
@@ -212,7 +211,12 @@ async function build(args: string[]): Promise<CommandResult> {
   if (typescriptEnabled) {
     getLog().info(`Found ${chalk.bold("tsconfig.json")}, typescript will be enabled`);
   } else {
-    return {success: false, message: `${chalk.bold('tsconfig.json')} is not found in the root of the project. Pure JS extensions are not supported yet`}
+    return {
+      success: false,
+      message: `${chalk.bold(
+        "tsconfig.json"
+      )} is not found in the root of the project. Pure JS extensions are not supported yet`,
+    };
   }
   validateTsConfig(tsConfigPath);
 
@@ -243,15 +247,17 @@ async function build(args: string[]): Promise<CommandResult> {
       return {
         success: false,
         message:
-          `${chalk.bold(indexFile)} should export ${chalk.italic("destination")} or ${chalk.italic("transform")} symbol. It exports: ` +
-          Object.keys(exports).join(", "),
+          `${chalk.bold(indexFile)} should export ${chalk.italic("destination")} or ${chalk.italic(
+            "transform"
+          )} symbol. It exports: ` + Object.keys(exports).join(", "),
       };
     } else if (exports["destination"] && exports["transform"]) {
       return {
         success: false,
         message:
-          `${chalk.bold(indexFile)} exports both ${chalk.italic("destination")} and ${chalk.italic("transform")} symbol. It should export either of them` +
-          Object.keys(exports).join(", "),
+          `${chalk.bold(indexFile)} exports both ${chalk.italic("destination")} and ${chalk.italic(
+            "transform"
+          )} symbol. It should export either of them` + Object.keys(exports).join(", "),
       };
     }
     fs.mkdirSync(path.dirname(fullOutputPath), { recursive: true });
@@ -284,7 +290,12 @@ async function test(args: string[]): Promise<CommandResult> {
   if (typescriptEnabled) {
     getLog().info(`ℹ️ Found ${chalk.bold("tsconfig.json")}, typescript will be enabled`);
   } else {
-    return {success: false, message: `${chalk.bold('tsconfig.json')} is not found in the root of the project. Pure JS extensions are not supported yet`}
+    return {
+      success: false,
+      message: `${chalk.bold(
+        "tsconfig.json"
+      )} is not found in the root of the project. Pure JS extensions are not supported yet`,
+    };
   }
   validateTsConfig(tsConfigPath);
   let jestArgs = ["--passWithNoTests", "--projects", projectBase];
