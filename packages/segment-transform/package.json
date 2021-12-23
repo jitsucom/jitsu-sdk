@@ -1,8 +1,11 @@
 {
   "name": "@jitsu/segment-transform",
-  "version": "0.4.1-alpha.1+2cd9b45",
+  "version": "0.4.1-alpha.2+4a5222c",
   "description": "Jitsu SDK-based transform that implements compatibility with Segment. Jitsu event is transformed to a JSON object that emulates Segment destination table",
-  "author": "Vladimir Klimontovich <vladimir@jitsu.com>",
+  "author": "Jitsu Dev Team <dev@jitsu.com>",
+  "publishConfig": {
+    "access": "public"
+  },
   "homepage": "https://github.com/jitsucom/jitsu-sdk#readme",
   "license": "MIT",
   "main": "dist/segment-transform.js",
@@ -12,7 +15,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/jitsucom/jitsu-sdk",
-    "directory": "packages/jitsu-types"
+    "directory": "packages/segment-transform"
   },
   "scripts": {
     "build": "jitsu extension build",
@@ -22,13 +25,13 @@
     "url": "https://github.com/jitsucom/jitsu/issues"
   },
   "dependencies": {
-    "@jitsu/pipeline-helper": "0.4.0"
+    "@jitsu/pipeline-helper": "^0.4.1-alpha.2+4a5222c"
   },
   "devDependencies": {
-    "@jitsu/cli": "^0.4.1-alpha.1+2cd9b45",
+    "@jitsu/cli": "^0.4.1-alpha.2+4a5222c",
     "@segment/analytics-next": "^1.32.1",
     "@types/jquery": "^3.5.10",
     "rollup": "^2.61.1"
   },
-  "gitHead": "2cd9b45d9dfe065766d23dd030154d314206af09"
+  "gitHead": "4a5222ce49da3cb6be58648c78b1111b39764fe1"
 }
