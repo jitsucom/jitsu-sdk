@@ -121,6 +121,8 @@ test("test segment mapping", () => {
     userId: "vladimir@jitsu.com",
   });
   removeEmptyFields(segmentTable);
+  //this field changes all the time, so it doesn't make sense to check it
+  delete segmentTable["context_library_version"];
   expect(segmentTable).toStrictEqual({
     JITSU_TABLE_NAME: "tracks",
     __sql_type_timestamp: "timestamp",
@@ -129,7 +131,6 @@ test("test segment mapping", () => {
     context_campaign_source: "utm_source_value",
     context_ip: "172.17.0.1",
     context_library_name: "jitsu-bridge",
-    context_library_version: "0.4.0",
     context_locale: "en-US",
     context_page_path: "/",
     context_page_referrer: "",
