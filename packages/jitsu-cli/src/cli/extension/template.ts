@@ -1,5 +1,5 @@
-import { ProjectTemplate } from "../lib/template";
-import { jitsuCliVersion } from "../lib/version";
+import { ProjectTemplate } from "../../lib/template";
+import { jitsuCliVersion } from "../../lib/version";
 
 export type DestinationTemplateVars = {
   license?: "MIT" | "Other";
@@ -60,8 +60,8 @@ let destinationTest = ({ type = "destination" }) => {
 
 let destinationCode = () => {
   return `
-    import { DestinationFunction, DestinationMessage, JitsuDestinationContext } from "@jitsu/types/extension";
-    import { DefaultJitsuEvent } from "@jitsu/types/event";
+    import { DestinationFunction, DestinationMessage, JitsuDestinationContext } from "packages/jitsu-types/extension";
+    import { DefaultJitsuEvent } from "packages/jitsu-types/event";
     
     export type DestinationConfig = {
       exampleParam: string
@@ -92,7 +92,7 @@ let transformCode = () => {
 let descriptor = {};
 
 descriptor["destination"] = (vars: DestinationTemplateVars) => `
-  import { DestinationFunction, ExtensionDescriptor,  ConfigValidator } from "@jitsu/types/extension";
+  import { DestinationFunction, ExtensionDescriptor,  ConfigValidator } from "packages/jitsu-types/extension";
   import destination, {DestinationConfig} from "./destination";
   
   const validator: ConfigValidator<DestinationConfig> = async (config: DestinationConfig) => {
