@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/types",
-  "version": "0.4.1-alpha.2+4a5222c",
+  "version": "0.5.1-alpha.0",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
   "description": "Types for Jitsu (👉 https://jitsu.com)",
   "publishConfig": {
@@ -9,7 +9,9 @@
   "files": [
     "*.d.ts"
   ],
-  "scripts": {},
+  "scripts": {
+    "test": "exit 0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/jitsucom/jitsu-sdk",

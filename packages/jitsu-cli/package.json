@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/cli",
-  "version": "0.4.1-alpha.2+4a5222c",
+  "version": "0.5.1-alpha.0",
   "publishConfig": {
     "access": "public"
   },
@@ -26,7 +26,7 @@
     "global": "yarn global",
     "clean:some": "rm -rf ./lib",
     "start": "ts-node src/index.ts",
-    "test": "jest"
+    "test": "jest --verbose ./__tests__"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.4",
@@ -51,6 +51,7 @@
     "inquirer": "^8.2.0",
     "jest": "^27.3.1",
     "jest-cli": "^27.3.1",
+    "json5": "^2.2.0",
     "node-fetch": "^3.1.0",
     "ora": "^6.0.1",
     "prismjs": "^1.25.0",

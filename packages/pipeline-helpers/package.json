@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/pipeline-helpers",
-  "version": "0.4.1-alpha.2+4a5222c",
+  "version": "0.5.0",
   "description": "Utility functions designed to outsource some processing logic from Server to JS",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
   "publishConfig": {
@@ -31,5 +31,5 @@
     "@segment/analytics-next": "^1.32.1",
     "@types/jquery": "^3.5.10"
   },
-  "gitHead": "4a5222ce49da3cb6be58648c78b1111b39764fe1"
+  "gitHead": "dead29f98059ecf21a0576b0c64cdb7f71da46f7"
 }

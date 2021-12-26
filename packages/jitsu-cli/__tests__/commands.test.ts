@@ -83,7 +83,11 @@ test("jitsu extension create -t destination", async () => {
       dir: projectBase,
     })
   ).toBe(0);
-  expect(await exec(`npm i`, { dir: projectBase })).toBe(0);
-  expect(await exec(`npm run build`, { dir: projectBase })).toBe(0);
-  expect(await exec(`npm run test`, { dir: projectBase })).toBe(0);
+  expect(await exec(`yarn install --force`, { dir: projectBase })).toBe(0);
+  expect(await exec(`yarn build`, { dir: projectBase })).toBe(0);
+  expect(await exec(`yarn test`, { dir: projectBase })).toBe(0);
+  expect(await exec(`yarn validate-config -j "{exampleParam: true}"`, { dir: projectBase })).toBe(1);
+  expect(await exec(`yarn validate-config -j "{exampleParam: 'valid-config'}"`, { dir: projectBase })).toBe(0);
+  fs.writeFileSync(path.resolve(projectBase, "test-config.json"), "{exampleParam: 'valid-config'}");
+  expect(await exec(`yarn validate-config -f test-config.json`, { dir: projectBase })).toBe(0);
 });

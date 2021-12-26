@@ -1,5 +1,5 @@
-import { ProjectTemplate } from "../lib/template";
-import { jitsuCliVersion } from "../lib/version";
+import { ProjectTemplate } from "../../lib/template";
+import { jitsuCliVersion } from "../../lib/version";
 
 export type DestinationTemplateVars = {
   license?: "MIT" | "Other";
@@ -16,6 +16,7 @@ export const packageJsonTemplate = ({ packageName, type, jitsuVersion = undefine
   scripts: {
     build: "jitsu extension build",
     test: "jitsu extension test",
+    "validate-config": "jitsu extension validate-config",
   },
   devDependencies: {
     "ts-jest": "latest",
@@ -96,7 +97,9 @@ descriptor["destination"] = (vars: DestinationTemplateVars) => `
   import destination, {DestinationConfig} from "./destination";
   
   const validator: ConfigValidator<DestinationConfig> = async (config: DestinationConfig) => {
-    //You can use \`fetch\` here to validate HTTP credentials
+    if (config.exampleParam !== 'valid-config') {
+      return \`Invalid config: exampleParam expected to be 'valid-config', but actual value is: \${config.exampleParam}\`;
+    }
     return true;
   }
 

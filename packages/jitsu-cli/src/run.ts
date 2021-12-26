@@ -9,7 +9,7 @@ import { jitsuCliVersion } from "./lib/version";
 
 const commands: CommandRegistry<"extension"> = {
   extension: subcommands(extensionCommands, {
-    description: "A set of commands for building Jitsu extension",
+    description: "Commands for building Jitsu extension",
     binPrefix: "jitsu extension",
     customHelp: help,
   }),
