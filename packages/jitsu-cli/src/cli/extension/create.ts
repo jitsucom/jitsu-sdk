@@ -82,7 +82,6 @@ export async function create(args: string[]): Promise<CommandResult> {
         },
       ])
     ).directory;
-  console.log("----> " + projectDir);
   projectDir = path.resolve(projectDir);
 
   getLog().info("Creating new jitsu project in " + chalk.bold(projectDir));

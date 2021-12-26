@@ -16,6 +16,7 @@ export const packageJsonTemplate = ({ packageName, type, jitsuVersion = undefine
   scripts: {
     build: "jitsu extension build",
     test: "jitsu extension test",
+    "validate-config": "jitsu extension validate-config",
   },
   devDependencies: {
     "ts-jest": "latest",
@@ -60,8 +61,8 @@ let destinationTest = ({ type = "destination" }) => {
 
 let destinationCode = () => {
   return `
-    import { DestinationFunction, DestinationMessage, JitsuDestinationContext } from "packages/jitsu-types/extension";
-    import { DefaultJitsuEvent } from "packages/jitsu-types/event";
+    import { DestinationFunction, DestinationMessage, JitsuDestinationContext } from "@jitsu/types/extension";
+    import { DefaultJitsuEvent } from "@jitsu/types/event";
     
     export type DestinationConfig = {
       exampleParam: string
@@ -92,11 +93,13 @@ let transformCode = () => {
 let descriptor = {};
 
 descriptor["destination"] = (vars: DestinationTemplateVars) => `
-  import { DestinationFunction, ExtensionDescriptor,  ConfigValidator } from "packages/jitsu-types/extension";
+  import { DestinationFunction, ExtensionDescriptor,  ConfigValidator } from "@jitsu/types/extension";
   import destination, {DestinationConfig} from "./destination";
   
   const validator: ConfigValidator<DestinationConfig> = async (config: DestinationConfig) => {
-    //You can use \`fetch\` here to validate HTTP credentials
+    if (config.exampleParam !== 'valid-config') {
+      return \`Invalid config: exampleParam expected to be 'valid-config', but actual value is: \${config.exampleParam}\`;
+    }
     return true;
   }
 

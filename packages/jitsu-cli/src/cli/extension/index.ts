@@ -10,21 +10,22 @@ import { validateConfig } from "./validate-config";
 import { packageJsonTemplate } from "./template";
 import { JitsuExtensionExport } from "@jitsu/types/extension";
 import { Partial } from "rollup-plugin-typescript2/dist/partial";
+import JSON5 from "JSON5";
 
 const usage = `
-  · ${chalk.bold('jitsu extension build <directory>')}
+  · ${chalk.bold("jitsu extension build <directory>")}
     
     Build project located in <directory>. If <directory> is not provided current directory is used.
    
-  · ${chalk.bold('jitsu extension test  <directory>')}
+  · ${chalk.bold("jitsu extension test  <directory>")}
     
     Run tests for project in <directory>/__test__. If <directory> is not provided current directory is used.
    
-  · ${chalk.bold('jitsu extension validate-config -f file or -j {json}')}
+  · ${chalk.bold("jitsu extension validate-config -f file or -j {json}")}
    
-    Validates configuration json object. ${chalk.bold('Note:')} run \`jitsu extension build\` beforehand 
+    Validates configuration json object. ${chalk.bold("Note:")} run \`jitsu extension build\` beforehand 
     
-  · ${chalk.bold('jitsu extension help')}
+  · ${chalk.bold("jitsu extension help")}
    
     Show this help 
 `;
@@ -83,11 +84,10 @@ export const extensionCommands: CommandRegistry<"test" | "build" | "create" | "v
   },
 };
 
-
 export function validateTsConfig(tsConfigPath: string) {
   let tsConfig: any;
   try {
-    tsConfig = JSON.parse(fs.readFileSync(tsConfigPath, "utf8"));
+    tsConfig = JSON5.parse(fs.readFileSync(tsConfigPath, "utf8"));
   } catch (e: any) {
     throw new Error(`${chalk.bold(tsConfigPath)} - syntax error: ${e.message}`);
   }

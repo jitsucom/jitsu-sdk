@@ -25,7 +25,7 @@
     "url": "https://github.com/jitsucom/jitsu/issues"
   },
   "dependencies": {
-    "@jitsu/pipeline-helper": "^0.4.1-alpha.2+4a5222c"
+    "@jitsu/pipeline-helpers": "^0.5.0"
   },
   "devDependencies": {
     "@jitsu/cli": "^0.5.0",

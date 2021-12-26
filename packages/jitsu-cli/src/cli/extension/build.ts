@@ -11,6 +11,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import { jitsuCliVersion, jitsuPackageName } from "../../lib/version";
 import { getDistFile, loadBuild, validateTsConfig } from "./";
+import JSON5 from "JSON5";
 
 export async function build(args: string[]): Promise<CommandResult> {
   const directory = args?.[0] || "";
@@ -25,7 +26,7 @@ export async function build(args: string[]): Promise<CommandResult> {
   }
   let packageJson;
   try {
-    packageJson = JSON.parse(fs.readFileSync(packageFile, "utf8"));
+    packageJson = JSON5.parse(fs.readFileSync(packageFile, "utf8"));
   } catch (e) {
     throw new Error(appendError(`Failed to parse package.json at ${projectBase}`, e));
   }

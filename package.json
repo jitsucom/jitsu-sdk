@@ -2,8 +2,8 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "prettier:check": "prettier --check --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
-    "prettier:write": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
+    "prettier:check": "prettier --check --config ./.prettierrc.json --ignore-path ./.prettierignore packages || (echo \"\t👉👉 Run yarn prettier:fix!\" && exit 1)",
+    "prettier:fix": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
     "build": "yarn prettier:check && lerna run build && lerna run test",
     "build-only": "lerna run build",
     "lerna": "lerna",
