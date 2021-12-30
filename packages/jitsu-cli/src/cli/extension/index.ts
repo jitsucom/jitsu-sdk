@@ -11,6 +11,8 @@ import { packageJsonTemplate } from "./template";
 import { JitsuExtensionExport } from "@jitsu/types/extension";
 import { Partial } from "rollup-plugin-typescript2/dist/partial";
 import JSON5 from "JSON5";
+//For new Function to get access to fetch
+global.fetch = require("cross-fetch");
 
 const usage = `
   · ${chalk.bold("jitsu extension build <directory>")}
@@ -104,10 +106,8 @@ export function getDistFile(packageJson) {
 }
 
 export function loadBuild(code: string): Partial<JitsuExtensionExport> {
-  let evalRes = eval(`(function(exports) {
-    ${code}
-  })`);
+  let f = new Function("exports", code)
   let exports = {};
-  evalRes(exports);
+  f(exports);
   return exports;
 }

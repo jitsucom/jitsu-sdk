@@ -1,14 +1,10 @@
 import { CommandResult } from "../../lib/command/types";
 import commander from "commander";
-import validateNpmPackage from "validate-npm-package-name";
-import inquirer from "inquirer";
 import chalk from "chalk";
 import path from "path";
 import fs from "fs";
 import JSON5 from "JSON5";
 import getLog from "../../lib/log";
-import { write } from "../../lib/template";
-import { extensionProjectTemplate } from "./template";
 import { getDistFile, loadBuild } from "./index";
 
 export async function validateConfig(args: string[]): Promise<CommandResult> {
@@ -44,13 +40,16 @@ export async function validateConfig(args: string[]): Promise<CommandResult> {
       return { success: false, message: `Malformed json in file ${opts.file} (-f): ${e.message}` };
     }
   }
-  let projectDir = opts.project_dir || ".";
+  let projectDir = opts.dir || ".";
+  getLog().info("Project dir: " + projectDir);
+
   let packageFile = path.resolve(projectDir, "package.json");
   if (!fs.existsSync(packageFile)) {
     return { success: false, message: `Can't find package file ${packageFile}` };
   }
   let packageObj = JSON5.parse(fs.readFileSync(packageFile, "utf8"));
-  let distFile = path.resolve(getDistFile(packageObj));
+  let distFile = path.resolve(projectDir, getDistFile(packageObj));
+  getLog().info("Dist file: " + distFile);
   if (!fs.existsSync(distFile)) {
     return { success: false, message: `Can't find dist file (${distFile}). Forget to run jitsu extension build?` };
   }
@@ -60,7 +59,7 @@ export async function validateConfig(args: string[]): Promise<CommandResult> {
   if (!build.validator) {
     return { success: false, message: "Build doesn't export validator symbol" };
   }
-  getLog().info("🤔 Validating configuration" + (opts.file ? ` from file ${path.resolve(projectDir, opts.file)}` : ""));
+  getLog().info("🤔 Validating configuration " + (opts.file ? `from file ${path.resolve(projectDir, opts.file)}` : JSON.stringify(configObj)));
   let validationResult = await build.validator(configObj);
   if (typeof validationResult === "boolean" && !validationResult) {
     return { success: false, message: "❌ Config is not valid, an exact reason isn't specified by validator" };

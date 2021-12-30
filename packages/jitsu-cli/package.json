@@ -23,7 +23,7 @@
   ],
   "scripts": {
     "build": "yarn clean:some && tsc -p . && mv ./lib/src/* ./lib/ && rmdir ./lib/src/",
-    "global": "yarn global",
+    "global": "yarn install -g",
     "clean:some": "rm -rf ./lib",
     "start": "ts-node src/index.ts",
     "test": "jest --verbose ./__tests__"
