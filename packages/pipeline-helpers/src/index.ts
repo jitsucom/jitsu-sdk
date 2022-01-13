@@ -30,7 +30,7 @@ export const getSegmentType = (
   }
 };
 
-function removeProps(ev: Record<string, string>, props: string[]) {
+export function removeProps(ev: Record<string, string>, props: string[]) {
   const copy = { ...ev };
   props.forEach(p => delete copy[p]);
   return copy;
@@ -92,7 +92,20 @@ export const jitsuToSegment: JitsuToSegmentMapper = (
         "_timestamp",
         "eventn_ctx_event_id",
         "utm",
-      ])
+        "parsed_ua",
+        "location",
+        "eventn_ctx",
+        "api_key",
+        "app",
+        "doc_encoding",
+        "doc_host",
+        "ids",
+        "local_tz_offset",
+        "screen_resolution",
+        "src",
+        "vp_size",
+        "src_payload",
+      ]), {skipArrays: true}
     ) as any,
     sentAt: ev.utc_time ? new Date(ev.utc_time) : new Date(),
     timestamp: ev.utc_time ? new Date(ev.utc_time) : new Date(),
@@ -193,7 +206,7 @@ export function removeEmptyFields<T>(obj: T) {
   }
 }
 
-export function flatten(obj: any, { separator = "_" } = {}, path: string[] = []): TableObject {
+export function flatten(obj: any, { separator = "_", skipArrays = false } = {}, path: string[] = []): TableObject {
   if (typeof obj !== "object") {
     throw new Error(`Can't flatten an object, expected object, but got" ${typeof obj}`);
   }
@@ -201,7 +214,11 @@ export function flatten(obj: any, { separator = "_" } = {}, path: string[] = [])
     throw new Error(`Can't flatten null value`);
   }
   if (Array.isArray(obj)) {
-    throw new Error(`Can't flatten array`);
+    if (!skipArrays) {
+      throw new Error(`Can't flatten array`);
+    } else {
+      return {}
+    }
   }
   const res = {};
   for (const [key, value] of Object.entries(obj)) {
