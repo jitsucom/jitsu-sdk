@@ -35,9 +35,10 @@ Destinations implemeted with this SDK:
 
 ### Testing and building
 
+* `yarn lerna:boot` bootstrap workspace  **Run before build**
 * `yarn build` runs all subpackages build and tests. **Run before all tests**
 * `yarn build-only` runs only build, without test
-* `yarn link` runs `npm link` in all packages (run `yarn link`). It's usefull when you want to debug 
+* `yarn link-all` runs `npm link` in all packages (run `yarn link`). It's usefull when you want to debug 
 your changes with extension
   * Run `yarn link @jitsu/cli @jitsu/types` in the extension folder
   * Run `yarn unlink @jitsu/cli @jitsu/types && yarn install --force` once you're done

@@ -93,11 +93,11 @@ export function validateTsConfig(tsConfigPath: string) {
   } catch (e: any) {
     throw new Error(`${chalk.bold(tsConfigPath)} - syntax error: ${e.message}`);
   }
-  if (tsConfig?.compilerOptions?.target !== "es5") {
-    throw new Error(`${chalk.bold(tsConfigPath)} error: compilerOptions.target should be set to es5!`);
-  }
-  if (tsConfig?.compilerOptions?.module !== "ESNext") {
-    throw new Error(`${chalk.bold(tsConfigPath)} error: compilerOptions.module should be set to ESNext!`);
+  // if (tsConfig?.compilerOptions?.target !== "es5") {
+  //   throw new Error(`${chalk.bold(tsConfigPath)} error: compilerOptions.target should be set to es5!`);
+  // }
+  if (tsConfig?.compilerOptions?.module !== "ES2020") {
+    throw new Error(`${chalk.bold(tsConfigPath)} error: compilerOptions.module should be set to ES2020!`);
   }
 }
 
@@ -106,7 +106,7 @@ export function getDistFile(packageJson) {
 }
 
 export function loadBuild(code: string): Partial<JitsuExtensionExport> {
-  let f = new Function("exports", code)
+  let f = new Function("exports", code);
   let exports = {};
   f(exports);
   return exports;

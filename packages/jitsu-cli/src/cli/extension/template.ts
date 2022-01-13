@@ -143,8 +143,8 @@ export const extensionProjectTemplate: ProjectTemplate<DestinationTemplateVars> 
   "package.json": packageJsonTemplate,
   "tsconfig.json": {
     compilerOptions: {
-      module: "ESNext",
-      target: "es5",
+      module: "ES2020",
+      target: "ES2021",
       moduleResolution: "Node",
       esModuleInterop: true,
       outDir: "./dist",

@@ -1,3 +1,4 @@
+**/*.js
 # dependencies
 /node_modules
 .next
@@ -7,12 +8,11 @@
 jitsu
 # configs -- will keep multi-line json arrays
 .eslintrc.json
-.craco.config.js
 package.json
-tailwind.config.js
 tsconfig.json
 tsconfig.paths.json
 packages/jitsu-cli/lib
 packages/jitsu-types/lib
 packages/pipeline-helpers/lib
 packages/segment-transform/dist
+packages/test-destination/dist

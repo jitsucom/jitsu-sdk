@@ -59,7 +59,10 @@ export async function validateConfig(args: string[]): Promise<CommandResult> {
   if (!build.validator) {
     return { success: false, message: "Build doesn't export validator symbol" };
   }
-  getLog().info("🤔 Validating configuration " + (opts.file ? `from file ${path.resolve(projectDir, opts.file)}` : JSON.stringify(configObj)));
+  getLog().info(
+    "🤔 Validating configuration " +
+      (opts.file ? `from file ${path.resolve(projectDir, opts.file)}` : JSON.stringify(configObj))
+  );
   let validationResult = await build.validator(configObj);
   if (typeof validationResult === "boolean" && !validationResult) {
     return { success: false, message: "❌ Config is not valid, an exact reason isn't specified by validator" };

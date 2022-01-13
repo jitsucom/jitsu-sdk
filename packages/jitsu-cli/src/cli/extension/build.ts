@@ -60,7 +60,7 @@ export async function build(args: string[]): Promise<CommandResult> {
     });
     getLog().info("Generating bundle");
     let output = await bundle.generate({
-      generatedCode: "es5",
+      generatedCode: "es2015",
       format: "cjs",
     });
     getLog().info("Validating build");

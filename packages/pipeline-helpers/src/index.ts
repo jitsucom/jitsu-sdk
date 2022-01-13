@@ -105,7 +105,8 @@ export const jitsuToSegment: JitsuToSegmentMapper = (
         "src",
         "vp_size",
         "src_payload",
-      ]), {skipArrays: true}
+      ]),
+      { skipArrays: true }
     ) as any,
     sentAt: ev.utc_time ? new Date(ev.utc_time) : new Date(),
     timestamp: ev.utc_time ? new Date(ev.utc_time) : new Date(),
@@ -217,13 +218,13 @@ export function flatten(obj: any, { separator = "_", skipArrays = false } = {}, 
     if (!skipArrays) {
       throw new Error(`Can't flatten array`);
     } else {
-      return {}
+      return {};
     }
   }
   const res = {};
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === "object") {
-      Object.entries(flatten(value, { separator }, [...path, key])).forEach(
+      Object.entries(flatten(value, { separator, skipArrays }, [...path, key])).forEach(
         ([subKey, subValue]) => (res[key + separator + subKey] = subValue)
       );
     } else if (typeof value == "function") {

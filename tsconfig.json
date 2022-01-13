@@ -3,12 +3,12 @@
     "paths": {
       "tslib" : ["./node_modules/tslib/tslib.d.ts"]
     },
-    "target": "ES6",
+    "target": "ES2021",
     "module": "commonjs",
     "lib": [
       "ES6",
       "ES2015",
-      "ESNext"
+      "ES2021"
     ],
     "outDir": "dist",
     "rootDir": "src",
