@@ -10,7 +10,7 @@ import { jitsuCliVersion } from "./lib/version";
 const commands: CommandRegistry<"extension"> = {
   extension: subcommands(extensionCommands, {
     description: "Commands for building Jitsu extension",
-    binPrefix: "jitsu extension",
+    binPrefix: "jitsu-cli extension",
     customHelp: help,
   }),
 };
@@ -26,7 +26,7 @@ function exitWithError(error: string, details?: string) {
 export async function run(args: string[]): Promise<number> {
   let result = await executeCommand(commands, args, {
     description: "CLI interface of " + chalk.bold("Jitsu") + `(👉 https://jitsu.com), version ${jitsuCliVersion}`,
-    binPrefix: "jitsu",
+    binPrefix: "jitsu-cli",
   });
   if (result.success) {
     getLog().info("✨ Done");

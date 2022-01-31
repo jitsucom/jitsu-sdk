@@ -1,6 +1,6 @@
 {
-  "name": "@jitsu/cli",
-  "version": "0.5.1",
+  "name": "jitsu-cli",
+  "version": "0.6.0",
   "publishConfig": {
     "access": "public"
   },
@@ -15,7 +15,7 @@
   },
   "license": "MIT",
   "bin": {
-    "jitsu": "./bin/jitsu"
+    "jitsu-cli": "./bin/jitsu-cli"
   },
   "files": [
     "lib",

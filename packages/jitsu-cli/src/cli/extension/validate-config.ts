@@ -51,7 +51,7 @@ export async function validateConfig(args: string[]): Promise<CommandResult> {
   let distFile = path.resolve(projectDir, getDistFile(packageObj));
   getLog().info("Dist file: " + distFile);
   if (!fs.existsSync(distFile)) {
-    return { success: false, message: `Can't find dist file (${distFile}). Forget to run jitsu extension build?` };
+    return { success: false, message: `Can't find dist file (${distFile}). Forgot to run jitsu-cli extension build ?` };
   }
   getLog().info("🤔 Loading build from " + chalk.bold(distFile));
   let build = loadBuild(fs.readFileSync(distFile, "utf8"));

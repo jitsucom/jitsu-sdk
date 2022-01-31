@@ -66,7 +66,7 @@ function displayHelp(
     } else {
       console.error(chalk.bold(`SYNOPSIS`));
       console.error("");
-      console.error(chalk.bold(`  jitsu ${cmd}`) + " - " + command.description);
+      console.error(chalk.bold(`  jitsu-cli ${cmd}`) + " - " + command.description);
       if (command.help) {
         console.error("");
         console.error(

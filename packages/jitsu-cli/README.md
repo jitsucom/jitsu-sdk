@@ -3,7 +3,7 @@
 #### Quick start
 
 ```
-npx @jitsu/cli --help
+npx jitsu-cli --help
 ```
 
 Submodule of [Jitsu SDK](https://github.com/jitsucom/jitsu-sdk).

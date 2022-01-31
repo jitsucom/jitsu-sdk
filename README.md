@@ -3,17 +3,18 @@
 This is an alpha version of [Jitsu](https://github.com/jitsucom/jitsu) extension SDK. 
 It contains a few packages that build, test and execute jitsu extensions
 
-* **Jitsu CLI** — a CLI interface for developing jitsu extensions, published as an [npm package](https://www.npmjs.com/package/@jitsu/jitsu-cli). 
-See run `jitsu extension build`, `jitsu extension build` and soon `npx @jitsu/cli extension build`)
+* **Jitsu CLI** — a CLI interface for developing jitsu extensions, published as an [npm package](https://www.npmjs.com/package/jitsu-cli).
+
+Run `npx jitsu-cli` 
 
 ## Implementing Jitsu destination
 
 ```shell
-npx jitsu extension create --type destination
+npx jitsu-cli extension create --type destination
 ```
 
 ```shell
-npx jitsu extension create --type transformation
+npx jitsu-cli extension create --type transformation
 ```
 
 Will create an empty project. Depending on `--type`, it will be either `destination` extension, or `transformation` extension
@@ -23,7 +24,7 @@ Run:
 * `yarn build` to build an extension
 * `yarn test` to run tests
 
-`yarn build` and `yarn test` are just wrappers around `jitsu extension build` and `jitsu extension test`
+`yarn build` and `yarn test` are just wrappers around `jitsu-cli extension build` and `jitsu-cli extension test`
 
 Destinations implemeted with this SDK:
 * [Mixpanel Destination](https://github.com/jitsucom/jitsu-mixpanel)
@@ -40,8 +41,8 @@ Destinations implemeted with this SDK:
 * `yarn build-only` runs only build, without test
 * `yarn link-all` runs `npm link` in all packages (run `yarn link`). It's usefull when you want to debug 
 your changes with extension
-  * Run `yarn link @jitsu/cli @jitsu/types` in the extension folder
-  * Run `yarn unlink @jitsu/cli @jitsu/types && yarn install --force` once you're done
+  * Run `yarn link jitsu-cli @jitsu/types` in the extension folder
+  * Run `yarn unlink jitsu-cli @jitsu/types && yarn install --force` once you're done
 * `yarn ci` builds the project and publishes canary version. It's intended to run within github actions
 
 ### How to publish new version

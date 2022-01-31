@@ -16,7 +16,7 @@ async function cmd(args?: string): Promise<{ exitCode: number; stderr: string }>
   let exitCode: number;
   try {
     exitCode = await run(args ? args.split(" ") : []);
-    let header = `   jitsu ${args || ""}, code: ${exitCode} `;
+    let header = `   jitsu-cli ${args || ""}, code: ${exitCode} `;
     originalInfo(
       [
         chalk.bgBlue.white(header),
@@ -33,22 +33,22 @@ async function cmd(args?: string): Promise<{ exitCode: number; stderr: string }>
   return { exitCode, stderr: consoleOutput.map(ln => `| ${ln}`).join("\n") };
 }
 
-test("jitsu", async () => {
+test("jitsu-cli", async () => {
   let result = await cmd();
   expect(result.exitCode).toBe(0);
 });
 
-test("jitsu help", async () => {
+test("jitsu-cli help", async () => {
   let result = await cmd("help");
   expect(result.exitCode).toBe(0);
 });
 
-test("jitsu extension", async () => {
+test("jitsu-cli extension", async () => {
   let result = await cmd("extension");
   expect(result.exitCode).toBe(0);
 });
 
-test("jitsu extension help", async () => {
+test("jitsu-cli extension help", async () => {
   let result = await cmd("extension help");
   expect(result.exitCode).toBe(0);
 });
@@ -71,7 +71,7 @@ async function exec(cmd: string, opts: { dir?: string } = {}) {
   return cmdResult.status;
 }
 
-test("jitsu extension create -t destination", async () => {
+test("jitsu-cli extension create -t destination", async () => {
   let projectBase = path.resolve(__dirname, "../../../test-projects/create-result");
   if (fs.existsSync(projectBase)) {
     fs.rmSync(projectBase, { recursive: true });

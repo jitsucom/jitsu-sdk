@@ -8,7 +8,7 @@ import { Config } from "prettier";
  */
 export declare type ExtensionBuildInfo = {
   /**
-   * SDK version (@jitsu/cli package version)
+   * SDK version (jitsu-cli package version)
    */
   sdkVersion: string;
   /**
@@ -49,7 +49,7 @@ export declare type JitsuExtensionExport = {
   validator?: ConfigValidator;
 
   /**
-   * Automatically added to module export by `jitsu extension build`
+   * Automatically added to module export by `jitsu-cli extension build`
    */
   buildInfo: ExtensionBuildInfo;
 };

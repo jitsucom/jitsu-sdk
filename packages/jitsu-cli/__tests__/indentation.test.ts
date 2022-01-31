@@ -1,6 +1,6 @@
 import { removeIndentation } from "../src/lib/indent";
 
-test("jitsu indentation", async () => {
+test("jitsu-cli indentation", async () => {
   const text = `
   a:
   

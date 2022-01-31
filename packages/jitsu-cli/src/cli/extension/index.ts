@@ -15,19 +15,19 @@ import JSON5 from "JSON5";
 global.fetch = require("cross-fetch");
 
 const usage = `
-  · ${chalk.bold("jitsu extension build <directory>")}
+  · ${chalk.bold("jitsu-cli extension build <directory>")}
     
     Build project located in <directory>. If <directory> is not provided current directory is used.
    
-  · ${chalk.bold("jitsu extension test  <directory>")}
+  · ${chalk.bold("jitsu-cli extension test  <directory>")}
     
     Run tests for project in <directory>/__test__. If <directory> is not provided current directory is used.
    
-  · ${chalk.bold("jitsu extension validate-config -f file or -j {json}")}
+  · ${chalk.bold("jitsu-cli extension validate-config -f file or -j {json}")}
    
-    Validates configuration json object. ${chalk.bold("Note:")} run \`jitsu extension build\` beforehand 
+    Validates configuration json object. ${chalk.bold("Note:")} run \`jitsu-cli extension build\` beforehand 
     
-  · ${chalk.bold("jitsu extension help")}
+  · ${chalk.bold("jitsu-cli extension help")}
    
     Show this help 
 `;
@@ -40,7 +40,7 @@ ${chalk.bold("DESCRIPTION")}
   placed to a location defined in main parameter of package.json (if not set, the bundle
   will be placed in dist/index.js
 
-  You can (and should!) call \`jitsu extension build\` in package.json. Example: ${chalkCode.json(
+  You can (and should!) call \`jitsu-cli extension build\` in package.json. Example: ${chalkCode.json(
     align(
       JSON.stringify(
         packageJsonTemplate({
@@ -81,7 +81,7 @@ export const extensionCommands: CommandRegistry<"test" | "build" | "create" | "v
   },
   "validate-config": {
     exec: validateConfig,
-    description: `Verifies a configuration. ${chalk.bold("Note:")} run \`jitsu extension build\` first!`,
+    description: `Verifies a configuration. ${chalk.bold("Note:")} run \`jitsu-cli extension build\` first!`,
     help: "",
   },
 };
