@@ -15,6 +15,10 @@ import JSON5 from "JSON5";
 global.fetch = require("cross-fetch");
 
 const usage = `
+  · ${chalk.bold("jitsu-cli extension create")}
+    
+    Create a project for jitsu plugin with placeholder implementation for all components.
+    
   · ${chalk.bold("jitsu-cli extension build <directory>")}
     
     Build project located in <directory>. If <directory> is not provided current directory is used.
