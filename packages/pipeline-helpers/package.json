@@ -31,5 +31,5 @@
     "@segment/analytics-next": "^1.32.1",
     "@types/jquery": "^3.5.10"
   },
-  "gitHead": "dead29f98059ecf21a0576b0c64cdb7f71da46f7"
+  "gitHead": "ede64e6fc3d51e3f38315fde5633d385e0bc9178"
 }

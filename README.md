@@ -49,7 +49,7 @@ your changes with extension
 
 * `npm login`. You need to do it only once. Run `npm whoami` to check if you're already logged in
 * `yarn lerna version` to change the version
-* `yarn lerna publish`
+* `yarn lerna publish from-package`
 
 
 
