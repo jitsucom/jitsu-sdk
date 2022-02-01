@@ -7,8 +7,10 @@ export type ConfigurationParameter<T = string> = {
   id: T;
   /**
    * Type of parameter
+   *
+   * Default is 'string'
    */
-  type: ConfigParameterType;
+  type?: ConfigParameterType;
   /**
    * Display name (for UI)
    */
@@ -16,8 +18,10 @@ export type ConfigurationParameter<T = string> = {
   /**
    *  Flag describes required/optional nature of the field. IF empty - field is optional
    *  Either constant or function of current config
+   *
+   *  Not required if not set
    */
-  required: boolean;
+  required?: boolean;
   /**
    * Default value (should be displayed by default)
    */

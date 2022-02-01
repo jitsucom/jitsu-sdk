@@ -11,6 +11,7 @@ import { packageJsonTemplate } from "./template";
 import { JitsuExtensionExport } from "@jitsu/types/extension";
 import { Partial } from "rollup-plugin-typescript2/dist/partial";
 import JSON5 from "JSON5";
+import { execExtension } from "./exec";
 //For new Function to get access to fetch
 global.fetch = require("cross-fetch");
 
@@ -67,7 +68,12 @@ ${chalk.bold("TYPESCRIPT")}
 ${chalk.bold("COMMANDS")} ${align(usage, { indent: 2, lnBefore: 2 })}
 `;
 
-export const extensionCommands: CommandRegistry<"test" | "build" | "create" | "validate-config"> = {
+export const extensionCommands: CommandRegistry<"test" | "build" | "create" | "validate-config" | "exec"> = {
+  exec: {
+    exec: execExtension,
+    description: "Execute extension of a test data",
+    help: ""
+  },
   test: {
     exec: test,
     description: "Execute test on extension",
