@@ -48,8 +48,7 @@ your changes with extension
 ### How to publish new version
 
 * `npm login`. You need to do it only once. Run `npm whoami` to check if you're already logged in
-* `yarn lerna version` to change the version
-* `yarn lerna publish from-package`
+* `yarn lerna publish` — to bump version and publish. Make sure that all changes are in git
 
 
 
