@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/segment-transform",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Jitsu SDK-based transform that implements compatibility with Segment. Jitsu event is transformed to a JSON object that emulates Segment destination table",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
   "publishConfig": {
@@ -25,12 +25,12 @@
     "url": "https://github.com/jitsucom/jitsu/issues"
   },
   "dependencies": {
-    "@jitsu/pipeline-helpers": "^0.7.0"
+    "@jitsu/pipeline-helpers": "^0.7.1"
   },
   "devDependencies": {
     "@segment/analytics-next": "^1.32.1",
     "@types/jquery": "^3.5.10",
-    "jitsu-cli": "^0.7.0",
+    "jitsu-cli": "^0.7.1",
     "rollup": "^2.61.1"
   },
   "gitHead": "ede64e6fc3d51e3f38315fde5633d385e0bc9178"

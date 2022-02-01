@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/pipeline-helpers",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Utility functions designed to outsource some processing logic from Server to JS",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
   "publishConfig": {
