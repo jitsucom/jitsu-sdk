@@ -17,6 +17,7 @@ export const packageJsonTemplate = ({ packageName, type, jitsuVersion = undefine
     build: "jitsu-cli extension build",
     test: "jitsu-cli extension test",
     "validate-config": "jitsu-cli extension validate-config",
+    exec: 'jitsu-cli extension exec'
   },
   devDependencies: {
     "@jitsu/types": `${jitsuVersion || "^" + jitsuCliVersion}`,
