@@ -47,7 +47,7 @@ your changes with extension
 
 ### How to publish new version
 
-* `npm login`. You need to do it only once.
+* `npm login`. You need to do it only once. Run `npm whoami` to check if you're already logged in
 * `yarn lerna publish`
 
 
