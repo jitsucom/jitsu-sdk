@@ -29,3 +29,15 @@ export function align(text: string, { indent = 0, lnBefore = 0, lnAfter = 0 } = 
     ...new Array(lnAfter).fill(""),
   ].join("\n");
 }
+
+export function jsonify(obj: any) {
+  if (typeof obj === 'string') {
+    try {
+      return JSON.parse(obj)
+    } catch (e) {
+      return obj;
+    }
+  }
+  return obj
+
+}
