@@ -1,34 +1,12 @@
-# Jitsu SDK (alpha)
+# Jitsu SDK
 
-This is an alpha version of [Jitsu](https://github.com/jitsucom/jitsu) extension SDK. 
-It contains a few packages that build, test and execute jitsu extensions
+Jitsu SDK makes it easier to develop custom destinations for [Jitsu](https://github.com/jitsucom/jitsu), an open-source 
+event streaming platform.
 
-* **Jitsu CLI** — a CLI interface for developing jitsu extensions, published as an [npm package](https://www.npmjs.com/package/jitsu-cli).
+A custom destinations or sources are called "extensions". The SDK allows to scaffold new extensions, test them and build them. Read
+a detailed guide on extendintg Jitsu below
 
-Run `npx jitsu-cli` 
-
-## Implementing Jitsu destination
-
-```shell
-npx jitsu-cli extension create --type destination
-```
-
-```shell
-npx jitsu-cli extension create --type transformation
-```
-
-Will create an empty project. Depending on `--type`, it will be either `destination` extension, or `transformation` extension
-
-Run:
-
-* `yarn build` to build an extension
-* `yarn test` to run tests
-
-`yarn build` and `yarn test` are just wrappers around `jitsu-cli extension build` and `jitsu-cli extension test`
-
-Destinations implemeted with this SDK:
-* [Mixpanel Destination](https://github.com/jitsucom/jitsu-mixpanel)
-* June.so (not published yet)
+### [Extending Jitsu →](https://jitsu.com/docs/extending)
 
 <hr />
 
