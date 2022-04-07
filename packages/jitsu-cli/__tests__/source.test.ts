@@ -16,8 +16,6 @@ import { validateConfiguration } from "../src/lib/validator-helper";
 import * as airtableSource from '../src/airtable'
 
 
-
-
 test("test sources interface", async () => {
   let config = {
     apiKey: "keyqJy9Est2CAlIzI",
