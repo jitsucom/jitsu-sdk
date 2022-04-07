@@ -23,8 +23,10 @@ export declare type TableObject = {
  */
 import { throws } from "assert";
 
+type SqlTypeHintKey = `__sql_type_${string}`;
+
 export declare type JitsuDestinationHints<T extends TableObject> = {
-  [key in `__sql_type_${string}`]: SqlTypeHint;
+  [key in SqlTypeHintKey]: SqlTypeHint;
 } & {
   JITSU_TABLE_NAME?: string;
 };

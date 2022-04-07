@@ -1,6 +1,7 @@
 import { DefaultJitsuEvent } from "./event";
 import { ConfigurationParameter } from "./parameters";
 import { Config } from "prettier";
+import { SourceFunctions } from "./source";
 
 /**
  * Information about extension build. It's added automatically
@@ -42,6 +43,9 @@ export declare type JitsuExtensionExport = {
    * It means that the extension is a complete control of how data should be landed to destination.
    */
   destination?: DestinationFunction;
+
+  source?: SourceFunctions
+
   /**
    * Optional configuration validator. Validator could call HTTP interface to validate
    * credentials, or other extension settings
@@ -51,7 +55,7 @@ export declare type JitsuExtensionExport = {
   /**
    * Automatically added to module export by `jitsu-cli extension build`
    */
-  buildInfo: ExtensionBuildInfo;
+  buildInfo?: ExtensionBuildInfo;
 };
 
 /**
