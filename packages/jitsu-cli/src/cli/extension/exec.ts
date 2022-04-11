@@ -6,19 +6,15 @@ import path from "path";
 import JSON5 from "JSON5";
 import fs from "fs";
 import { getDistFile, loadBuild } from "./index";
-import { doc } from "prettier";
 import { align, jsonify } from "../../lib/indent";
 import { chalkCode } from "../../lib/chalk-code-highlight";
 import { appendError } from "../../lib/errors";
 import { DestinationMessage, JitsuExtensionExport } from "@jitsu/types/extension";
 import { validateConfiguration } from "../../lib/validation";
-import { throws } from "assert";
-import { AddMessage, DataRecord, JitsuDataMessage, JitsuDataMessageType } from "@jitsu/types/sources";
+import { Bookmark, Chunk, DataRecord, JitsuDataMessage, JitsuDataMessageType } from "@jitsu/types/sources";
 import { build } from "./build";
 
 import Table from "cli-table";
-import { types } from "util";
-import { canonicalSqlTypeHint } from "@jitsu/pipeline-helpers";
 
 function getJson(json: string, file: string) {
   if (json) {
@@ -130,13 +126,15 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   await extension.sourceConnector.streamer(
     configObject,
     stream.streamName,
-    cliOpts.streamConfig ? JSON5.parse(cliOpts.streamConfig) : {},
+    { params: cliOpts.streamConfig ? JSON5.parse(cliOpts.streamConfig) : {} },
     {
+      startChunk(chunk: Chunk) {},
+      saveBookmark(bookmark: Bookmark) {},
       addRecord(record: DataRecord) {
-        return this.msg({ messageType: "add_record", message: record });
+        return this.msg({ type: "record", message: record });
       },
       msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
-        if (msg.messageType === "add_record") {
+        if (msg.type === "record") {
           add(resultTable, msg.message);
         }
       },
@@ -157,7 +155,8 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
     "Special column types: \n" +
       Object.entries(resultTable.columns)
         .filter(([colName, colValue]) => (colValue as any).types.length > 0)
-        .map(([colName, colValue]) => `\t${colName}: ${(colValue as any).types}`).join("\n")
+        .map(([colName, colValue]) => `\t${colName}: ${(colValue as any).types}`)
+        .join("\n")
   );
 
   return { success: true };
@@ -183,12 +182,12 @@ function add(t: Table, rec: any) {
       }
       newRow[key] = Array.isArray(val) ? JSON.stringify(val) : val;
     } else {
-      const columnName = key.substring("__sql_type".length)
+      const columnName = key.substring("__sql_type".length);
       if (t.columns[columnName] === undefined) {
-        t.columns[columnName] = {types: []}
+        t.columns[columnName] = { types: [] };
       }
       let uniqueTypes = new Set(t.columns[columnName].types);
-      uniqueTypes.add(val as string)
+      uniqueTypes.add(val as string);
       t.columns[columnName].types = [...uniqueTypes];
     }
   }

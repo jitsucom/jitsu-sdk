@@ -1,4 +1,11 @@
-import { GetAllStreams, BookmarkService, SourceFunctions, Streamer, StreamSink } from "@jitsu/types/sources";
+import {
+  GetAllStreams,
+  BookmarkService,
+  SourceFunctions,
+  Streamer,
+  StreamSink,
+  StreamConfiguration,
+} from "@jitsu/types/sources";
 import Airtable, { Record } from "airtable";
 import { TableObject } from "@jitsu/types/sql-hints";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
@@ -98,7 +105,7 @@ function flatten(obj: any, path: string[] = []) {
 const streamer: Streamer<AirtableConfig, TableStreamConfig> = async (
   sourceConfig: AirtableConfig,
   streamName: string,
-  streamConfig: TableStreamConfig,
+  streamConfiguration: StreamConfiguration<TableStreamConfig>,
   streamSink: StreamSink,
   services: { bookmarks: BookmarkService }
 ) => {
@@ -107,7 +114,7 @@ const streamer: Streamer<AirtableConfig, TableStreamConfig> = async (
   }
   const airtable = new Airtable({ apiKey: sourceConfig.apiKey });
 
-  let table = airtable.base(sourceConfig.baseId).table(streamConfig.tableId);
+  let table = airtable.base(sourceConfig.baseId).table(streamConfiguration.params.tableId);
 
   let allRecords = await table.select().all();
   allRecords.forEach(r => {
