@@ -83,7 +83,6 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
     return { success: false, message: `Extension doesn't export ${chalk.bold("sourceConnector")} symbol` };
   }
 
-  getLog().info("🏃 Getting available streams...");
   let configObject: any;
   try {
     configObject = JSON5.parse(cliOpts.config);
@@ -93,6 +92,21 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
       message: `Can't parse config JSON: '${cliOpts.config}' ${e.message})`,
     };
   }
+
+  if (!extension.validator) {
+    getLog().info("⚠️ Extension doesn't support connection validation")
+  } else {
+    getLog().info("⌛️ Validating connection parameters...");
+    let validationError = await validateConfiguration(configObject, extension.validator);
+    if (validationError) {
+      return {
+        success: false,
+        message: `Configuration validation failed: ${validationError}`,
+      };
+    }
+    getLog().info(" 🙌️ Configuration is valid!");
+  }
+  getLog().info("🏃 Getting available streams...");
 
   let streams = await extension.sourceConnector.getAllStreams(configObject);
 
