@@ -11,7 +11,7 @@ import { chalkCode } from "../../lib/chalk-code-highlight";
 import { appendError } from "../../lib/errors";
 import { DestinationMessage, JitsuExtensionExport } from "@jitsu/types/extension";
 import { validateConfiguration } from "../../lib/validation";
-import { Bookmark, Chunk, DataRecord, JitsuDataMessage, JitsuDataMessageType } from "@jitsu/types/sources";
+import { DataRecord, JitsuDataMessage, JitsuDataMessageType } from "@jitsu/types/sources";
 import { build } from "./build";
 
 import Table from "cli-table";
@@ -128,8 +128,6 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
     stream.streamName,
     { params: cliOpts.streamConfig ? JSON5.parse(cliOpts.streamConfig) : {} },
     {
-      startChunk(chunk: Chunk) {},
-      saveBookmark(bookmark: Bookmark) {},
       addRecord(record: DataRecord) {
         return this.msg({ type: "record", message: record });
       },
@@ -140,7 +138,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
       },
     },
     {
-      bookmarks: {
+      state: {
         set(key: string, object: any, opts: { expireInMs?: number }) {},
         get(key: string): any {
           return undefined;

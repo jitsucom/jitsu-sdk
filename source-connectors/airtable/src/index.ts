@@ -1,6 +1,6 @@
 import {
   GetAllStreams,
-  BookmarkService,
+  StateService,
   SourceFunctions,
   Streamer,
   StreamSink,
@@ -55,6 +55,7 @@ const getAllStreams: GetAllStreams<AirtableConfig, TableStreamConfig> = async (c
   return [
     {
       streamName: "table",
+      mode: "full_sync",
       params: [
         {
           id: "tableId",
@@ -107,7 +108,7 @@ const streamer: Streamer<AirtableConfig, TableStreamConfig> = async (
   streamName: string,
   streamConfiguration: StreamConfiguration<TableStreamConfig>,
   streamSink: StreamSink,
-  services: { bookmarks: BookmarkService }
+  services: { state: StateService }
 ) => {
   if (streamName !== "table") {
     throw new Error(`${streamName} streams is not supported`);

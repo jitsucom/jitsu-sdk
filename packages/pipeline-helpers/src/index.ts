@@ -3,6 +3,7 @@ import { SegmentEvent } from "@segment/analytics-next";
 import { JitsuDestinationHints, CanonicalSqlTypeHint, SqlTypeHint, TableObject } from "@jitsu/types/sql-hints";
 import { JitsuToSegmentMapper, JitsuToSegmentOpts, SegmentEventType, SegmentTableObject } from "@jitsu/types/segment";
 import pkg from "../package.json";
+import { DataRecord, DeleteRecords, StreamSink } from "@jitsu/types/sources";
 
 export const segmentEventsTypes: Record<SegmentEventType, boolean> = {
   alias: true,
@@ -235,3 +236,26 @@ export function flatten(obj: any, { separator = "_", skipArrays = false } = {}, 
   }
   return res;
 }
+
+export const chunkedStreamSink = (streamSink: StreamSink) => {
+  return {
+    currentChunk: "",
+
+    addRecord(record: DataRecord) {
+      if (this.currentChunk) {
+        return streamSink.addRecord({ ...record, __chunk: this.currentChunk });
+      } else {
+        return streamSink.addRecord(record);
+      }
+    },
+
+    startChunk(chunk: string) {
+      this.currentChunk = chunk;
+      streamSink.msg({ type: "new_transaction" });
+      streamSink.msg({
+        type: "delete_records",
+        message: { whenConditions: [{ parameter: "__chunk", condition: "=", value: chunk }] } as DeleteRecords,
+      });
+    },
+  };
+};

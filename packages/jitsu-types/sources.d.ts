@@ -5,19 +5,15 @@
  *  - SQL type of the column
  */
 import { ConfigurationParameter } from "./parameters";
-import { ExtensionDescriptor, JitsuExtensionExport } from "./extension";
 import { SqlTypeHint, SqlTypeHintKey } from "./sql-hints";
 
-declare type JitsuDataMessageType = "record" | "chunk_start" | "bookmark";
+declare type JitsuDataMessageType = "record" | "clear_stream" | "delete_records" | "new_transaction";
 
 /**
  * full_sync – each sync clears the destination table and reprocesses all the data
- * incremental – each sync only appends data to the destination table. BookmarkService is used to remember sync position
- * chunked – data is split in chunks based on key parameter (typically based on date). for services that may retrospectively update data that was already synced.
- * each sync destination data is cleared and reprocessed independently for each processed chunk
- * E.g. for Google Analytics it makes sense to always reprocess last 30 days of data due to conversion attribution
+ * incremental – each sync appends data to the destination table or modify data in the sync window. StateService is used to remember sync position
  */
-declare type StreamSyncMode = "full_sync" | "incremental" | "chunked";
+declare type StreamSyncMode = "full_sync" | "incremental";
 
 declare type DataRecord = {
   /**
@@ -40,39 +36,19 @@ declare type DataRecord = {
 };
 
 /**
- * Represent saved state of synced stream. E.g. lost synced row id.
+ * Command to delete data based on parameter conditions
  */
-declare type Bookmark = Record<string, any>;
+declare type DeleteRecords = {
+  whenConditions: WhenCondition[];
+};
 
 /**
- * For streams in mode=chunked indicates start of the chunk.
- * All following JitsuDataMessage-s with type=record must belong to that chunk.
- * Chunk ends when another chunk starts or when there is no more messages in StreamSink
+ * Parameter condition that will transform to simple SQL expressions
  */
-declare type Chunk = {
-  /**
-   * Key of the chunk.
-   * Jitsu deletes all previous records for the chunk based on key value
-   * before starting processing new records
-   */
-  key: string;
-  /**
-   * Indicate that all records for this chunk must be processed in a single transaction
-   */
-  transactional?: boolean;
-
-  /**
-   * Optional. chunk_parameter tell what record parameter what used to split records on chunks
-   */
-  chunkParameter?: string;
-  /**
-   * Optional. If chunk represents interval - indicate what chunk_parameter value is used as a start of interval (inclusive)
-   */
-  intervalFrom?: any;
-  /**
-   * Optional. If chunk represents interval - indicate what chunk_parameter value is used as an end of interval (exclusive)
-   */
-  intervalTo?: any;
+declare type WhenCondition = {
+  parameter: string;
+  condition: "=" | ">" | "<" | "<>" | ">=" | "<=" | "is null" | "is not null";
+  value?: any;
 };
 
 declare type StreamConfigurationParameters<StreamConfig = Record<string, any>> = {
@@ -86,18 +62,9 @@ declare type StreamConfiguration<StreamConfig = Record<string, any>> = {
   params: StreamConfig;
 };
 
-/**
- * Axillary services for leaving 'bookmarks', a permanent values that are accessible
- * between runs.
- */
-declare type BookmarkService = {
-  get(key: string): any;
-  set(key: string, object: any, opts: { expireInMs?: number });
-};
-
 declare type JitsuDataMessage<T extends JitsuDataMessageType, P> = {
   type: T;
-  message: P;
+  message?: P;
 };
 
 declare type StreamSink = {
@@ -112,16 +79,6 @@ declare type StreamSink = {
    * @param record record
    */
   addRecord(record: DataRecord);
-
-  /**
-   * Starts new chunk of records. See {@link Chunk}
-   */
-  startChunk(chunk: Chunk);
-
-  /**
-   * Prints bookmark to the StreamSink. See {@link Bookmark}
-   */
-  saveBookmark(bookmark: Bookmark);
 };
 
 declare type GetAllStreams<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
@@ -133,7 +90,7 @@ declare type Streamer<Config = Record<string, any>, StreamConfig = Record<string
   streamName: string,
   streamConfiguration: StreamConfiguration<StreamConfig>,
   streamSink: StreamSink,
-  services: { bookmarks: BookmarkService }
+  services: { state: StateService }
 ) => Promise<void>;
 /**
  * A source extension
@@ -153,4 +110,13 @@ declare type SourceFunctions<Config = Record<string, any>, StreamConfig = Record
    * @param services
    */
   streamer: Streamer<Config, StreamConfig>;
+};
+
+/**
+ * Axillary services for saving state, a permanent values that are accessible
+ * between runs.
+ */
+declare type StateService = {
+  get(key: string): any;
+  set(key: string, object: any, opts: { expireInMs?: number });
 };
