@@ -36,19 +36,24 @@ declare type DataRecord = {
 };
 
 /**
- * Command to delete data based on parameter conditions
+ * Command to delete data based on parameter conditions, see "delete_records" message
  */
 declare type DeleteRecords = {
-  whenConditions: WhenCondition[];
+  whenConditions: Condition[];
 };
 
 /**
- * Parameter condition that will transform to simple SQL expressions
+ * SQL Condition for clearing the data, see
  */
-declare type WhenCondition = {
-  parameter: string;
-  condition: "=" | ">" | "<" | "<>" | ">=" | "<=" | "is null" | "is not null";
-  value?: any;
+declare type Condition = {
+  /**
+   * Condition expression. Use placeholders instead of values
+   */
+  expression: string;
+  /**
+   * Condition values, placeholders for ?
+   */
+  values: any[];
 };
 
 declare type StreamConfigurationParameters<StreamConfig = Record<string, any>> = {
@@ -58,6 +63,9 @@ declare type StreamConfigurationParameters<StreamConfig = Record<string, any>> =
 };
 
 declare type StreamConfiguration<StreamConfig = Record<string, any>> = {
+  /**
+   * 'incremental' is a default value
+   */
   mode?: StreamSyncMode;
   params: StreamConfig;
 };
@@ -67,18 +75,53 @@ declare type JitsuDataMessage<T extends JitsuDataMessageType, P> = {
   message?: P;
 };
 
+/**
+ * Adds a record to an underlying stream. Records are UPSERT'ed, meaning that
+ * the record with same id will be replaced. Id is DataRecord.__id
+ */
+declare type AddRecordMessage = JitsuDataMessage<"record", DataRecord>;
+/**
+ * Clears underlying table. Removes all records. Equivalent of 'TRUNCATE TABLE'
+ */
+declare type ClearStreamMessage = JitsuDataMessage<"clear_stream", never>;
+/**
+ * Delete records based on condition
+ */
+declare type DeleteRecordsMessage = JitsuDataMessage<"delete_records", DeleteRecords>;
+/**
+ * Starts a new transaction. There's no corresponding endTransaction calls.
+ *
+ *  - New translation call will commit previous transaction (if any)
+ *  - At the end of streaming cycle current transaction will be committed
+ *
+ */
+declare type NewTransactionMessage = JitsuDataMessage<"new_transaction", never>;
+
 declare type StreamSink = {
   /**
-   * Sends message to the sink. Low level method
-   * @param msg
+   * Sends message to the sink. See types of messages above
    */
   msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>);
 
   /**
-   * Adds data record to stream. TODO: ??? Replaces record with a same ID
+   * Adds data record to stream. Alias for msg({type: "record",  message: record})
    * @param record record
    */
   addRecord(record: DataRecord);
+  /**
+   * Alias for ClearStreamMessage
+   */
+  clearStream();
+
+  /**
+   * Alias for NewTransactionMessage
+   */
+  newTransaction();
+
+  /**
+   * Alias for DeleteRecordsMessage
+   */
+  deleteRecords(condition: string, values: any[]);
 };
 
 declare type GetAllStreams<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
