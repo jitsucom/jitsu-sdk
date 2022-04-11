@@ -11,7 +11,7 @@ import { packageJsonTemplate } from "./template";
 import { JitsuExtensionExport } from "@jitsu/types/extension";
 import { Partial } from "rollup-plugin-typescript2/dist/partial";
 import JSON5 from "JSON5";
-import { execExtension } from "./exec";
+import { execDestinationExtension, execSourceExtension } from "./exec";
 //For new Function to get access to fetch
 global.fetch = require("cross-fetch");
 
@@ -68,33 +68,39 @@ ${chalk.bold("TYPESCRIPT")}
 ${chalk.bold("COMMANDS")} ${align(usage, { indent: 2, lnBefore: 2 })}
 `;
 
-export const extensionCommands: CommandRegistry<"test" | "build" | "create" | "validate-config" | "exec"> = {
-  exec: {
-    exec: execExtension,
-    description: "Execute extension of a test data",
-    help: ""
-  },
-  test: {
-    exec: test,
-    description: "Execute test on extension",
-    help: "Tests should be located in ./__test__ folder and follow *.test.ts pattern",
-  },
-  build: {
-    exec: build,
-    description: "Builds Jitsu extension",
-    help: "",
-  },
-  create: {
-    exec: create,
-    description: "Creates an empty project",
-    help: "",
-  },
-  "validate-config": {
-    exec: validateConfig,
-    description: `Verifies a configuration. ${chalk.bold("Note:")} run \`jitsu-cli extension build\` first!`,
-    help: "",
-  },
-};
+export const extensionCommands: CommandRegistry<"test" | "build" | "create" | "validate-config" | "exec" | "exec-src"> =
+  {
+    exec: {
+      exec: execDestinationExtension,
+      description: "Execute destination extension on a test dataset",
+      help: "",
+    },
+    "exec-src": {
+      exec: execSourceExtension,
+      description: "Builds and execute source connector extension with a test credentials and output data",
+      help: "",
+    },
+    test: {
+      exec: test,
+      description: "Execute test on extension",
+      help: "Tests should be located in ./__test__ folder and follow *.test.ts pattern",
+    },
+    build: {
+      exec: build,
+      description: "Builds Jitsu extension",
+      help: "",
+    },
+    create: {
+      exec: create,
+      description: "Creates an empty project",
+      help: "",
+    },
+    "validate-config": {
+      exec: validateConfig,
+      description: `Verifies a configuration. ${chalk.bold("Note:")} run \`jitsu-cli extension build\` first!`,
+      help: "",
+    },
+  };
 
 export function validateTsConfig(tsConfigPath: string) {
   let tsConfig: any;
@@ -115,9 +121,6 @@ export function getDistFile(packageJson) {
   return packageJson.main || "dist/index.js";
 }
 
-export function loadBuild(code: string): Partial<JitsuExtensionExport> {
-  let f = new Function("exports", code);
-  let exports = {};
-  f(exports);
-  return exports;
+export function loadBuild(file: string): Partial<JitsuExtensionExport> {
+  return require(file);
 }

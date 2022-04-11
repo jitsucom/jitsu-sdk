@@ -6,7 +6,7 @@ import fs from "fs";
 import JSON5 from "JSON5";
 import getLog from "../../lib/log";
 import { getDistFile, loadBuild } from "./index";
-import { validateConfiguration } from "../../lib/validator-helper";
+import { validateConfiguration } from "../../lib/validation";
 
 export async function validateConfig(args: string[]): Promise<CommandResult> {
   const program = new commander.Command();
@@ -55,7 +55,7 @@ export async function validateConfig(args: string[]): Promise<CommandResult> {
     return { success: false, message: `Can't find dist file (${distFile}). Forgot to run jitsu-cli extension build ?` };
   }
   getLog().info("🤔 Loading build from " + chalk.bold(distFile));
-  let build = loadBuild(fs.readFileSync(distFile, "utf8"));
+  let build = loadBuild(distFile);
   getLog().info("👍 Module loaded!");
   if (!build.validator) {
     return { success: false, message: "Build doesn't export validator symbol" };
@@ -66,7 +66,7 @@ export async function validateConfig(args: string[]): Promise<CommandResult> {
   );
   let validationError = await validateConfiguration(configObj, build.validator);
   if (validationError) {
-    return { success: false, message: `❌ ${validationError}` }
+    return { success: false, message: `❌ ${validationError}` };
   }
 
   getLog().info("✅ Config is valid. Hooray!");

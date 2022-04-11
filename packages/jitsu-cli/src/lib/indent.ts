@@ -31,13 +31,12 @@ export function align(text: string, { indent = 0, lnBefore = 0, lnAfter = 0 } = 
 }
 
 export function jsonify(obj: any) {
-  if (typeof obj === 'string') {
+  if (typeof obj === "string") {
     try {
-      return JSON.parse(obj)
+      return JSON.parse(obj);
     } catch (e) {
       return obj;
     }
   }
-  return obj
-
+  return obj;
 }

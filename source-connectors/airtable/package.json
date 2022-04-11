@@ -1,0 +1,31 @@
+{
+  "name": "jitsu-airtable-source",
+  "version": "0.7.2",
+  "description": "Airtable Source for Jitsu",
+  "main": "dist/airtable-source.js",
+  "author": "Jitsu Dev Team <dev@jitsu.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jitsucom/jitsu-sdk",
+    "directory": "source-connectors/pipeline-helpers"
+  },
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "build": "jitsu-cli extension build",
+    "test": "jitsu-cli extension test",
+    "execute": "jitsu-cli extension exec-src",
+    "validate-config": "jitsu-cli extension validate-config"
+  },
+  "devDependencies": {
+    "jitsu-cli": "0.7.2",
+    "typescript": "^4.5.2",
+    "tslib": "^2.3.1"
+  },
+  "dependencies": {
+    "airtable": "0.11.3"
+  }
+}

@@ -9,9 +9,16 @@ import { getDistFile, loadBuild } from "./index";
 import { doc } from "prettier";
 import { align, jsonify } from "../../lib/indent";
 import { chalkCode } from "../../lib/chalk-code-highlight";
-import { validateConfiguration } from "../../lib/validator-helper";
 import { appendError } from "../../lib/errors";
-import { DestinationMessage } from "@jitsu/types/extension";
+import { DestinationMessage, JitsuExtensionExport } from "@jitsu/types/extension";
+import { validateConfiguration } from "../../lib/validation";
+import { throws } from "assert";
+import { AddMessage, DataRecord, JitsuDataMessage, JitsuDataMessageType } from "@jitsu/types/sources";
+import { build } from "./build";
+
+import Table from "cli-table";
+import { types } from "util";
+import { canonicalSqlTypeHint } from "@jitsu/pipeline-helpers";
 
 function getJson(json: string, file: string) {
   if (json) {
@@ -37,7 +44,164 @@ function toArray(obj: any) {
   }
 }
 
-export async function execExtension(args: string[]): Promise<CommandResult> {
+function loadExtension(directory: string): {
+  extension: Partial<JitsuExtensionExport>;
+  distFile: string;
+  projectBase: string;
+} {
+  let projectBase = path.isAbsolute(directory) ? directory : path.resolve(process.cwd() + "/" + directory);
+  let packageFile = path.resolve(projectBase, "package.json");
+  if (!fs.existsSync(packageFile)) {
+    throw new Error("Can't find package.json in " + projectBase);
+  }
+  let distFile = path.resolve(projectBase, getDistFile(JSON5.parse(fs.readFileSync(packageFile, "utf-8"))));
+  getLog().info(
+    "⌛️ Loading extension (don't forget to build it before running exec!). Source: " + chalk.bold(distFile)
+  );
+  if (!fs.existsSync(path.resolve(projectBase, distFile))) {
+    throw new Error(
+      `Can't find dist file ${chalk.bold(distFile)}. Does this dir contains jitsu extension? Have you run yarn build? `
+    );
+  }
+  let extension = loadBuild(distFile);
+
+  return { extension, distFile, projectBase };
+}
+
+export async function execSourceExtension(args: string[]): Promise<CommandResult> {
+  const program = new commander.Command();
+  program.option("-c, --config <json>", "Connector configuration as JSON object");
+  program.option("-d, --dir <project_dir>", "project dir");
+  program.option(
+    "-s, --stream-config <json>",
+    "Stream configuration as an object. If connector exports one stream, this can be omitted"
+  );
+  program.parse(["dummy", "dummy", ...args]);
+  let cliOpts = program.opts();
+
+  let directory = cliOpts.dir || ".";
+  await build([directory]);
+  const { extension } = loadExtension(directory);
+
+  if (!extension.sourceConnector) {
+    return { success: false, message: `Extension doesn't export ${chalk.bold("sourceConnector")} symbol` };
+  }
+
+  getLog().info("🏃 Getting available streams...");
+  let configObject: any;
+  try {
+    configObject = JSON5.parse(cliOpts.config);
+  } catch (e: any) {
+    return {
+      success: false,
+      message: `Can't parse config JSON: '${cliOpts.config}' ${e.message})`,
+    };
+  }
+
+  let streams = await extension.sourceConnector.getAllStreams(configObject);
+
+  streams.forEach(stream => {
+    let paramsDocs = (stream.params ?? []).map(param => `${param.id} - ${param.displayName}`).join(", ");
+    getLog().info(
+      `🚰 Stream: ${chalk.bold(stream.streamName)}. Parameters: ${paramsDocs.length > 0 ? paramsDocs : "none"}`
+    );
+  });
+  let stream;
+  if (streams.length > 1) {
+    if (!cliOpts.streamConfig) {
+      return {
+        success: false,
+        message: `The connector exports more than one (${streams.length}) streams. Please specify stream name and config as -s {stream: 'name', ...}`,
+      };
+    }
+    if (!cliOpts.streamConfig?.name) {
+      return { success: false, message: `Specify stream name as as: -s {stream: 'name', ...}` };
+    }
+    stream = streams.find(stream => stream.streamName === cliOpts.streamConfig?.name);
+    if (!stream) {
+      return { success: false, message: `Stream with ${cliOpts.streamConfig?.name} is not found` };
+    }
+  } else {
+    stream = streams[0];
+  }
+
+  const resultTable = newTable();
+
+  await extension.sourceConnector.streamer(
+    configObject,
+    stream.streamName,
+    cliOpts.streamConfig ? JSON5.parse(cliOpts.streamConfig) : {},
+    {
+      addRecord(record: DataRecord) {
+        return this.msg({ messageType: "add_record", message: record });
+      },
+      msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
+        if (msg.messageType === "add_record") {
+          add(resultTable, msg.message);
+        }
+      },
+    },
+    {
+      bookmarks: {
+        set(key: string, object: any, opts: { expireInMs?: number }) {},
+        get(key: string): any {
+          return undefined;
+        },
+      },
+    }
+  );
+
+  console.log(resultTable.rows);
+
+  console.log(
+    "Special column types: \n" +
+      Object.entries(resultTable.columns)
+        .filter(([colName, colValue]) => (colValue as any).types.length > 0)
+        .map(([colName, colValue]) => `\t${colName}: ${(colValue as any).types}`).join("\n")
+  );
+
+  return { success: true };
+}
+
+type Table = {
+  rows: any[];
+  columns: Record<string, { types: string[] }>;
+};
+
+function newTable() {
+  return { rows: [], columns: {} };
+}
+
+function add(t: Table, rec: any) {
+  const newRow = {};
+  for (const [key, val] of Object.entries(rec)) {
+    if (key.indexOf("__sql_type") !== 0) {
+      if (t.columns[key] === undefined) {
+        //new column detected
+        t.columns[key] = { types: [] };
+        t.rows.forEach(row => (row[key] = undefined));
+      }
+      newRow[key] = Array.isArray(val) ? JSON.stringify(val) : val;
+    } else {
+      const columnName = key.substring("__sql_type".length)
+      if (t.columns[columnName] === undefined) {
+        t.columns[columnName] = {types: []}
+      }
+      let uniqueTypes = new Set(t.columns[columnName].types);
+      uniqueTypes.add(val as string)
+      t.columns[columnName].types = [...uniqueTypes];
+    }
+  }
+  Object.keys(t.columns).forEach(col => {
+    //add missing columns
+    if (newRow[col] === undefined) {
+      newRow[col] = undefined;
+    }
+  });
+  t.rows.push(newRow);
+}
+
+export async function execDestinationExtension(args: string[]): Promise<CommandResult> {
   const program = new commander.Command();
   program.option(
     "-f, --file <file path>",
@@ -55,11 +219,6 @@ export async function execExtension(args: string[]): Promise<CommandResult> {
   program.parse(["dummy", "dummy", ...args]);
   let cliOpts = program.opts();
   let directory = cliOpts.dir || ".";
-  let projectBase = path.isAbsolute(directory) ? directory : path.resolve(process.cwd() + "/" + directory);
-  let packageFile = path.resolve(projectBase, "package.json");
-  if (!fs.existsSync(packageFile)) {
-    return { success: false, message: "Can't find package.json in " + projectBase };
-  }
   if (!cliOpts.json && !cliOpts.file) {
     return { success: false, message: "Please specify -j or -f" };
   }
@@ -72,18 +231,11 @@ export async function execExtension(args: string[]): Promise<CommandResult> {
   if (!cliOpts.config && !cliOpts.configObject) {
     return { success: false, message: "Please specify -o or -c" };
   }
+  const { extension, projectBase } = loadExtension(directory);
   getLog().info("🛂 Executing tests destination on " + chalk.bold(projectBase));
   let events: any[] = toArray(getJson(cliOpts.json, cliOpts.file));
   let config = getJson(cliOpts.configObject, cliOpts.config);
-  let distFile = path.resolve(projectBase, getDistFile(JSON5.parse(fs.readFileSync(packageFile, "utf-8"))));
-  getLog().info("⌛️ Loading destination plugin (don't forget to build it before running exec!). Source: " + chalk.bold(distFile));
-  if (!fs.existsSync(path.resolve(projectBase, distFile))) {
-    return {
-      success: false,
-      message: `Can't find dist file ${chalk.bold(distFile)}. Does this dir contains jitsu extension? Have you run yarn build? `,
-    };
-  }
-  let extension = loadBuild(fs.readFileSync(distFile, "utf-8"));
+
   if (!extension.destination) {
     return { success: false, message: "Extension doesn't export destination function" };
   }
@@ -118,16 +270,20 @@ export async function execExtension(args: string[]): Promise<CommandResult> {
         continue;
       }
       const messagesArray: DestinationMessage[] = Array.isArray(messages) ? messages : [messages];
-      getLog().info(`✅ Event emitted ${messagesArray.length} messages. Event JSON: ` + chalk.italic(ellipsis(JSON.stringify(ev))));
+      getLog().info(
+        `✅ Event emitted ${messagesArray.length} messages. Event JSON: ` + chalk.italic(ellipsis(JSON.stringify(ev)))
+      );
       messagesArray.forEach(msg => {
         getLog().info(`    ${chalk.bold(msg.method)} ${msg.url}`);
         if (msg.headers && Object.entries(msg).length > 0) {
           Object.entries(msg.headers).forEach(([h, v]) => {
             getLog().info(`     ${chalk.bold(h)}: ${v}`);
-          })
+          });
         }
         if (msg.body) {
-          getLog().info("    Body:\n" + chalkCode.json(align(JSON.stringify(jsonify(msg.body), null, 2), { indent: 8 })));
+          getLog().info(
+            "    Body:\n" + chalkCode.json(align(JSON.stringify(jsonify(msg.body), null, 2), { indent: 8 }))
+          );
         }
       });
     } catch (e) {

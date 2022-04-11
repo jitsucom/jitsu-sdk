@@ -1,6 +1,7 @@
 import { DefaultJitsuEvent } from "./event";
 import { ConfigurationParameter } from "./parameters";
 import { Config } from "prettier";
+import { SourceFunctions } from "./sources";
 
 /**
  * Information about extension build. It's added automatically
@@ -32,6 +33,12 @@ export declare type JitsuExtensionExport = {
    * Descriptor of the plugin
    */
   descriptor: ExtensionDescriptor;
+  /**
+   * Extension can export transformation logic. The transformation logic
+   * is applied before event is sent to destination
+   */
+  sourceConnector?: SourceFunctions;
+
   /**
    * Extension can export transformation logic. The transformation logic
    * is applied before event is sent to destination

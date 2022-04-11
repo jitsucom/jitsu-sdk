@@ -8,9 +8,9 @@ export const jitsuCliVersion = pkg.version;
 export const jitsuPackageName = pkg.name;
 let newVersion = undefined;
 
-export function getUpgradeMessage(newVersion: string) {
+export function getUpgradeMessage(newVersion: string, oldVersion: string) {
   return box(
-    `🚀 New version of Jitsu CLI is available: ${newVersion}.\n   Run ${chalk.bold(
+    `🚀 New version of Jitsu CLI is available: ${newVersion} (you're using ${oldVersion}).\n   Run ${chalk.bold(
       "npm install -g " + jitsuPackageName
     )} or ${chalk.bold("yarn global install " + jitsuPackageName)}`
   );

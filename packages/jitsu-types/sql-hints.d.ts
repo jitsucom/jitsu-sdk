@@ -21,10 +21,10 @@ export declare type TableObject = {
  * Not every type should have have a hint. If field has no hint,
  * the type will be picked automatically based on JSON type
  */
-import { throws } from "assert";
+export type SqlTypeHintKey = `__sql_type_${string}`;
 
 export declare type JitsuDestinationHints<T extends TableObject> = {
-  [key in `__sql_type_${string}`]: SqlTypeHint;
+  [key in SqlTypeHintKey]: SqlTypeHint;
 } & {
   JITSU_TABLE_NAME?: string;
 };

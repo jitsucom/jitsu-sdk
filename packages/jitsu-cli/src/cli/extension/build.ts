@@ -7,16 +7,28 @@ import { appendError } from "../../lib/errors";
 import { rollup } from "rollup";
 import rollupTypescript from "rollup-plugin-typescript2";
 import multi from "@rollup/plugin-multi-entry";
+import rollupJson from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import { jitsuCliVersion, jitsuPackageName } from "../../lib/version";
 import { getDistFile, loadBuild, validateTsConfig } from "./";
 import JSON5 from "JSON5";
 
+function fixNodeFetch(code: string) {
+  /**
+   * A very ugly attempt to fix an issue with node-fetch. Node fetch has in internal assertion that checks
+   * if certain var is an instance of AbortSignal. It's done by constructor.name; however, rollup changes
+   * the name of the class to AbortSignal$1, so the check fails.
+   *
+   * The fix is not universal, however it works!
+   */
+  return code.replace("throw new TypeError('Expected signal to be an instanceof AbortSignal');", "");
+}
+
 export async function build(args: string[]): Promise<CommandResult> {
   const directory = args?.[0] || "";
   let projectBase = path.isAbsolute(directory) ? directory : path.resolve(process.cwd() + "/" + directory);
-  getLog().info("🔨 Building project in " + chalk.bold(projectBase));
+  getLog().info("🔨 Building project in " + chalk.bold(projectBase) + ` with ${jitsuPackageName}@${jitsuCliVersion} `);
   if (!fs.existsSync(projectBase)) {
     throw new Error(`Path ${projectBase} does not exist`);
   }
@@ -56,24 +68,35 @@ export async function build(args: string[]): Promise<CommandResult> {
     }
     const bundle = await rollup({
       input: [indexFile],
-      plugins: [typescriptEnabled && rollupTypescript({ cwd: projectBase }), multi(), resolve(), commonjs()],
+      plugins: [
+        typescriptEnabled && rollupTypescript({ cwd: projectBase }),
+        multi(),
+        resolve(),
+        commonjs(),
+        rollupJson(),
+      ],
     });
     getLog().info("Generating bundle");
     let output = await bundle.generate({
       generatedCode: "es2015",
       format: "cjs",
     });
-    getLog().info("Validating build");
     let code = output.output[0].code;
+
+    code = fixNodeFetch(code);
+
     code += `\nexports.buildInfo = {sdkVersion: "${jitsuCliVersion}", sdkPackage: "${jitsuPackageName}", buildTimestamp: "${new Date().toISOString()}"}`;
-    const exports = loadBuild(code);
-    if (!exports.destination && !exports.transform) {
+    fs.mkdirSync(path.dirname(fullOutputPath), { recursive: true });
+    fs.writeFileSync(fullOutputPath, code);
+    getLog().info("Validating build");
+    const exports = loadBuild(fullOutputPath);
+    if (!exports.destination && !exports.transform && !exports.sourceConnector) {
       return {
         success: false,
         message:
-          `${chalk.bold(indexFile)} should export ${chalk.italic("destination")} or ${chalk.italic(
+          `${chalk.bold(indexFile)} should export ${chalk.italic("destination")}, ${chalk.italic(
             "transform"
-          )} symbol. It exports: ` + Object.keys(exports).join(", "),
+          )} or ${chalk.italic("sourceConnector")}   symbol. It exports: ` + Object.keys(exports).join(", "),
       };
     } else if (exports.destination && exports.transform) {
       return {
@@ -84,8 +107,6 @@ export async function build(args: string[]): Promise<CommandResult> {
           )} symbol. It should export either of them` + Object.keys(exports).join(", "),
       };
     }
-    fs.mkdirSync(path.dirname(fullOutputPath), { recursive: true });
-    fs.writeFileSync(fullOutputPath, code);
   } catch (e: any) {
     if (e.id && e.loc && e.frame) {
       return {
