@@ -39,7 +39,7 @@ declare type DataRecord = {
  * Command to delete data based on parameter conditions, see "delete_records" message
  */
 declare type DeleteRecords = {
-  whenConditions: Condition[];
+  whenConditions: Condition;
 };
 
 /**
@@ -121,7 +121,7 @@ declare type StreamSink = {
   /**
    * Alias for DeleteRecordsMessage
    */
-  deleteRecords(condition: string, values: any[]);
+  deleteRecords(condition: string, values: any[] | any);
 };
 
 declare type GetAllStreams<Config = Record<string, any>, StreamConfig = Record<string, any>> = (

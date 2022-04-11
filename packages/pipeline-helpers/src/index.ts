@@ -251,11 +251,8 @@ export const chunkedStreamSink = (streamSink: StreamSink) => {
 
     startChunk(chunk: string) {
       this.currentChunk = chunk;
-      streamSink.msg({ type: "new_transaction" });
-      streamSink.msg({
-        type: "delete_records",
-        message: { whenConditions: [{ parameter: "__chunk", condition: "=", value: chunk }] } as DeleteRecords,
-      });
+      streamSink.newTransaction();
+      streamSink.deleteRecords("__chunk = ?", chunk);
     },
   };
 };

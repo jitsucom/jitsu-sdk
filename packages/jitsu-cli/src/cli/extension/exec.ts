@@ -129,7 +129,24 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
     { params: cliOpts.streamConfig ? JSON5.parse(cliOpts.streamConfig) : {} },
     {
       addRecord(record: DataRecord) {
-        return this.msg({ type: "record", message: record });
+        this.msg({ type: "record", message: record });
+      },
+      clearStream() {
+        this.msg({ type: "clear_stream" });
+      },
+      deleteRecords(condition: string, values: any) {
+        this.msg({
+          type: "delete_records",
+          message: {
+            whenCondition: {
+              expression: condition,
+              values: Array.isArray(values) ? values : [values],
+            },
+          },
+        });
+      },
+      newTransaction() {
+        this.msg({ type: "new_transaction" });
       },
       msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
         if (msg.type === "record") {
