@@ -22,11 +22,7 @@ jobs:
         with:
           args: project update
 
-      - name: Init dagger (dagger project init)
-        uses: dagger/dagger-for-github@v2
-        with:
-          args: project init (dagger do build)
-      - name: Build with dagger
+      - name: Build with dagger (dagger do build)
         uses: dagger/dagger-for-github@v2
         with:
           args: do build
