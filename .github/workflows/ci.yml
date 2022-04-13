@@ -4,8 +4,7 @@ on:
   push:
     # Trigger this workflow on all branches
     branches:
-      - '*'
-
+      - '**'
 jobs:
   dagger:
     runs-on: ubuntu-latest
