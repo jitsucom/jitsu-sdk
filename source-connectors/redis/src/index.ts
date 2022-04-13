@@ -8,8 +8,7 @@ import {
 } from "@jitsu/types/sources";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
 import { createClient } from "redis";
-import JSON5 from "JSON5";
-import getLog from "jitsu-cli/lib/lib/log";
+import * as JSON5  from "json5";
 
 export interface RedisConfig {
   host: string;
@@ -202,8 +201,7 @@ const streamer: Streamer<RedisConfig, HashStreamConfig> = async (
   sourceConfig: RedisConfig,
   streamName: string,
   streamConfiguration: StreamConfiguration<HashStreamConfig>,
-  streamSink: StreamSink,
-  services: { state: StateService }
+  streamSink: StreamSink
 ) => {
   const redis = await connect(sourceConfig);
   try {

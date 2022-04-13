@@ -14,7 +14,7 @@ a detailed guide on extendintg Jitsu below
 
 ### Testing and building
 
-* `yarn lerna:boot` bootstrap workspace  **Run before build**
+* `yarn lerna:boot` bootstrap workspace, including installing of all software packages (equi.   **Run before build**
 * `yarn build` runs all subpackages build and tests. **Run before all tests**
 * `yarn build-only` runs only build, without test
 * `yarn link-all` runs `npm link` in all packages (run `yarn link`). It's usefull when you want to debug 

@@ -3,7 +3,7 @@ import commander from "commander";
 import getLog from "../../lib/log";
 import chalk from "chalk";
 import path from "path";
-import JSON5 from "JSON5";
+import * as JSON5 from "json5";
 import fs from "fs";
 import { getDistFile, loadBuild } from "./index";
 import { align, jsonify } from "../../lib/indent";
@@ -94,7 +94,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   }
 
   if (!extension.validator) {
-    getLog().info("⚠️ Extension doesn't support connection validation")
+    getLog().info("⚠️ Extension doesn't support connection validation");
   } else {
     getLog().info("⌛️ Validating connection parameters...");
     let validationError = await validateConfiguration(configObject, extension.validator);

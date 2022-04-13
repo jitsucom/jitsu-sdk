@@ -12,7 +12,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import { jitsuCliVersion, jitsuPackageName } from "../../lib/version";
 import { getDistFile, loadBuild, validateTsConfig } from "./";
-import JSON5 from "JSON5";
+import * as JSON5 from "json5";
 
 function fixNodeFetch(code: string) {
   /**
