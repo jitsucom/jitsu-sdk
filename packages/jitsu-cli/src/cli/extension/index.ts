@@ -12,6 +12,7 @@ import { JitsuExtensionExport } from "@jitsu/types/extension";
 import { Partial } from "rollup-plugin-typescript2/dist/partial";
 import JSON5 from "json5";
 import { execDestinationExtension, execSourceExtension } from "./exec";
+import * as readline from "readline";
 //For new Function to get access to fetch
 global.fetch = require("cross-fetch");
 
@@ -121,6 +122,27 @@ export function getDistFile(packageJson) {
   return packageJson.main || "dist/index.js";
 }
 
-export function loadBuild(file: string): Partial<JitsuExtensionExport> {
-  return require(file);
+async function getFirstLine(pathToFile): Promise<string> {
+  const readable = fs.createReadStream(pathToFile);
+  const reader = readline.createInterface({ input: readable });
+  const line = await new Promise<string>((resolve) => {
+    reader.on('line', (line) => {
+      reader.close();
+      resolve(line);
+    });
+  });
+  readable.close();
+  return line;
+}
+
+export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExport>> {
+  let formatDefinition = await getFirstLine(file);
+  if (formatDefinition.trim() === "//format=es" || formatDefinition.trim() === "//format=esm") {
+    return import(file)
+  } else if (formatDefinition.trim() === "//format=cjs" || formatDefinition.trim() === "//format=commonjs") {
+    return require(file);
+  } else {
+    throw new Error(`Unsupported build format - ${formatDefinition}`)
+  }
+
 }

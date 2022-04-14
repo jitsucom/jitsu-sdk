@@ -1,5 +1,4 @@
 import { run } from "./run";
-import getLog from "./lib/log";
 
 (async function (): Promise<any> {
   const args = [...process.argv.slice(2)];

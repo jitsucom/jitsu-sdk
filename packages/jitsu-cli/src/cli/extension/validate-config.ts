@@ -55,7 +55,7 @@ export async function validateConfig(args: string[]): Promise<CommandResult> {
     return { success: false, message: `Can't find dist file (${distFile}). Forgot to run jitsu-cli extension build ?` };
   }
   getLog().info("🤔 Loading build from " + chalk.bold(distFile));
-  let build = loadBuild(distFile);
+  let build = await loadBuild(distFile);
   getLog().info("👍 Module loaded!");
   if (!build.validator) {
     return { success: false, message: "Build doesn't export validator symbol" };

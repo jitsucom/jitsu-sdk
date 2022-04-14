@@ -1,9 +1,14 @@
 import { GetAllStreams, Streamer, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
+import { initializeApp, deleteApp, App, cert } from "firebase-admin/app";
+
+import JSON5 from "json5";
+import { streamUsers } from "./users";
+import { streamFirestore } from "./firestore";
 
 export interface FirebaseConfig {
-  serviceJson: string | any;
-  projectId: string;
+  service_account_key: string | any;
+  project_id: string;
 }
 
 export interface UsersStreamConfig {}
@@ -18,14 +23,14 @@ const descriptor: ExtensionDescriptor<FirebaseConfig> = {
   description: "Pulls data from Redis database",
   configurationParameters: [
     {
-      id: "serviceJson",
+      id: "service_account_key",
       displayName: "Service Account Key JSON",
       documentation:
         "Read how to get an account here: https://cloud.google.com/iam/docs/creating-managing-service-account-keys",
       required: true,
     },
     {
-      id: "projectId",
+      id: "project_id",
       displayName: "Project ID",
       defaultValue: 6379,
       documentation: "Firebase Project ID",
@@ -34,7 +39,17 @@ const descriptor: ExtensionDescriptor<FirebaseConfig> = {
   ],
 };
 
+function getFirebaseApp(config: FirebaseConfig): App {
+  const jsonCredentials =
+    typeof config.service_account_key === "string"
+      ? JSON5.parse(config.service_account_key)
+      : config.service_account_key;
+  return initializeApp({ credential: cert(jsonCredentials), projectId: config.project_id });
+}
+
 async function validator(config: FirebaseConfig): Promise<ConfigValidationResult> {
+  let app = getFirebaseApp(config);
+  await deleteApp(app);
   return true;
 }
 
@@ -60,30 +75,24 @@ const getAllStreams: GetAllStreams<FirebaseConfig> = async () => {
   ];
 };
 
-
-function streamFirestore() {
-
-}
-
-function streamUsers() {
-
-}
-
 const streamer: Streamer<FirebaseConfig, FirestoreStreamConfig | UsersStreamConfig> = async (
   sourceConfig: FirebaseConfig,
   streamName: string,
   streamConfiguration: StreamConfiguration<FirestoreStreamConfig | UsersStreamConfig>,
   streamSink: StreamSink
 ) => {
-  if (streamName === "users") {
-    streamUsers();
-  } else {
-    streamFirestore();
+  let firebaseApp = getFirebaseApp(sourceConfig);
+  try {
+    if (streamName === "users") {
+      await streamUsers(firebaseApp, streamSink);
+    } else {
+      await streamFirestore(firebaseApp, streamConfiguration as any as FirestoreStreamConfig);
+    }
+  } finally {
+    await deleteApp(firebaseApp);
   }
 };
 
 const sourceConnector = { getAllStreams, streamer };
 
 export { sourceConnector, descriptor, validator };
-
-

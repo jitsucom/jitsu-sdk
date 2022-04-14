@@ -1,6 +1,8 @@
 *.idea
+cue.mod
 *node_modules
 packages/jitsu-cli/lib
 packages/jitsu-types/lib
 test-projects
 *yarn-error.log
+*dist

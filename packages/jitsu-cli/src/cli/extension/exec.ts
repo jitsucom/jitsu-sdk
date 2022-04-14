@@ -40,11 +40,11 @@ function toArray(obj: any) {
   }
 }
 
-function loadExtension(directory: string): {
+async function loadExtension(directory: string): Promise<{
   extension: Partial<JitsuExtensionExport>;
   distFile: string;
   projectBase: string;
-} {
+}> {
   let projectBase = path.isAbsolute(directory) ? directory : path.resolve(process.cwd() + "/" + directory);
   let packageFile = path.resolve(projectBase, "package.json");
   if (!fs.existsSync(packageFile)) {
@@ -59,7 +59,7 @@ function loadExtension(directory: string): {
       `Can't find dist file ${chalk.bold(distFile)}. Does this dir contains jitsu extension? Have you run yarn build? `
     );
   }
-  let extension = loadBuild(distFile);
+  let extension = await loadBuild(distFile);
 
   return { extension, distFile, projectBase };
 }
@@ -77,7 +77,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
 
   let directory = cliOpts.dir || ".";
   await build([directory]);
-  const { extension } = loadExtension(directory);
+  const { extension } = await loadExtension(directory);
 
   if (!extension.sourceConnector) {
     return { success: false, message: `Extension doesn't export ${chalk.bold("sourceConnector")} symbol` };
@@ -104,7 +104,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
         message: `Configuration validation failed: ${validationError}`,
       };
     }
-    getLog().info(" 🙌️ Configuration is valid!");
+    getLog().info("🙌️ Configuration is valid!");
   }
   getLog().info("🏃 Getting available streams...");
 
@@ -113,23 +113,29 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   streams.forEach(stream => {
     let paramsDocs = (stream.params ?? []).map(param => `${param.id} - ${param.displayName}`).join(", ");
     getLog().info(
-      `🚰 Stream: ${chalk.bold(stream.streamName)}. Parameters: ${paramsDocs.length > 0 ? paramsDocs : "none"}`
+      `🌊 Stream: ${chalk.bold(stream.streamName)}. Parameters: ${paramsDocs.length > 0 ? paramsDocs : "none"}`
     );
   });
   let stream;
+  let streamConfigObject = cliOpts.streamConfig && JSON5.parse(cliOpts.streamConfig);
   if (streams.length > 1) {
-    if (!cliOpts.streamConfig) {
+    if (!streamConfigObject) {
       return {
         success: false,
         message: `The connector exports more than one (${streams.length}) streams. Please specify stream name and config as -s {stream: 'name', ...}`,
       };
     }
-    if (!cliOpts.streamConfig?.name) {
-      return { success: false, message: `Specify stream name as as: -s {stream: 'name', ...}` };
+    if (!streamConfigObject?.name) {
+      return {
+        success: false,
+        message: `Connector defines multiple streams (${streams.map(
+          s => s.streamName
+        )}). Specify stream name as as: -s {name: 'name', ...}`,
+      };
     }
-    stream = streams.find(stream => stream.streamName === cliOpts.streamConfig?.name);
+    stream = streams.find(stream => stream.streamName === streamConfigObject?.name);
     if (!stream) {
-      return { success: false, message: `Stream with ${cliOpts.streamConfig?.name} is not found` };
+      return { success: false, message: `Stream with ${streamConfigObject?.name} is not found` };
     }
   } else {
     stream = streams[0];
@@ -140,7 +146,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   await extension.sourceConnector.streamer(
     configObject,
     stream.streamName,
-    { params: cliOpts.streamConfig ? JSON5.parse(cliOpts.streamConfig) : {} },
+    { params: streamConfigObject },
     {
       addRecord(record: DataRecord) {
         this.msg({ type: "record", message: record });
@@ -259,7 +265,7 @@ export async function execDestinationExtension(args: string[]): Promise<CommandR
   if (!cliOpts.config && !cliOpts.configObject) {
     return { success: false, message: "Please specify -o or -c" };
   }
-  const { extension, projectBase } = loadExtension(directory);
+  const { extension, projectBase } = await loadExtension(directory);
   getLog().info("🛂 Executing tests destination on " + chalk.bold(projectBase));
   let events: any[] = toArray(getJson(cliOpts.json, cliOpts.file));
   let config = getJson(cliOpts.configObject, cliOpts.config);

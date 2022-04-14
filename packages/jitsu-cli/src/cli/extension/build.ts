@@ -4,7 +4,7 @@ import getLog from "../../lib/log";
 import chalk from "chalk";
 import fs from "fs";
 import { appendError } from "../../lib/errors";
-import { rollup } from "rollup";
+import { ModuleFormat, rollup } from "rollup";
 import rollupTypescript from "rollup-plugin-typescript2";
 import multi from "@rollup/plugin-multi-entry";
 import rollupJson from "@rollup/plugin-json";
@@ -76,12 +76,15 @@ export async function build(args: string[]): Promise<CommandResult> {
         rollupJson(),
       ],
     });
-    getLog().info("Generating bundle");
+
+    let format: ModuleFormat = "cjs";
     let output = await bundle.generate({
-      generatedCode: "es2015",
-      format: "cjs",
+      generatedCode: "es5",
+      format: format,
+      exports: "named",
+      //preserveModules: true,
     });
-    let code = output.output[0].code;
+    let code = `//format=${format}\n` + output.output[0].code;
 
     code = fixNodeFetch(code);
 
@@ -89,7 +92,7 @@ export async function build(args: string[]): Promise<CommandResult> {
     fs.mkdirSync(path.dirname(fullOutputPath), { recursive: true });
     fs.writeFileSync(fullOutputPath, code);
     getLog().info("Validating build");
-    const exports = loadBuild(fullOutputPath);
+    const exports = await loadBuild(fullOutputPath);
     if (!exports.destination && !exports.transform && !exports.sourceConnector) {
       return {
         success: false,
