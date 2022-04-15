@@ -1,7 +1,7 @@
 import { DefaultJitsuEvent } from "./event";
 import { ConfigurationParameter } from "./parameters";
 import { Config } from "prettier";
-import {SourceCatalog, StreamReader} from "./sources";
+import { SourceCatalog, StreamReader } from "./sources";
 
 /**
  * Information about extension build. It's added automatically

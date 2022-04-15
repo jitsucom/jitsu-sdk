@@ -99,7 +99,8 @@ export async function build(args: string[]): Promise<CommandResult> {
         message:
           `${chalk.bold(indexFile)} should export ${chalk.italic("destination")}, ${chalk.italic(
             "transform"
-          )} or both ${chalk.italic("streamReader")} and ${chalk.italic("sourceCatalog")} symbols. It exports: ` + Object.keys(exports).join(", "),
+          )} or both ${chalk.italic("streamReader")} and ${chalk.italic("sourceCatalog")} symbols. It exports: ` +
+          Object.keys(exports).join(", "),
       };
     } else if (exports.destination && exports.transform) {
       return {

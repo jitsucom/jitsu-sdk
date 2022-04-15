@@ -6,7 +6,7 @@
  */
 import { ConfigurationParameter } from "./parameters";
 import { SqlTypeHint, SqlTypeHintKey } from "./sql-hints";
-import {stdoutStreamSink} from "@jitsu/pipeline-helpers";
+import { stdoutStreamSink } from "@jitsu/pipeline-helpers";
 
 declare type JitsuDataMessageType = "record" | "clear_stream" | "delete_records" | "new_transaction";
 
@@ -136,7 +136,6 @@ declare type StreamReader<Config = Record<string, any>, StreamConfig = Record<st
   streamSink?: StreamSink,
   services?: { state: StateService }
 ) => Promise<void>;
-
 
 /**
  * Axillary services for saving state, a permanent values that are accessible
