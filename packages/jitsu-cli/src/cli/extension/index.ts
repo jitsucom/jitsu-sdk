@@ -138,28 +138,6 @@ async function getFirstLine(pathToFile): Promise<string> {
   return line;
 }
 
-function requireProxy(self: string, originalRequire): (module: string) => any {
-  return module => {
-    getLog().info(`Calling require('${module}) from ${self}`);
-    let parsedModule = {}; // originalRequire(module);
-    getLog().info(`Require result: ${typeof parsedModule}`);
-    return parsedModule;
-  };
-}
-
-function withCustomRequire(rootModule, customRequire: (module: string, originalRequire) => void) {
-  const Module = require("module");
-  const originalRequire = Module.prototype.require;
-
-  try {
-    Module.prototype.require = mod => {
-      return customRequire(mod, originalRequire);
-    };
-    return originalRequire(rootModule);
-  } finally {
-    Module.prototype.require = originalRequire;
-  }
-}
 
 function mockModule(moduleName: string, knownSymbols: Record<string, any>) {
   return new Proxy(
@@ -204,6 +182,8 @@ export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExp
           "stream",
           "http",
           "url",
+          "http2",
+          "dns",
           "punycode",
           "https",
           "zlib",
@@ -217,11 +197,14 @@ export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExp
           "crypto",
           "path",
           "tty",
+          "querystring",
+          "console"
         ],
         root: "./",
         mock: {
           fs: mockModule("fs", {}),
           os: mockModule("os", { platform: os.platform, EOL: os.EOL }),
+          child_process: {}
         },
         resolve: moduleName => {
           throw new Error(`The extension ${file} calls require('${moduleName}') which is not system module. Rollup should have linked it into JS code.`)
