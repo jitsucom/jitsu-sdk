@@ -79,8 +79,12 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   await build([directory]);
   const { extension } = await loadExtension(directory);
 
-  if (!extension.sourceConnector) {
-    return { success: false, message: `Extension doesn't export ${chalk.bold("sourceConnector")} symbol` };
+  if (!extension.streamReader) {
+    return { success: false, message: `Extension doesn't export ${chalk.bold("streamReader")} symbol` };
+  }
+
+  if (!extension.sourceCatalog) {
+    return { success: false, message: `Extension doesn't export ${chalk.bold("sourceCatalog")} symbol` };
   }
 
   let configObject: any;
@@ -108,7 +112,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   }
   getLog().info("🏃 Getting available streams...");
 
-  let streams = await extension.sourceConnector.getAllStreams(configObject);
+  let streams = await extension.sourceCatalog(configObject);
 
   streams.forEach(stream => {
     let paramsDocs = (stream.params ?? []).map(param => `${param.id} - ${param.displayName}`).join(", ");
@@ -143,7 +147,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
 
   const resultTable = newTable();
 
-  await extension.sourceConnector.streamer(
+  await extension.streamReader(
     configObject,
     stream.streamName,
     { params: streamConfigObject },

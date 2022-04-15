@@ -6,6 +6,7 @@
  */
 import { ConfigurationParameter } from "./parameters";
 import { SqlTypeHint, SqlTypeHintKey } from "./sql-hints";
+import {stdoutStreamSink} from "@jitsu/pipeline-helpers";
 
 declare type JitsuDataMessageType = "record" | "clear_stream" | "delete_records" | "new_transaction";
 
@@ -124,36 +125,18 @@ declare type StreamSink = {
   deleteRecords(condition: string, values: any[] | any);
 };
 
-declare type GetAllStreams<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
+declare type SourceCatalog<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
   config: Config
 ) => Promise<StreamConfigurationParameters<StreamConfig>[]>;
 
-declare type Streamer<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
+declare type StreamReader<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
   sourceConfig: Config,
   streamName: string,
   streamConfiguration: StreamConfiguration<StreamConfig>,
-  streamSink: StreamSink,
-  services: { state: StateService }
+  streamSink?: StreamSink,
+  services?: { state: StateService }
 ) => Promise<void>;
-/**
- * A source extension
- */
-declare type SourceFunctions<Config = Record<string, any>, StreamConfig = Record<string, any>> = {
-  /**
-   * Returns all available streams with configuration parameters
-   *
-   *
-   */
-  getAllStreams: GetAllStreams<Config>;
-  /**
-   * Runs
-   * @param sourceConfig
-   * @param streamConfig
-   * @param streamSink
-   * @param services
-   */
-  streamer: Streamer<Config, StreamConfig>;
-};
+
 
 /**
  * Axillary services for saving state, a permanent values that are accessible

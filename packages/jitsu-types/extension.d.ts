@@ -1,7 +1,7 @@
 import { DefaultJitsuEvent } from "./event";
 import { ConfigurationParameter } from "./parameters";
 import { Config } from "prettier";
-import { SourceFunctions } from "./sources";
+import {SourceCatalog, StreamReader} from "./sources";
 
 /**
  * Information about extension build. It's added automatically
@@ -34,10 +34,17 @@ export declare type JitsuExtensionExport = {
    */
   descriptor: ExtensionDescriptor;
   /**
-   * Extension can export transformation logic. The transformation logic
-   * is applied before event is sent to destination
+   * For source extension: returns all available streams with configuration parameters
    */
-  sourceConnector?: SourceFunctions;
+  sourceCatalog?: SourceCatalog<Config>;
+  /**
+   * The main logic of source extension. Pulls data from underlying API and push it to provided StreamSink object
+   * @param sourceConfig
+   * @param streamConfig
+   * @param streamSink
+   * @param services
+   */
+  streamReader?: StreamReader<Config, Record<string, any>>;
 
   /**
    * Extension can export transformation logic. The transformation logic

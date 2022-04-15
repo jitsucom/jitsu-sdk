@@ -125,8 +125,8 @@ export function getDistFile(packageJson) {
 async function getFirstLine(pathToFile): Promise<string> {
   const readable = fs.createReadStream(pathToFile);
   const reader = readline.createInterface({ input: readable });
-  const line = await new Promise<string>((resolve) => {
-    reader.on('line', (line) => {
+  const line = await new Promise<string>(resolve => {
+    reader.on("line", line => {
       reader.close();
       resolve(line);
     });
@@ -138,11 +138,10 @@ async function getFirstLine(pathToFile): Promise<string> {
 export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExport>> {
   let formatDefinition = await getFirstLine(file);
   if (formatDefinition.trim() === "//format=es" || formatDefinition.trim() === "//format=esm") {
-    return import(file)
+    return import(file);
   } else if (formatDefinition.trim() === "//format=cjs" || formatDefinition.trim() === "//format=commonjs") {
     return require(file);
   } else {
-    throw new Error(`Unsupported build format - ${formatDefinition}`)
+    throw new Error(`Unsupported build format - ${formatDefinition}`);
   }
-
 }

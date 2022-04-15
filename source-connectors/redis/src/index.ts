@@ -1,14 +1,14 @@
 import {
-  GetAllStreams,
+  SourceCatalog,
   StateService,
-  SourceFunctions,
-  Streamer,
+  StreamReader,
   StreamSink,
   StreamConfiguration,
 } from "@jitsu/types/sources";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
 import { createClient } from "redis";
 import * as JSON5  from "json5";
+import {stdoutStreamSink} from "@jitsu/pipeline-helpers";
 
 export interface RedisConfig {
   host: string;
@@ -84,7 +84,7 @@ async function validator(config: RedisConfig): Promise<ConfigValidationResult> {
   return true;
 }
 
-const getAllStreams: GetAllStreams<RedisConfig, HashStreamConfig> = async (config: RedisConfig) => {
+const sourceCatalog: SourceCatalog<RedisConfig, HashStreamConfig> = async (config: RedisConfig) => {
   return [
     {
       streamName: "hash",
@@ -197,11 +197,11 @@ function formatNum(num: number): string {
 }
 
 const redisScanCount = 50000;
-const streamer: Streamer<RedisConfig, HashStreamConfig> = async (
+const streamReader: StreamReader<RedisConfig, HashStreamConfig> = async (
   sourceConfig: RedisConfig,
   streamName: string,
   streamConfiguration: StreamConfiguration<HashStreamConfig>,
-  streamSink: StreamSink
+  streamSink: StreamSink = stdoutStreamSink
 ) => {
   const redis = await connect(sourceConfig);
   try {
@@ -245,6 +245,5 @@ function addRecord(sink: StreamSink, redisKey: string, redisHash: string | null,
   });
 }
 
-const sourceConnector = { getAllStreams, streamer };
 
-export { sourceConnector, descriptor, validator };
+export { sourceCatalog, streamReader, descriptor, validator };

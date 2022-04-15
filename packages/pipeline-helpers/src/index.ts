@@ -3,7 +3,7 @@ import { SegmentEvent } from "@segment/analytics-next";
 import { JitsuDestinationHints, CanonicalSqlTypeHint, SqlTypeHint, TableObject } from "@jitsu/types/sql-hints";
 import { JitsuToSegmentMapper, JitsuToSegmentOpts, SegmentEventType, SegmentTableObject } from "@jitsu/types/segment";
 import pkg from "../package.json";
-import { DataRecord, DeleteRecords, StreamSink } from "@jitsu/types/sources";
+import { DataRecord, DeleteRecords, JitsuDataMessage, JitsuDataMessageType, StreamSink } from "@jitsu/types/sources";
 
 export const segmentEventsTypes: Record<SegmentEventType, boolean> = {
   alias: true,
@@ -236,6 +236,32 @@ export function flatten(obj: any, { separator = "_", skipArrays = false } = {}, 
   }
   return res;
 }
+
+export const stdoutStreamSink: StreamSink = {
+  addRecord(record: DataRecord) {
+    this.msg({ type: "record", message: record });
+  },
+  clearStream() {
+    this.msg({ type: "clear_stream" });
+  },
+  deleteRecords(condition: string, values: any) {
+    this.msg({
+      type: "delete_records",
+      message: {
+        whenCondition: {
+          expression: condition,
+          values: Array.isArray(values) ? values : [values],
+        },
+      },
+    });
+  },
+  newTransaction() {
+    this.msg({ type: "new_transaction" });
+  },
+  msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
+    console.log(JSON.stringify(msg));
+  },
+};
 
 export const chunkedStreamSink = (streamSink: StreamSink) => {
   return {

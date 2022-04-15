@@ -1,10 +1,11 @@
-import { GetAllStreams, Streamer, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
+import { SourceCatalog, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
 import { initializeApp, deleteApp, App, cert } from "firebase-admin/app";
 
 import JSON5 from "json5";
 import { streamUsers } from "./users";
 import { streamFirestore } from "./firestore";
+import {stdoutStreamSink} from "@jitsu/pipeline-helpers";
 
 export interface FirebaseConfig {
   service_account_key: string | any;
@@ -53,7 +54,7 @@ async function validator(config: FirebaseConfig): Promise<ConfigValidationResult
   return true;
 }
 
-const getAllStreams: GetAllStreams<FirebaseConfig> = async () => {
+const sourceCatalog: SourceCatalog<FirebaseConfig> = async () => {
   return [
     {
       streamName: "users",
@@ -75,11 +76,11 @@ const getAllStreams: GetAllStreams<FirebaseConfig> = async () => {
   ];
 };
 
-const streamer: Streamer<FirebaseConfig, FirestoreStreamConfig | UsersStreamConfig> = async (
+const streamReader: StreamReader<FirebaseConfig, FirestoreStreamConfig | UsersStreamConfig> = async (
   sourceConfig: FirebaseConfig,
   streamName: string,
   streamConfiguration: StreamConfiguration<FirestoreStreamConfig | UsersStreamConfig>,
-  streamSink: StreamSink
+  streamSink: StreamSink = stdoutStreamSink
 ) => {
   let firebaseApp = getFirebaseApp(sourceConfig);
   try {
@@ -93,6 +94,5 @@ const streamer: Streamer<FirebaseConfig, FirestoreStreamConfig | UsersStreamConf
   }
 };
 
-const sourceConnector = { getAllStreams, streamer };
 
-export { sourceConnector, descriptor, validator };
+export { streamReader, sourceCatalog, descriptor, validator };

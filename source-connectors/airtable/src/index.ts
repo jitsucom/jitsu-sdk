@@ -1,14 +1,13 @@
 import {
-  GetAllStreams,
+  SourceCatalog,
   StateService,
-  SourceFunctions,
-  Streamer,
+  StreamReader,
   StreamSink,
   StreamConfiguration,
 } from "@jitsu/types/sources";
 import Airtable, { Record } from "airtable";
-import { TableObject } from "@jitsu/types/sql-hints";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
+import { stdoutStreamSink } from "@jitsu/pipeline-helpers";
 
 export interface AirtableConfig {
   apiKey: string;
@@ -51,7 +50,7 @@ async function validator(config: AirtableConfig): Promise<ConfigValidationResult
   return true;
 }
 
-const getAllStreams: GetAllStreams<AirtableConfig, TableStreamConfig> = async (config: AirtableConfig) => {
+const sourceCatalog: SourceCatalog<AirtableConfig, TableStreamConfig> = async (config: AirtableConfig) => {
   return [
     {
       streamName: "table",
@@ -103,12 +102,12 @@ function flatten(obj: any, path: string[] = []) {
   return res;
 }
 
-const streamer: Streamer<AirtableConfig, TableStreamConfig> = async (
+const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
   sourceConfig: AirtableConfig,
   streamName: string,
   streamConfiguration: StreamConfiguration<TableStreamConfig>,
-  streamSink: StreamSink,
-  services: { state: StateService }
+  streamSink: StreamSink = stdoutStreamSink,
+  services?: { state: StateService }
 ) => {
   if (streamName !== "table") {
     throw new Error(`${streamName} streams is not supported`);
@@ -130,6 +129,4 @@ const streamer: Streamer<AirtableConfig, TableStreamConfig> = async (
   });
 };
 
-const sourceConnector = { getAllStreams, streamer };
-
-export { sourceConnector, descriptor, validator };
+export { streamReader, sourceCatalog, descriptor, validator };
