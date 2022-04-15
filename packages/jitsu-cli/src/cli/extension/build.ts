@@ -71,7 +71,7 @@ export async function build(args: string[]): Promise<CommandResult> {
       plugins: [
         typescriptEnabled && rollupTypescript({ cwd: projectBase }),
         multi(),
-        resolve(/*{modulesOnly: true}*/),
+        resolve({ preferBuiltins: false }),
         commonjs(),
         rollupJson(),
       ],

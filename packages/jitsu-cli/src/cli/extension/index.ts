@@ -13,6 +13,9 @@ import { Partial } from "rollup-plugin-typescript2/dist/partial";
 import JSON5 from "json5";
 import { execDestinationExtension, execSourceExtension } from "./exec";
 import * as readline from "readline";
+import getLog from "../../lib/log";
+import { NodeVM } from "vm2";
+import * as os from "os";
 //For new Function to get access to fetch
 global.fetch = require("cross-fetch");
 
@@ -135,12 +138,98 @@ async function getFirstLine(pathToFile): Promise<string> {
   return line;
 }
 
+function requireProxy(self: string, originalRequire): (module: string) => any {
+  return module => {
+    getLog().info(`Calling require('${module}) from ${self}`);
+    let parsedModule = {}; // originalRequire(module);
+    getLog().info(`Require result: ${typeof parsedModule}`);
+    return parsedModule;
+  };
+}
+
+function withCustomRequire(rootModule, customRequire: (module: string, originalRequire) => void) {
+  const Module = require("module");
+  const originalRequire = Module.prototype.require;
+
+  try {
+    Module.prototype.require = mod => {
+      return customRequire(mod, originalRequire);
+    };
+    return originalRequire(rootModule);
+  } finally {
+    Module.prototype.require = originalRequire;
+  }
+}
+
+function mockModule(moduleName: string, knownSymbols: Record<string, any>) {
+  return new Proxy(
+    {},
+    {
+      get: (target, prop) => {
+        let known = knownSymbols[prop.toString()];
+        if (known) {
+          return known;
+        } else {
+          throw new Error(`Attempt to call ${moduleName}.${prop.toString()} which is not safe`);
+        }
+      },
+    }
+  );
+}
+
+function keySlice(obj: Record<string, any>, keys: string[]) {
+  return keys.reduce((slice, key) => ({ ...slice, key: obj[key] }), {});
+}
+
 export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExport>> {
   let formatDefinition = await getFirstLine(file);
   if (formatDefinition.trim() === "//format=es" || formatDefinition.trim() === "//format=esm") {
     return import(file);
   } else if (formatDefinition.trim() === "//format=cjs" || formatDefinition.trim() === "//format=commonjs") {
-    return require(file);
+    const vm = new NodeVM({
+      console: "inherit",
+      sandbox: {
+        queueMicrotask: queueMicrotask,
+        self: { },
+        process: {
+          versions: process.versions,
+          version: process.version,
+          stderr: process.stderr,
+          env: {},
+        },
+      },
+      require: {
+        external: true,
+        builtin: [
+          "stream",
+          "http",
+          "url",
+          "punycode",
+          "https",
+          "zlib",
+          "events",
+          "net",
+          "tls",
+          "buffer",
+          "string_decoder",
+          "assert",
+          "util",
+          "crypto",
+          "path",
+          "tty",
+        ],
+        root: "./",
+        mock: {
+          fs: mockModule("fs", {}),
+          os: mockModule("os", { platform: os.platform, EOL: os.EOL }),
+        },
+        resolve: moduleName => {
+          throw new Error(`The extension ${file} calls require('${moduleName}') which is not system module. Rollup should have linked it into JS code.`)
+        }
+      },
+    });
+
+    return vm.runFile(file);
   } else {
     throw new Error(`Unsupported build format - ${formatDefinition}`);
   }

@@ -210,7 +210,7 @@ const streamReader: StreamReader<RedisConfig, HashStreamConfig> = async (
         let scanRes = await redis.scan(cursor, { MATCH: redisKeyPattern, COUNT: redisScanCount });
         scanIterations++;
         console.log(
-          `Scanned ${formatNum(scanIterations * redisScanCount)} / ${formatNum(keys)} keys (${formatNum(
+          `Scanned ${formatNum(Math.min(scanIterations * redisScanCount, keys))} / ${formatNum(keys)} keys (${formatNum(
             ((scanIterations * redisScanCount) / keys) * 100
           )}%). Got ${scanRes.keys.length} keys`
         );
