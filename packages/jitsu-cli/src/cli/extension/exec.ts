@@ -15,6 +15,7 @@ import { DataRecord, JitsuDataMessage, JitsuDataMessageType } from "@jitsu/types
 import { build } from "./build";
 
 import Table from "cli-table";
+import { flatten } from "@jitsu/pipeline-helpers";
 
 function getJson(json: string, file: string) {
   if (json) {
@@ -211,6 +212,7 @@ function newTable() {
 }
 
 function add(t: Table, rec: any) {
+  //rec = flatten(rec);
   const newRow = {};
   for (const [key, val] of Object.entries(rec)) {
     if (key.indexOf("__sql_type") !== 0) {

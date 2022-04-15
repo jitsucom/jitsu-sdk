@@ -132,8 +132,8 @@ declare type StreamReader<Config = Record<string, any>, StreamConfig = Record<st
   sourceConfig: Config,
   streamName: string,
   streamConfiguration: StreamConfiguration<StreamConfig>,
-  streamSink?: StreamSink,
-  services?: { state: StateService }
+  streamSink: StreamSink,
+  services: { state: StateService }
 ) => Promise<void>;
 
 /**

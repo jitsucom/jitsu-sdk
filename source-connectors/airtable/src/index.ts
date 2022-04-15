@@ -7,7 +7,6 @@ import {
 } from "@jitsu/types/sources";
 import Airtable, { Record } from "airtable";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
-import { stdoutStreamSink } from "@jitsu/pipeline-helpers";
 
 export interface AirtableConfig {
   apiKey: string;
@@ -42,11 +41,10 @@ const descriptor: ExtensionDescriptor = {
 };
 
 async function validator(config: AirtableConfig): Promise<ConfigValidationResult> {
+  console.log(`Will connect to airtable with apiKey=${config.apiKey} and baseId=${config.baseId}`)
   const airtable = new Airtable({ apiKey: config.apiKey });
-
-  const response = await airtable.base(config.baseId).makeRequest();
-  console.log(response);
-
+  // const response = await airtable.base(config.baseId).makeRequest();
+  // console.log('Airtable response:' + response);
   return true;
 }
 
@@ -106,8 +104,8 @@ const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
   sourceConfig: AirtableConfig,
   streamName: string,
   streamConfiguration: StreamConfiguration<TableStreamConfig>,
-  streamSink: StreamSink = stdoutStreamSink,
-  services?: { state: StateService }
+  streamSink: StreamSink,
+  services: { state: StateService }
 ) => {
   if (streamName !== "table") {
     throw new Error(`${streamName} streams is not supported`);
@@ -130,3 +128,4 @@ const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
 };
 
 export { streamReader, sourceCatalog, descriptor, validator };
+

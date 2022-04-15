@@ -26,6 +26,7 @@
     "global": "yarn install -g",
     "clean:some": "rm -rf ./lib",
     "start": "ts-node src/index.ts",
+    "cli": "node lib/index.js",
     "test": "jest --verbose ./__tests__"
   },
   "devDependencies": {
@@ -46,6 +47,7 @@
     "@rollup/plugin-multi-entry": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.6",
     "@types/prismjs": "^1.16.6",
+    "@jitsu/pipeline-helpers": "0.7.1",
     "chalk": "^4.1.2",
     "commander": "^8.3.0",
     "cli-table": "latest",

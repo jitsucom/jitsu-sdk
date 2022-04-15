@@ -4,7 +4,7 @@ import { initializeApp, deleteApp, App, cert } from "firebase-admin/app";
 
 import JSON5 from "json5";
 import { streamUsers } from "./users";
-import { streamFirestore } from "./firestore";
+//import { streamFirestore } from "./firestore";
 import {stdoutStreamSink} from "@jitsu/pipeline-helpers";
 
 export interface FirebaseConfig {
@@ -87,7 +87,7 @@ const streamReader: StreamReader<FirebaseConfig, FirestoreStreamConfig | UsersSt
     if (streamName === "users") {
       await streamUsers(firebaseApp, streamSink);
     } else {
-      await streamFirestore(firebaseApp, streamConfiguration as any as FirestoreStreamConfig);
+      //await streamFirestore(firebaseApp, streamConfiguration.params as FirestoreStreamConfig, streamSink);
     }
   } finally {
     await deleteApp(firebaseApp);
