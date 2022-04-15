@@ -8,7 +8,7 @@
     "build:no-test": "lerna run build --stream",
     "test-only": "yarn prettier:check && yarn lerna run test",
     "jitsu-cli:no-build": "node packages/jitsu-cli/lib/index.js",
-    "jitsu-cli": "lerna run build --stream --scope jitsu-cli --scope '@jitsu/*' && yarn jitsu-cli:no-build",
+    "jitsu-cli": "lerna run build --stream --scope jitsu-cli --scope '@jitsu/jitsu-*' --scope '@jitsu/*-helpers' && yarn jitsu-cli:no-build",
     "lerna": "lerna",
     "boot": "yarn install && yarn lerna bootstrap",
     "ci:check-env-var": "[ -z \"$NPM_TOKEN\" ] && echo \"❌ NPM_TOKEN env var must be set to run CI pipeline\" && exit 1 || exit 0",

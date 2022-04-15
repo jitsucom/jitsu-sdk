@@ -155,9 +155,6 @@ function mockModule(moduleName: string, knownSymbols: Record<string, any>) {
   );
 }
 
-function keySlice(obj: Record<string, any>, keys: string[]) {
-  return keys.reduce((slice, key) => ({ ...slice, key: obj[key] }), {});
-}
 
 export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExport>> {
   let formatDefinition = await getFirstLine(file);
@@ -166,6 +163,7 @@ export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExp
   } else if (formatDefinition.trim() === "//format=cjs" || formatDefinition.trim() === "//format=commonjs") {
     const vm = new NodeVM({
       console: "inherit",
+
       sandbox: {
         queueMicrotask: queueMicrotask,
         self: { },
@@ -177,7 +175,8 @@ export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExp
         },
       },
       require: {
-        external: true,
+        context: "sandbox",
+        external: false,
         builtin: [
           "stream",
           "http",
@@ -201,12 +200,14 @@ export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExp
           "console"
         ],
         root: "./",
+
         mock: {
           fs: mockModule("fs", {}),
           os: mockModule("os", { platform: os.platform, EOL: os.EOL }),
           child_process: {}
         },
         resolve: moduleName => {
+
           throw new Error(`The extension ${file} calls require('${moduleName}') which is not system module. Rollup should have linked it into JS code.`)
         }
       },
