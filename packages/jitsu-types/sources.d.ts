@@ -7,7 +7,7 @@
 import { ConfigurationParameter } from "./parameters";
 import { SqlTypeHint, SqlTypeHintKey } from "./sql-hints";
 
-declare type JitsuDataMessageType = "record" | "clear_stream" | "delete_records" | "new_transaction";
+declare type JitsuDataMessageType = "record" | "clear_stream" | "delete_records" | "new_transaction" | "change_state";
 
 /**
  * full_sync – each sync clears the destination table and reprocesses all the data
@@ -96,6 +96,19 @@ declare type DeleteRecordsMessage = JitsuDataMessage<"delete_records", DeleteRec
  *
  */
 declare type NewTransactionMessage = JitsuDataMessage<"new_transaction", never>;
+
+/**
+ * To signal executor save a certain data to 'state'. See stdout-streamer.ts.
+ *
+ * Don't us it directly, it's an internal message
+ */
+declare type ChangeStateMessage = JitsuDataMessage<"change_state", {
+  key: string,
+  value: any
+  //set to negative to delete the key, undefined means the key never expires
+  expireMs?: number
+}>;
+
 
 declare type StreamSink = {
   /**
