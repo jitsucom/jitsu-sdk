@@ -6,7 +6,6 @@
  */
 import { ConfigurationParameter } from "./parameters";
 import { SqlTypeHint, SqlTypeHintKey } from "./sql-hints";
-import { stdoutStreamSink } from "@jitsu/pipeline-helpers";
 
 declare type JitsuDataMessageType = "record" | "clear_stream" | "delete_records" | "new_transaction";
 

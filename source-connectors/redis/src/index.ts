@@ -1,14 +1,8 @@
-import {
-  SourceCatalog,
-  StateService,
-  StreamReader,
-  StreamSink,
-  StreamConfiguration,
-} from "@jitsu/types/sources";
+import { SourceCatalog, StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
 import { createClient } from "redis";
-import * as JSON5  from "json5";
-import {stdoutStreamSink} from "@jitsu/pipeline-helpers";
+import * as JSON5 from "json5";
+import { stdoutStreamSink } from "@jitsu/pipeline-helpers";
 
 export interface RedisConfig {
   host: string;
@@ -43,6 +37,7 @@ const descriptor: ExtensionDescriptor<RedisConfig> = {
     },
     {
       id: "password",
+      type: "password",
       displayName: "Redis Password",
       documentation: "Not required if redis auth is not configured",
       required: false,
@@ -244,6 +239,5 @@ function addRecord(sink: StreamSink, redisKey: string, redisHash: string | null,
     redis_hash: redisHash,
   });
 }
-
 
 export { sourceCatalog, streamReader, descriptor, validator };
