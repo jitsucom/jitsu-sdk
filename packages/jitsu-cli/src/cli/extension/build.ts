@@ -36,10 +36,10 @@ function insertStreamReaderFacade(targetFile) {
         let newCode = [
           `import * as srcLib from "@jitsu/jlib/lib/sources-lib";`,
           code,
-          ';',
-          `export const __$srcLib = srcLib;`
-        ].join('\n');
-        console.log(newCode)
+          ";",
+          `export const __$srcLib = srcLib;`,
+        ].join("\n");
+        console.log(newCode);
         return { code: newCode };
       }
       return null;
