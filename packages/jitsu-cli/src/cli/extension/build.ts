@@ -4,7 +4,7 @@ import getLog from "../../lib/log";
 import chalk from "chalk";
 import fs from "fs";
 import { appendError } from "../../lib/errors";
-import { ModuleFormat, rollup } from "rollup";
+import { ModuleFormat, ModuleInfo, rollup } from "rollup";
 import rollupTypescript from "rollup-plugin-typescript2";
 import multi from "@rollup/plugin-multi-entry";
 import rollupJson from "@rollup/plugin-json";
@@ -13,6 +13,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import { jitsuCliVersion, jitsuPackageName } from "../../lib/version";
 import { getDistFile, loadBuild, validateTsConfig } from "./";
 import * as JSON5 from "json5";
+import inject from "@rollup/plugin-inject";
 
 function fixNodeFetch(code: string) {
   /**
@@ -23,6 +24,27 @@ function fixNodeFetch(code: string) {
    * The fix is not universal, however it works!
    */
   return code.replace("throw new TypeError('Expected signal to be an instanceof AbortSignal');", "");
+}
+
+function insertStreamReaderFacade(targetFile) {
+  return {
+    name: "insert-stream-reader-facade",
+    transform: async (code: string, id: string) => {
+      const [path] = id.split("?");
+      if (path === targetFile) {
+        console.log("transform called", id);
+        let newCode = [
+          `import * as srcLib from "@jitsu/jlib/lib/sources-lib";`,
+          code,
+          ';',
+          `export const __$srcLib = srcLib;`
+        ].join('\n');
+        console.log(newCode)
+        return { code: newCode };
+      }
+      return null;
+    },
+  };
 }
 
 export async function build(args: string[]): Promise<CommandResult> {
@@ -60,7 +82,7 @@ export async function build(args: string[]): Promise<CommandResult> {
   }
   validateTsConfig(tsConfigPath);
 
-  getLog().info("Building project");
+  getLog().info("Building project...");
   try {
     let indexFile = path.resolve(projectBase, "src/index.ts");
     if (!fs.existsSync(indexFile)) {
@@ -70,6 +92,7 @@ export async function build(args: string[]): Promise<CommandResult> {
       input: [indexFile],
       plugins: [
         typescriptEnabled && rollupTypescript({ cwd: projectBase }),
+        insertStreamReaderFacade(indexFile),
         multi(),
         resolve({ preferBuiltins: false }),
         commonjs(),
@@ -82,13 +105,16 @@ export async function build(args: string[]): Promise<CommandResult> {
       generatedCode: "es5",
       format: format,
       exports: "named",
+      banner: `//format=${format}`,
+      outro: [
+        `exports.buildInfo = {sdkVersion: "${jitsuCliVersion}", sdkPackage: "${jitsuPackageName}", buildTimestamp: "${new Date().toISOString()}"};`,
+        `exports.streamReader$StdoutFacade = exports.streamReader && __$srcLib.stoutStreamReader(exports.streamReader);`,
+      ].join("\n"),
       //preserveModules: true,
     });
-    let code = `//format=${format}\n` + output.output[0].code;
 
-    code = fixNodeFetch(code);
+    let code = fixNodeFetch(output.output[0].code);
 
-    code += `\nexports.buildInfo = {sdkVersion: "${jitsuCliVersion}", sdkPackage: "${jitsuPackageName}", buildTimestamp: "${new Date().toISOString()}"}`;
     fs.mkdirSync(path.dirname(fullOutputPath), { recursive: true });
     fs.writeFileSync(fullOutputPath, code);
     getLog().info("Validating build");

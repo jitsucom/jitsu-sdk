@@ -15,7 +15,7 @@ import { DataRecord, JitsuDataMessage, JitsuDataMessageType } from "@jitsu/types
 import { build } from "./build";
 
 import Table from "cli-table";
-import { flatten } from "@jitsu/pipeline-helpers";
+import { makeStreamSink } from "@jitsu/jlib/lib/sources-lib";
 
 function getJson(json: string, file: string) {
   if (json) {
@@ -152,33 +152,13 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
     configObject,
     stream.streamName,
     { params: streamConfigObject },
-    {
-      addRecord(record: DataRecord) {
-        this.msg({ type: "record", message: record });
-      },
-      clearStream() {
-        this.msg({ type: "clear_stream" });
-      },
-      deleteRecords(condition: string, values: any) {
-        this.msg({
-          type: "delete_records",
-          message: {
-            whenCondition: {
-              expression: condition,
-              values: Array.isArray(values) ? values : [values],
-            },
-          },
-        });
-      },
-      newTransaction() {
-        this.msg({ type: "new_transaction" });
-      },
+    makeStreamSink({
       msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
         if (msg.type === "record") {
           add(resultTable, msg.message);
         }
       },
-    },
+    }),
     {
       state: {
         set(key: string, object: any, opts: { expireInMs?: number }) {},

@@ -15,6 +15,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
+    "clean": "rm -rf ./dist",
     "build": "jitsu-cli extension build",
     "test": "jitsu-cli extension test",
     "execute": "jitsu-cli extension exec-src",

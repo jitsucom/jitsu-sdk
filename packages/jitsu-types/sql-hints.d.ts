@@ -6,8 +6,6 @@ export declare type DataWarehousePrimitive = null | undefined | number | string 
 /**
  * Object that is ready to be written to database. Can be coupled with JitsuDestinationHints.
  *
- * see flattenToTable() from pipeline-helpers module
- *
  */
 export declare type TableObject = {
   [field: string]: DataWarehousePrimitive;
@@ -34,7 +32,7 @@ export declare type JitsuDestinationHints<T extends TableObject> = {
  * CanonicalSqlTypeHint — a detailed information about how the
  * column should be mapped to SQL type or shortcut. Shortcuts are
  * being converted to CanonicalSqlTypeHint by `canonicalSqlTypeHint` from
- * pipeline-helpers package
+ * @jitsu/jlib package
  *
  * Supported shortcuts: string (just an SQL type), [string, string] (ddl type, cast type)
  */

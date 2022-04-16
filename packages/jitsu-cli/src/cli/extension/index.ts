@@ -138,7 +138,6 @@ async function getFirstLine(pathToFile): Promise<string> {
   return line;
 }
 
-
 function mockModule(moduleName: string, knownSymbols: Record<string, any>) {
   return new Proxy(
     {},
@@ -155,7 +154,6 @@ function mockModule(moduleName: string, knownSymbols: Record<string, any>) {
   );
 }
 
-
 export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExport>> {
   let formatDefinition = await getFirstLine(file);
   if (formatDefinition.trim() === "//format=es" || formatDefinition.trim() === "//format=esm") {
@@ -166,11 +164,12 @@ export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExp
 
       sandbox: {
         queueMicrotask: queueMicrotask,
-        self: { },
+        self: {},
         process: {
           versions: process.versions,
           version: process.version,
           stderr: process.stderr,
+          stdout: process.stdout,
           env: {},
         },
       },
@@ -197,19 +196,20 @@ export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExp
           "path",
           "tty",
           "querystring",
-          "console"
+          "console",
         ],
         root: "./",
 
         mock: {
           fs: mockModule("fs", {}),
           os: mockModule("os", { platform: os.platform, EOL: os.EOL }),
-          child_process: {}
+          child_process: {},
         },
         resolve: moduleName => {
-
-          throw new Error(`The extension ${file} calls require('${moduleName}') which is not system module. Rollup should have linked it into JS code.`)
-        }
+          throw new Error(
+            `The extension ${file} calls require('${moduleName}') which is not system module. Rollup should have linked it into JS code.`
+          );
+        },
       },
     });
 

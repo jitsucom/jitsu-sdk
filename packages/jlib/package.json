@@ -1,6 +1,6 @@
 {
-  "name": "@jitsu/pipeline-helpers",
-  "version": "0.7.1",
+  "name": "@jitsu/jlib",
+  "version": "0.7.2",
   "description": "Utility functions designed to outsource some processing logic from Server to JS",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
   "publishConfig": {
@@ -17,10 +17,11 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/jitsucom/jitsu-sdk",
-    "directory": "packages/pipeline-helpers"
+    "directory": "packages/jlib"
   },
   "scripts": {
-    "build": "rm -rf ./lib && rollup -c && mv ./lib/src/*.d.ts ./lib && rmdir ./lib/src",
+    "clean": "rm -rf ./lib",
+    "build": "yarn clean && tsc -p . && mv ./lib/src/* ./lib && rmdir ./lib/src",
     "test": "jest"
   },
   "bugs": {

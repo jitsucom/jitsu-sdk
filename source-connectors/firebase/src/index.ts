@@ -4,8 +4,7 @@ import { initializeApp, deleteApp, App, cert } from "firebase-admin/app";
 
 import JSON5 from "json5";
 import { streamUsers } from "./users";
-//import { streamFirestore } from "./firestore";
-import {stdoutStreamSink} from "@jitsu/pipeline-helpers";
+
 
 export interface FirebaseConfig {
   service_account_key: string | any;
@@ -80,7 +79,7 @@ const streamReader: StreamReader<FirebaseConfig, FirestoreStreamConfig | UsersSt
   sourceConfig: FirebaseConfig,
   streamName: string,
   streamConfiguration: StreamConfiguration<FirestoreStreamConfig | UsersStreamConfig>,
-  streamSink: StreamSink = stdoutStreamSink
+  streamSink: StreamSink
 ) => {
   let firebaseApp = getFirebaseApp(sourceConfig);
   try {

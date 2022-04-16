@@ -4,7 +4,7 @@ const typescriptPlugin = typescript();
 
 export default [
   {
-    input: "./src/index.ts",
+    input: "./src/*",
     plugins: [typescriptPlugin, json()],
     output: [
       { file: "lib/index.js", format: "cjs" },

@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "lib": ["dom"],
-    "module": "ES2020",
+    "module": "CommonJS",
     "target": "ES2021",
     "moduleResolution": "node",
     "rootDir": "./",

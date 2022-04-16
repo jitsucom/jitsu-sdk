@@ -102,13 +102,15 @@ declare type NewTransactionMessage = JitsuDataMessage<"new_transaction", never>;
  *
  * Don't us it directly, it's an internal message
  */
-declare type ChangeStateMessage = JitsuDataMessage<"change_state", {
-  key: string,
-  value: any
-  //set to negative to delete the key, undefined means the key never expires
-  expireMs?: number
-}>;
-
+declare type ChangeStateMessage = JitsuDataMessage<
+  "change_state",
+  {
+    key: string;
+    value: any;
+    //set to negative to delete the key, undefined means the key never expires
+    expireMs?: number;
+  }
+>;
 
 declare type StreamSink = {
   /**

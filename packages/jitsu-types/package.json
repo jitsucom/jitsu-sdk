@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/types",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
   "description": "Types for Jitsu (👉 https://jitsu.com)",
   "publishConfig": {
