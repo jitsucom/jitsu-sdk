@@ -71,6 +71,10 @@ async function exec(cmd: string, opts: { dir?: string } = {}) {
   return cmdResult.status;
 }
 
+function amendJson(file: string, callback: (json: any) => any) {
+  fs.writeFileSync(file, JSON.stringify(callback(JSON.parse(fs.readFileSync(file, "utf-8"))), null, 2));
+}
+
 test("jitsu-cli extension create -t destination", async () => {
   let projectBase = path.resolve(__dirname, "../../../test-projects/create-result");
   if (fs.existsSync(projectBase)) {
@@ -78,11 +82,13 @@ test("jitsu-cli extension create -t destination", async () => {
   }
   let result = await cmd(`extension create -d ${projectBase} -n testprj -j latest -t destination`);
   expect(result.exitCode).toBe(0);
-  expect(
-    await exec(`npm i ${path.resolve(__dirname, "../../jitsu-types")} ${path.resolve(__dirname, "..")}`, {
-      dir: projectBase,
-    })
-  ).toBe(0);
+  amendJson(path.resolve(projectBase, "package.json"), pkg => ({
+    ...pkg,
+    resolutions: {
+      "@jitsu/jlib": `file:${path.resolve(__dirname, "../../jlib")}`,
+      "jitsu-cli": `file:${path.resolve(__dirname, "../../jitsu-cli")}`,
+    },
+  }));
   expect(await exec(`yarn install --force`, { dir: projectBase })).toBe(0);
   expect(await exec(`yarn build`, { dir: projectBase })).toBe(0);
   expect(await exec(`yarn test`, { dir: projectBase })).toBe(0);

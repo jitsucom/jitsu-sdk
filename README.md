@@ -41,6 +41,14 @@ Other related commands:
  * `yarn jitsu-cli test source-connectors/[source-name]` - build source connector, do not run it
  * `yarn build:sources` - build `jitsu-cli` and then all sources with it; alsu runs tests (TODO: implement)
 
+### To add module
+
+**Don't use `yarn add`**!
+ * `yarn lerna add @rollup/plugin-inject --scope <package> [--dev]` to add dependency to single package
+ * `yarn lerna add @rollup/plugin-inject [--dev]` to add dependency to single package
+ * `--dev` adds package as `devDependency`
+
+
 
 ### How to publish new version
 
