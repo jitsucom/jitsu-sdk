@@ -1914,7 +1914,7 @@
 
 "@lerna/filter-packages@4.0.0":
   version "4.0.0"
-  resolved "https://registry.npmjs.org/@lerna/filter-packages/-/filter-packages-4.0.0.tgz"
+  resolved "https://registry.npmjs.org/@lerna/filter-core/-/filter-packages-4.0.0.tgz"
   integrity sha512-+4AJIkK7iIiOaqCiVTYJxh/I9qikk4XjNQLhE3kixaqgMuHl1NQ99qXRR0OZqAWB9mh8Z1HA9bM5K1HZLBTOqA==
   dependencies:
     "@lerna/validation-error" "4.0.0"

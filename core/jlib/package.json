@@ -17,7 +17,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/jitsucom/jitsu-sdk",
-    "directory": "packages/jlib"
+    "directory": "core/jlib"
   },
   "scripts": {
     "clean": "rm -rf ./lib",

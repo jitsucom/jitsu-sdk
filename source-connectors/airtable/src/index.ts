@@ -1,10 +1,4 @@
-import {
-  SourceCatalog,
-  StateService,
-  StreamReader,
-  StreamSink,
-  StreamConfiguration,
-} from "@jitsu/types/sources";
+import { SourceCatalog, StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
 import Airtable, { Record } from "airtable";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
 
@@ -41,7 +35,7 @@ const descriptor: ExtensionDescriptor = {
 };
 
 async function validator(config: AirtableConfig): Promise<ConfigValidationResult> {
-  console.log(`Will connect to airtable with apiKey=${config.apiKey} and baseId=${config.baseId}`)
+  console.log(`Will connect to airtable with apiKey=${config.apiKey} and baseId=${config.baseId}`);
   const airtable = new Airtable({ apiKey: config.apiKey });
   // const response = await airtable.base(config.baseId).makeRequest();
   // console.log('Airtable response:' + response);
@@ -128,4 +122,3 @@ const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
 };
 
 export { streamReader, sourceCatalog, descriptor, validator };
-

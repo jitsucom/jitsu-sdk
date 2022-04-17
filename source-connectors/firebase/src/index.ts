@@ -5,7 +5,6 @@ import { initializeApp, deleteApp, App, cert } from "firebase-admin/app";
 import JSON5 from "json5";
 import { streamUsers } from "./users";
 
-
 export interface FirebaseConfig {
   service_account_key: string | any;
   project_id: string;
@@ -92,6 +91,5 @@ const streamReader: StreamReader<FirebaseConfig, FirestoreStreamConfig | UsersSt
     await deleteApp(firebaseApp);
   }
 };
-
 
 export { streamReader, sourceCatalog, descriptor, validator };

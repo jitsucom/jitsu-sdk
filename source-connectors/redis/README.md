@@ -2,15 +2,15 @@
 
 This dir contains an redis connector to jitsu
 
-
 <hr />
 
 ## Dev tips
 
-Run 
+Run
+
 ```
 # To download all redis, maybe VERY resource consuming
-yarn execute  -c "{host:'XXX', port: 6379, password: 'XXXX', username: 'XXX''}" 
+yarn execute  -c "{host:'XXX', port: 6379, password: 'XXXX', username: 'XXX''}"
 
 # To download particular key
 yarn execute  -c "{host:'XXX', port: 6379, password: 'XXXX', username: 'XXX''}" -s "{redis_key: 'XXXX'}"

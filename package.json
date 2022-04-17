@@ -3,12 +3,12 @@
   "version": "0.7.2",
   "private": true,
   "scripts": {
-    "prettier:check": "prettier --check --config ./.prettierrc.json --ignore-path ./.prettierignore packages || (echo \"\t👉👉 Run yarn prettier:fix!\" && exit 1)",
-    "prettier:fix": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
+    "prettier:check": "prettier --check --config ./.prettierrc.json --ignore-path ./.prettierignore core source-connectors || (echo \"\t👉👉 Run yarn prettier:fix!\" && exit 1)",
+    "prettier:fix": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore core source-connectors",
     "build": "yarn prettier:check && yarn build:no-test && yarn lerna run test",
     "build:no-test": "lerna run build --stream",
     "test-only": "yarn prettier:check && yarn lerna run test",
-    "jitsu-cli:no-build": "node packages/jitsu-cli/lib/index.js",
+    "jitsu-cli:no-build": "node core/jitsu-cli/lib/index.js",
     "jitsu-cli": "lerna run build --stream --scope jitsu-cli --scope '@jitsu/jitsu-*' --scope '@jitsu/jlib' && yarn jitsu-cli:no-build",
     "lerna": "lerna",
     "boot": "yarn install && yarn lerna bootstrap",
@@ -23,7 +23,7 @@
     "typescript": "^4.5.2"
   },
   "workspaces": [
-    "packages/*",
+    "core/*",
     "source-connectors/*"
   ]
 }

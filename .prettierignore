@@ -11,7 +11,7 @@ jitsu
 package.json
 tsconfig.json
 tsconfig.paths.json
-packages/jitsu-cli/lib
-packages/jitsu-types/lib
-packages/jlib/lib
-packages/test-destination/dist
+core/jitsu-cli/lib
+core/jitsu-types/lib
+core/jlib/lib
+core/test-destination/dist

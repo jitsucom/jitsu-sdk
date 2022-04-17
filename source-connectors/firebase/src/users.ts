@@ -1,11 +1,10 @@
 import { StreamSink } from "@jitsu/types/sources";
-import { App} from "firebase-admin/app";
+import { App } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 
 function toISO(strDate: string) {
   return new Date(strDate).toISOString();
 }
-
 
 export async function streamUsers(firebaseApp: App, streamSink: StreamSink) {
   let pageToken: string | undefined = undefined;
