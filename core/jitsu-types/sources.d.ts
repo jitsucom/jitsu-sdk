@@ -152,6 +152,27 @@ declare type StreamReader<Config = Record<string, any>, StreamConfig = Record<st
 ) => Promise<void>;
 
 /**
+ * (For future implementation) function that is called when source triggers a webhook, and the
+ * webhook request handled by Jitsu. Webhooks can be handled on global (source) level or on a stream
+ * level. Depending on that config.stream can be undefined
+ */
+declare type WebHookHandler<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
+  config: {
+    source: Config,
+    stream?: StreamConfig
+  },
+  webhook: {
+    //header names are lower-cased
+    headers: Record<string, string>
+    body: string
+    //if hook sends json, the parsed body will be here
+    json?: any
+  },
+  streamSink: StreamSink,
+  services: { state: StateService }
+) => Promise<void>
+
+/**
  * Axillary services for saving state, a permanent values that are accessible
  * between runs.
  */
