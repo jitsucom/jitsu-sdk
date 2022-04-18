@@ -32,14 +32,12 @@ function insertStreamReaderFacade(targetFile) {
     transform: async (code: string, id: string) => {
       const [path] = id.split("?");
       if (path === targetFile) {
-        console.log("transform called", id);
         let newCode = [
           `import * as srcLib from "@jitsu/jlib/lib/sources-lib";`,
           code,
           ";",
           `export const __$srcLib = srcLib;`,
         ].join("\n");
-        console.log(newCode);
         return { code: newCode };
       }
       return null;

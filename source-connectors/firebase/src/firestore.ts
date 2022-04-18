@@ -56,17 +56,4 @@ export async function streamFirestore(firebaseApp: App, streamConfiguration: Fir
       }
     }
   );
-  while (docs.size > 0) {
-    docs.forEach((doc: QueryDocumentSnapshot) => {
-      if (subCollection) {
-      }
-    });
-    offset += docs.size;
-    docs = await getFirestore(firebaseApp).collection(collection).limit(limit).offset(offset).get();
-  }
-
-  let stream = await getFirestore(firebaseApp).collection(collection).limit(1).offset(1).get();
-  stream.forEach(doc => {
-    console.log(doc.id, "=>", doc.data());
-  });
 }

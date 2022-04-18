@@ -7,6 +7,7 @@ import {
   StreamReader,
   StreamSink,
 } from "@jitsu/types/sources";
+import { LocalStorage } from "@segment/analytics-next";
 
 export function makeStreamSink(msg: Pick<StreamSink, "msg">): StreamSink {
   return {

@@ -10,6 +10,7 @@
 
     "build:core": "lerna run build --stream --scope jitsu-cli --scope '@jitsu/*'",
     "build:sources": "lerna run build --stream --scope 'jitsu-*-source'",
+    "build:destinations": "lerna run build --stream --scope 'jitsu-*-destination'",
     "build:all": "lerna run build",
 
     "test:all": "yarn lerna run test --stream",
@@ -31,6 +32,7 @@
   },
   "workspaces": [
     "core/*",
-    "source-connectors/*"
+    "source-connectors/*",
+    "destinations/*"
   ]
 }

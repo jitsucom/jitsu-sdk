@@ -1,7 +1,8 @@
 {
   "packages": [
     "core/*",
-    "source-connectors/*"
+    "source-connectors/*",
+    "destinations/*"
   ],
   "version": "0.7.2",
   "npmClient": "yarn",
