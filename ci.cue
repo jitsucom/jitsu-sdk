@@ -52,18 +52,33 @@ dagger.#Plan & {
 					}
 
 					script: contents: #"""
-					  yarn config set cache-folder /cache/yarn
-						yarn lerna:boot
+						yarn boot
 					"""#
 				}
 			]
+		}
+
+		"code-style": bash.#Run & {
+			input:   deps.output
+			workdir: "/src"
+			script: contents: #"""
+					yarn prettier:check
+				"""#
 		}
 
 		build: bash.#Run & {
 			input:   deps.output
 			workdir: "/src"
 			script: contents: #"""
-					yarn build
+					yarn build:all
+				"""#
+		}
+
+		test: bash.#Run & {
+			input:   build.output
+			workdir: "/src"
+			script: contents: #"""
+					yarn test:all
 				"""#
 		}
 	}

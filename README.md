@@ -15,15 +15,15 @@ a detailed guide on extendintg Jitsu below
 ## Testing and building
 
 * Before starting: `yarn boot` bootstrap workspace, including installing of all software packages (equivalent to `yarn install` — **DO NOT RUN `yarn install` DIRECTLY**).
-* `rm -rf \`find . -type d -name node_modules\`` to remove all installed packages and 'reset' the build environment
-* `yarn build` runs all subpackages build and tests.
-* `yarn jitsu-cli` builds and runs `jitsu-cli`
-* `yarn build:no-test` runs only build, without test
-* `yarn link-all` runs `npm link` in all packages (run `yarn link`). It's usefull when you want to debug 
-your changes with extension
-  * Run `yarn link jitsu-cli @jitsu/types` in the extension folder
-  * Run `yarn unlink jitsu-cli @jitsu/types && yarn install --force` once you're done
-* `yarn ci` builds the project and publishes canary version. It's intended to run within github actions
+* `yarn ci` runs all builds and tests (same as CI - see `ci.cue`)
+* `yarn build:core`, `yarn build:sources` and `yarn build:all` builds and runs build of core, sources and everything respectively
+* `yarn test:all` runs all tests
+
+## Project structure
+
+* `core/*` - core packages of jitsu sdk
+* `source-connector/*` - officially supported source connectors
+* `destinations/*` - officially supported destinations (*TODO*) 
 
 ## Recipes
 
@@ -33,13 +33,11 @@ your changes with extension
   * Builds `jitsu-cli`
   * Builds source connector with freshly built `jitsu-cli`
   * Runs source connector with given config
-  * If you want to skip the `jitsu-cli` build
-    * `yarn jitsu-cli:no-build exec-src source-connectors/[source-name] -c {} -s`
 
 Other related commands:
  * `yarn jitsu-cli build source-connectors/[source-name]` - build source connector, do not run it
  * `yarn jitsu-cli test source-connectors/[source-name]` - build source connector, do not run it
- * `yarn build:sources` - build `jitsu-cli` and then all sources with it; alsu runs tests (TODO: implement)
+
 
 ### To add module
 

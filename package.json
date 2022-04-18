@@ -3,17 +3,24 @@
   "version": "0.7.2",
   "private": true,
   "scripts": {
+    "boot": "yarn install && yarn lerna bootstrap",
+
     "prettier:check": "prettier --check --config ./.prettierrc.json --ignore-path ./.prettierignore core source-connectors || (echo \"\t👉👉 Run yarn prettier:fix!\" && exit 1)",
     "prettier:fix": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore core source-connectors",
-    "build": "yarn prettier:check && yarn build:no-test && yarn lerna run test",
-    "build:no-test": "lerna run build --stream",
-    "test-only": "yarn prettier:check && yarn lerna run test",
-    "jitsu-cli:no-build": "node core/jitsu-cli/lib/index.js",
-    "jitsu-cli": "lerna run build --stream --scope jitsu-cli --scope '@jitsu/jitsu-*' --scope '@jitsu/jlib' && yarn jitsu-cli:no-build",
+
+    "build:core": "lerna run build --stream --scope jitsu-cli --scope '@jitsu/*'",
+    "build:sources": "lerna run build --stream --scope 'jitsu-*-source'",
+    "build:all": "lerna run build",
+
+    "test:all": "yarn lerna run test --stream",
+
+    "jitsu-cli": "yarn build:core && node core/jitsu-cli/lib/index.js",
+
+    "ci": "yarn prettier:check && yarn build:all && yarn test:all",
+
     "lerna": "lerna",
-    "boot": "yarn install && yarn lerna bootstrap",
-    "clean": "lerna run clean --stream",
-    "link-all": "lerna exec -- yarn link"
+    "clean:modules": "rm -rf `find . -type d -name node_modules`",
+    "clean": "lerna run clean --stream"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",
