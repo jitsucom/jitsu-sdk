@@ -1,8 +1,28 @@
 /**
- * A special keys that contains a cue how certain key
- * should be serialized to DB. Examples of such cues:
- *  - If subtree should be flattened
- *  - SQL type of the column
+ * This file contains definitions for sources connector.
+ *
+ * "Source" (aka "connector", aka "source connector") is an external dataset. Jitsu
+ * pulls data from "source" and puts to destination database. Examples of sources are:
+ *  - Non-relational databases (Redis, Firestore, Firebase Auth)
+ *  - Services with APIs (Airtable, Google Sheets, Google Analytics)
+ *
+ *
+ * Source is represented by:
+ *
+ *  - Configuration (see Config template parameter). Configuration usually contains credentials (example: Redis login password)
+ *  - Streams (aka collections). Each stream will be mapped to a table in destination. Each source might expose multiple stream.
+ *    Example, firebase exposes two streams: users, and firestore. Stream has a unique name
+ *  - Stream configuration (see StreamConfiguration template variable). Stream might be configurable. Example: firebase 'users'
+ *    is not configurable stream, but firestore is parameterized by collection (equivalent to table in SQL terms)
+ *  - A pair of stream and it's configuration makes a "stream instance"
+ *  - Each stream can have a multiple instance
+ *  - Each stream instance will be mapped to a table in destination database
+ *
+ *  Source also is represented by functions, which define a business logic of working with underlying API or database. The
+ *  types of functions are (see typedefs below)
+ *   - ConfigValidator — validates source configuration. This type is shared with other types of extensions (see extension.d.ts
+ *   - SourceCatalog - returns a list of stream instances (based on source configuration)
+ *   - StreamReader - reads data from stream and sends data as a set of records, which will be added to destination database
  */
 import { ConfigurationParameter } from "./parameters";
 import { SqlTypeHint, SqlTypeHintKey } from "./sql-hints";
@@ -56,7 +76,7 @@ declare type Condition = {
   values: any[];
 };
 
-declare type StreamConfigurationParameters<StreamConfig = Record<string, any>> = {
+declare type StreamInstance<StreamConfig = Record<string, any>> = {
   streamName: string;
   mode?: StreamSyncMode;
   params?: ConfigurationParameter<keyof StreamConfig>[];
@@ -141,7 +161,7 @@ declare type StreamSink = {
 
 declare type SourceCatalog<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
   config: Config
-) => Promise<StreamConfigurationParameters<StreamConfig>[]>;
+) => Promise<StreamInstance<StreamConfig>[]>;
 
 declare type StreamReader<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
   sourceConfig: Config,
