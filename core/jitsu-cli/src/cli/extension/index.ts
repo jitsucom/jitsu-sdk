@@ -16,6 +16,7 @@ import * as readline from "readline";
 import getLog from "../../lib/log";
 import { NodeVM } from "vm2";
 import * as os from "os";
+import { sandbox } from "@jitsu/node-bridge/sandbox";
 //For new Function to get access to fetch
 global.fetch = require("cross-fetch");
 
@@ -138,81 +139,12 @@ async function getFirstLine(pathToFile): Promise<string> {
   return line;
 }
 
-function mockModule(moduleName: string, knownSymbols: Record<string, any>) {
-  return new Proxy(
-    {},
-    {
-      get: (target, prop) => {
-        let known = knownSymbols[prop.toString()];
-        if (known) {
-          return known;
-        } else {
-          throw new Error(`Attempt to call ${moduleName}.${prop.toString()} which is not safe`);
-        }
-      },
-    }
-  );
-}
-
 export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExport>> {
   let formatDefinition = await getFirstLine(file);
   if (formatDefinition.trim() === "//format=es" || formatDefinition.trim() === "//format=esm") {
     return import(file);
   } else if (formatDefinition.trim() === "//format=cjs" || formatDefinition.trim() === "//format=commonjs") {
-    const vm = new NodeVM({
-      console: "inherit",
-
-      sandbox: {
-        queueMicrotask: queueMicrotask,
-        self: {},
-        process: {
-          versions: process.versions,
-          version: process.version,
-          stderr: process.stderr,
-          stdout: process.stdout,
-          env: {},
-        },
-      },
-      require: {
-        context: "sandbox",
-        external: false,
-        builtin: [
-          "stream",
-          "http",
-          "url",
-          "http2",
-          "dns",
-          "punycode",
-          "https",
-          "zlib",
-          "events",
-          "net",
-          "tls",
-          "buffer",
-          "string_decoder",
-          "assert",
-          "util",
-          "crypto",
-          "path",
-          "tty",
-          "querystring",
-          "console",
-        ],
-        root: "./",
-
-        mock: {
-          fs: mockModule("fs", {}),
-          os: mockModule("os", { platform: os.platform, EOL: os.EOL }),
-          child_process: {},
-        },
-        resolve: moduleName => {
-          throw new Error(
-            `The extension ${file} calls require('${moduleName}') which is not system module. Rollup should have linked it into JS code.`
-          );
-        },
-      },
-    });
-
+    const vm = sandbox({ file });
     return vm.runFile(file);
   } else {
     throw new Error(`Unsupported build format - ${formatDefinition}`);

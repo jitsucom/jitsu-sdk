@@ -178,19 +178,19 @@ declare type StreamReader<Config = Record<string, any>, StreamConfig = Record<st
  */
 declare type WebHookHandler<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
   config: {
-    source: Config,
-    stream?: StreamConfig
+    source: Config;
+    stream?: StreamConfig;
   },
   webhook: {
     //header names are lower-cased
-    headers: Record<string, string>
-    body: string
+    headers: Record<string, string>;
+    body: string;
     //if hook sends json, the parsed body will be here
-    json?: any
+    json?: any;
   },
   streamSink: StreamSink,
   services: { state: StateService }
-) => Promise<void>
+) => Promise<void>;
 
 /**
  * Axillary services for saving state, a permanent values that are accessible
