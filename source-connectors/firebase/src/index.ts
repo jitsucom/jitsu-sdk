@@ -86,7 +86,7 @@ const streamReader: StreamReader<FirebaseConfig, FirestoreStreamConfig | UsersSt
     if (streamType === "users") {
       await streamUsers(firebaseApp, streamSink);
     } else {
-      //await streamFirestore(firebaseApp, streamConfiguration.parameters as FirestoreStreamConfig, streamSink);
+      await streamFirestore(firebaseApp, streamConfiguration.parameters as FirestoreStreamConfig, streamSink);
     }
   } finally {
     await deleteApp(firebaseApp);
