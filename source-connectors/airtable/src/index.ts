@@ -38,7 +38,7 @@ async function validator(config: AirtableConfig): Promise<ConfigValidationResult
   console.log(`Will connect to airtable with apiKey=${config.apiKey} and baseId=${config.baseId}`);
   const airtable = new Airtable({ apiKey: config.apiKey });
   // const response = await airtable.base(config.baseId).makeRequest();
-  // console.log('Airtable response:' + response);
+  // console.log("Airtable response:" + response);
   return true;
 }
 
@@ -46,7 +46,7 @@ const sourceCatalog: SourceCatalog<AirtableConfig, TableStreamConfig> = async (c
   return [
     {
       streamName: "table",
-      mode: "full_sync",
+      supported_modes: ["full_sync"],
       params: [
         {
           id: "tableId",
@@ -106,7 +106,7 @@ const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
   }
   const airtable = new Airtable({ apiKey: sourceConfig.apiKey });
 
-  let table = airtable.base(sourceConfig.baseId).table(streamConfiguration.params.tableId);
+  let table = airtable.base(sourceConfig.baseId).table(streamConfiguration.parameters.tableId);
 
   let allRecords = await table.select().all();
   allRecords.forEach(r => {
@@ -115,7 +115,6 @@ const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
     streamSink.addRecord({
       __id: id,
       created: new Date(createdTime),
-      __sql_type_created: "TIMESTAMPZ",
       ...flatRow,
     });
   });

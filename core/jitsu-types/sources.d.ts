@@ -27,7 +27,14 @@
 import { ConfigurationParameter } from "./parameters";
 import { SqlTypeHint, SqlTypeHintKey } from "./sql-hints";
 
-declare type JitsuDataMessageType = "record" | "clear_stream" | "delete_records" | "new_transaction" | "change_state";
+declare type JitsuDataMessageType =
+  | "record"
+  | "clear_stream"
+  | "delete_records"
+  | "new_transaction"
+  | "change_state"
+  | "error"
+  | "log";
 
 /**
  * full_sync – each sync clears the destination table and reprocesses all the data
@@ -78,7 +85,7 @@ declare type Condition = {
 
 declare type StreamInstance<StreamConfig = Record<string, any>> = {
   streamName: string;
-  mode?: StreamSyncMode;
+  supported_modes?: StreamSyncMode[];
   params?: ConfigurationParameter<keyof StreamConfig>[];
 };
 
@@ -87,7 +94,7 @@ declare type StreamConfiguration<StreamConfig = Record<string, any>> = {
    * 'incremental' is a default value
    */
   mode?: StreamSyncMode;
-  params: StreamConfig;
+  parameters: StreamConfig;
 };
 
 declare type JitsuDataMessage<T extends JitsuDataMessageType, P> = {

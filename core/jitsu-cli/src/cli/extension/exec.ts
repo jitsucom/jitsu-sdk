@@ -151,7 +151,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   await extension.streamReader(
     configObject,
     stream.streamName,
-    { params: streamConfigObject },
+    { parameters: streamConfigObject },
     makeStreamSink({
       msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
         if (msg.type === "record") {

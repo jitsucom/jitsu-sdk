@@ -199,7 +199,7 @@ const streamReader: StreamReader<RedisConfig, HashStreamConfig> = async (
 ) => {
   const redis = await connect(sourceConfig);
   try {
-    let redisKeyPattern = streamConfiguration.params.redis_key || "*";
+    let redisKeyPattern = streamConfiguration.parameters.redis_key || "*";
     if (redisKeyPattern.indexOf("*") >= 0) {
       let keys = await redis.dbSize();
       console.log(`Going to scan through ${formatNum(keys)}, matching pattern '${redisKeyPattern}'`);

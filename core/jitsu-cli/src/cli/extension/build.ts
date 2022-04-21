@@ -106,7 +106,7 @@ export async function build(args: string[]): Promise<CommandResult> {
       banner: `//format=${format}`,
       outro: [
         `exports.buildInfo = {sdkVersion: "${jitsuCliVersion}", sdkPackage: "${jitsuPackageName}", buildTimestamp: "${new Date().toISOString()}"};`,
-        `exports.streamReader$StdoutFacade = exports.streamReader && __$srcLib.stoutStreamReader(exports.streamReader);`,
+        `exports.streamReader$StdoutFacade = exports.streamReader && __$srcLib.stdoutStreamReader(exports.streamReader);`,
       ].join("\n"),
       //preserveModules: true,
     });
