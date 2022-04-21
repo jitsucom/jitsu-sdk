@@ -4,7 +4,7 @@ import { initializeApp, deleteApp, App, cert } from "firebase-admin/app";
 
 import JSON5 from "json5";
 import { streamUsers } from "./users";
-//import { streamFirestore } from "./firestore";
+import { streamFirestore } from "./firestore";
 
 export interface FirebaseConfig {
   service_account_key: string | any;
@@ -25,6 +25,7 @@ const descriptor: ExtensionDescriptor<FirebaseConfig> = {
     {
       id: "service_account_key",
       displayName: "Service Account Key JSON",
+      type: "json",
       documentation:
         "Read how to get an account here: https://cloud.google.com/iam/docs/creating-managing-service-account-keys",
       required: true,
@@ -32,7 +33,6 @@ const descriptor: ExtensionDescriptor<FirebaseConfig> = {
     {
       id: "project_id",
       displayName: "Project ID",
-      defaultValue: 6379,
       documentation: "Firebase Project ID",
       required: true,
     },
@@ -56,12 +56,12 @@ async function validator(config: FirebaseConfig): Promise<ConfigValidationResult
 const sourceCatalog: SourceCatalog<FirebaseConfig> = async () => {
   return [
     {
-      streamName: "users",
+      type: "users",
       mode: "full_sync",
       params: [],
     },
     {
-      streamName: "firestore",
+      type: "firestore",
       mode: "full_sync",
       params: [
         {
@@ -77,16 +77,16 @@ const sourceCatalog: SourceCatalog<FirebaseConfig> = async () => {
 
 const streamReader: StreamReader<FirebaseConfig, FirestoreStreamConfig | UsersStreamConfig> = async (
   sourceConfig: FirebaseConfig,
-  streamName: string,
+  streamType: string,
   streamConfiguration: StreamConfiguration<FirestoreStreamConfig | UsersStreamConfig>,
   streamSink: StreamSink
 ) => {
   let firebaseApp = getFirebaseApp(sourceConfig);
   try {
-    if (streamName === "users") {
+    if (streamType === "users") {
       await streamUsers(firebaseApp, streamSink);
     } else {
-      //await streamFirestore(firebaseApp, streamConfiguration.params as FirestoreStreamConfig, streamSink);
+      //await streamFirestore(firebaseApp, streamConfiguration.parameters as FirestoreStreamConfig, streamSink);
     }
   } finally {
     await deleteApp(firebaseApp);

@@ -84,7 +84,7 @@ declare type Condition = {
 };
 
 declare type StreamInstance<StreamConfig = Record<string, any>> = {
-  streamName: string;
+  type: string;
   supported_modes?: StreamSyncMode[];
   params?: ConfigurationParameter<keyof StreamConfig>[];
 };
@@ -172,7 +172,7 @@ declare type SourceCatalog<Config = Record<string, any>, StreamConfig = Record<s
 
 declare type StreamReader<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
   sourceConfig: Config,
-  streamName: string,
+  streamType: string,
   streamConfiguration: StreamConfiguration<StreamConfig>,
   streamSink: StreamSink,
   services: { state: StateService }

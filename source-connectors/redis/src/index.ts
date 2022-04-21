@@ -81,7 +81,7 @@ async function validator(config: RedisConfig): Promise<ConfigValidationResult> {
 const sourceCatalog: SourceCatalog<RedisConfig, HashStreamConfig> = async (config: RedisConfig) => {
   return [
     {
-      streamName: "hash",
+      type: "hash",
       mode: "full_sync",
       params: [
         {
@@ -193,7 +193,7 @@ function formatNum(num: number): string {
 const redisScanCount = 50000;
 const streamReader: StreamReader<RedisConfig, HashStreamConfig> = async (
   sourceConfig: RedisConfig,
-  streamName: string,
+  streamType: string,
   streamConfiguration: StreamConfiguration<HashStreamConfig>,
   streamSink: StreamSink
 ) => {

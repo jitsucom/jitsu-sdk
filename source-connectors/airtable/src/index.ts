@@ -45,7 +45,7 @@ async function validator(config: AirtableConfig): Promise<ConfigValidationResult
 const sourceCatalog: SourceCatalog<AirtableConfig, TableStreamConfig> = async (config: AirtableConfig) => {
   return [
     {
-      streamName: "table",
+      type: "table",
       supported_modes: ["full_sync"],
       params: [
         {
@@ -96,13 +96,13 @@ function flatten(obj: any, path: string[] = []) {
 
 const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
   sourceConfig: AirtableConfig,
-  streamName: string,
+  streamType: string,
   streamConfiguration: StreamConfiguration<TableStreamConfig>,
   streamSink: StreamSink,
   services: { state: StateService }
 ) => {
-  if (streamName !== "table") {
-    throw new Error(`${streamName} streams is not supported`);
+  if (streamType !== "table") {
+    throw new Error(`${streamType} streams is not supported`);
   }
   const airtable = new Airtable({ apiKey: sourceConfig.apiKey });
 
