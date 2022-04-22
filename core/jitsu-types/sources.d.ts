@@ -85,7 +85,7 @@ declare type Condition = {
 
 declare type StreamInstance<StreamConfig = Record<string, any>> = {
   type: string;
-  supported_modes?: StreamSyncMode[];
+  supportedModes?: StreamSyncMode[];
   params?: ConfigurationParameter<keyof StreamConfig>[];
 };
 

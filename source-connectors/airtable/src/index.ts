@@ -46,7 +46,7 @@ const sourceCatalog: SourceCatalog<AirtableConfig, TableStreamConfig> = async (c
   return [
     {
       type: "table",
-      supported_modes: ["full_sync"],
+      supportedModes: ["full_sync"],
       params: [
         {
           id: "tableId",
