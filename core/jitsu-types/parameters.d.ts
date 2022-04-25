@@ -1,4 +1,11 @@
-type ConfigParameterType = "string" | "int" | "json" | "boolean" | "password";
+type ConfigParameterType =
+  | "string"
+  | "int"
+  | "json"
+  | "boolean"
+  | "password"
+  | { oneOf: string[] } // not implemented
+  | { severalOf: string[]; max?: number }; // not implemented
 
 export type ConfigurationParameter<T = string> = {
   /**
@@ -30,4 +37,13 @@ export type ConfigurationParameter<T = string> = {
    * Text of documentation hint in UI. Can contain HTML
    */
   documentation?: string;
+  /**
+   * Defines if the field can be accepted depending on the parent field value
+   */
+  relevantIf?: {
+    /** Parent field id */
+    field: string;
+    /** Parent field value for which this field is relevant */
+    value: unknown;
+  };
 };
