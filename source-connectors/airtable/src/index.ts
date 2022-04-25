@@ -66,34 +66,6 @@ const sourceCatalog: SourceCatalog<AirtableConfig, TableStreamConfig> = async (c
   ];
 };
 
-function sanitizeKey(key: any) {
-  return key.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-}
-
-function flatten(obj: any, path: string[] = []) {
-  if (typeof obj !== "object") {
-    throw new Error(`Can't flatten an object, expected object, but got" ${typeof obj}: ${obj}`);
-  }
-  if (Array.isArray(obj)) {
-    return obj;
-  }
-  const res = {};
-
-  for (let [key, value] of Object.entries(obj)) {
-    key = sanitizeKey(key);
-    if (typeof value === "object" && !Array.isArray(value)) {
-      Object.entries(flatten(value, [...path, key])).forEach(
-        ([subKey, subValue]) => (res[key + "_" + subKey] = subValue)
-      );
-    } else if (typeof value == "function") {
-      throw new Error(`Can't flatten object with function as a value of ${key}. Path to node: ${path.join(".")}`);
-    } else {
-      res[key] = value;
-    }
-  }
-  return res;
-}
-
 const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
   sourceConfig: AirtableConfig,
   streamType: string,
@@ -111,11 +83,11 @@ const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
   let allRecords = await table.select().all();
   allRecords.forEach(r => {
     const { id, createdTime, fields } = r._rawJson;
-    let flatRow = flatten(fields);
     streamSink.addRecord({
       __id: id,
       created: new Date(createdTime),
-      ...flatRow,
+      __sql_type_created: "timestamp with time zone",
+      ...fields,
     });
   });
 };

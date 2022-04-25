@@ -6,18 +6,19 @@ import * as console from "console";
 
 const readCollection = async (
   collection: () => CollectionReference<DocumentData>,
-  callback: (doc: QueryDocumentSnapshot) => void
+  callback: (doc: QueryDocumentSnapshot) => void,
+  sink: StreamSink
 ) => {
   let offset = 0;
   const limit = 2;
   let docs = await collection().limit(limit).offset(offset).get();
   while (docs.size > 0) {
-    console.log(`Processing ${docs.size} documents`);
+    sink.log("INFO", `Processing ${docs.size} documents`);
     docs.forEach(callback);
     offset += docs.size;
     docs = await collection().limit(limit).offset(offset).get();
     if (docs.size === 0) {
-      console.log(`Processing finished. Processed ${offset} docs in total`);
+      sink.log("INFO", `Processing finished. Processed ${offset} docs in total`);
     }
   }
 };
@@ -26,15 +27,13 @@ export async function streamFirestore(firebaseApp: App, streamConfiguration: Fir
   let collectionName = streamConfiguration.collection;
 
   const [collection, subCollection] = collectionName.split("/*/");
-  let offset = 0;
-  const limit = 2;
-  let docs = await getFirestore(firebaseApp).collection(collection).limit(limit).offset(offset).get();
-  console.log(`Reading firestore collection ${collection}`);
+
+  sink.log("INFO", `Reading firestore collection ${collection}`);
   await readCollection(
     () => getFirestore(firebaseApp).collection(collection),
     (doc: QueryDocumentSnapshot) => {
       if (subCollection) {
-        console.log(`Reading firestore sub-collection ${collection}/${subCollection} of document ${doc.id}`);
+        sink.log("INFO", `Reading firestore sub-collection ${collection}/${subCollection} of document ${doc.id}`);
         readCollection(
           () => doc.ref.collection(subCollection),
           subDoc => {
@@ -44,7 +43,8 @@ export async function streamFirestore(firebaseApp: App, streamConfiguration: Fir
               [`_firestore_document_id_${subCollection.toLocaleLowerCase()}`]: subDoc.id,
               ...doc.data(),
             });
-          }
+          },
+          sink
         );
         doc.ref.collection(subCollection);
       } else {
@@ -54,6 +54,7 @@ export async function streamFirestore(firebaseApp: App, streamConfiguration: Fir
           ...doc.data(),
         });
       }
-    }
+    },
+    sink
   );
 }

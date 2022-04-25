@@ -2,6 +2,7 @@ import {
   DataRecord,
   JitsuDataMessage,
   JitsuDataMessageType,
+  JitsuLogLevel,
   StateService,
   StreamConfiguration,
   StreamReader,
@@ -13,6 +14,9 @@ export function makeStreamSink(msg: Pick<StreamSink, "msg">): StreamSink {
   return {
     addRecord(record: DataRecord) {
       msg.msg({ type: "record", message: record });
+    },
+    log(level: JitsuLogLevel, message: string) {
+      msg.msg({ type: "log", message: { level: level, message: message } });
     },
     clearStream() {
       msg.msg({ type: "clear_stream" });

@@ -96,30 +96,6 @@ const sourceCatalog: SourceCatalog<RedisConfig, HashStreamConfig> = async (confi
   ];
 };
 
-function flatten(obj: any, path: string[] = []) {
-  if (typeof obj !== "object") {
-    throw new Error(`Can't flatten an object, expected object, but got" ${typeof obj}: ${obj}`);
-  }
-  if (Array.isArray(obj)) {
-    return obj;
-  }
-  const res = {};
-
-  for (let [key, value] of Object.entries(obj)) {
-    key = key.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-    if (typeof value === "object" && !Array.isArray(value)) {
-      Object.entries(flatten(value, [...path, key])).forEach(
-        ([subKey, subValue]) => (res[key + "_" + subKey] = subValue)
-      );
-    } else if (typeof value == "function") {
-      throw new Error(`Can't flatten object with function as a value of ${key}. Path to node: ${path.join(".")}`);
-    } else {
-      res[key] = value;
-    }
-  }
-  return res;
-}
-
 type Maybe<T> = T | undefined | null;
 
 function jsonOrString(value: Maybe<string>, ifString: (s: Maybe<string>) => any = s => s) {
@@ -127,7 +103,7 @@ function jsonOrString(value: Maybe<string>, ifString: (s: Maybe<string>) => any 
     return ifString(value);
   }
   try {
-    return flatten(JSON5.parse(value));
+    return JSON5.parse(value);
   } catch (e) {
     return ifString(value);
   }
@@ -202,13 +178,14 @@ const streamReader: StreamReader<RedisConfig, HashStreamConfig> = async (
     let redisKeyPattern = streamConfiguration.parameters.redis_key || "*";
     if (redisKeyPattern.indexOf("*") >= 0) {
       let keys = await redis.dbSize();
-      console.log(`Going to scan through ${formatNum(keys)}, matching pattern '${redisKeyPattern}'`);
+      streamSink.log("INFO", `Going to scan through ${formatNum(keys)}, matching pattern '${redisKeyPattern}'`);
       let cursor = 0;
       let scanIterations = 0;
       while (true) {
         let scanRes = await redis.scan(cursor, { MATCH: redisKeyPattern, COUNT: redisScanCount });
         scanIterations++;
-        console.log(
+        streamSink.log(
+          "INFO",
           `Scanned ${formatNum(Math.min(scanIterations * redisScanCount, keys))} / ${formatNum(keys)} keys (${formatNum(
             ((scanIterations * redisScanCount) / keys) * 100
           )}%). Got ${scanRes.keys.length} keys`
@@ -222,7 +199,7 @@ const streamReader: StreamReader<RedisConfig, HashStreamConfig> = async (
         }
       }
     } else {
-      console.log(`Running GET ${redisKeyPattern}`);
+      streamSink.log("INFO", `Running GET ${redisKeyPattern}`);
       await processRedisKey(redisKeyPattern, redis, streamSink);
     }
   } finally {

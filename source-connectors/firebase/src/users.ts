@@ -13,7 +13,8 @@ export async function streamUsers(firebaseApp: App, streamSink: StreamSink) {
   while (true) {
     let listResult = await getAuth(firebaseApp).listUsers(batchSize, pageToken);
     totalUsers += listResult.users.length;
-    console.log(
+    streamSink.log(
+      "INFO",
       `Got a batch of ${listResult.users.length} users (${totalUsers} downloaded to this moment). ${
         listResult.pageToken ? "Will continue iteration" : "This is the last batch"
       }`

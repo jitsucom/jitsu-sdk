@@ -33,8 +33,9 @@ declare type JitsuDataMessageType =
   | "delete_records"
   | "new_transaction"
   | "change_state"
-  | "error"
   | "log";
+
+declare type JitsuLogLevel = "INFO" | "WARN" | "DEBUG" | "ERROR";
 
 /**
  * full_sync – each sync clears the destination table and reprocesses all the data
@@ -42,6 +43,12 @@ declare type JitsuDataMessageType =
  */
 declare type StreamSyncMode = "full_sync" | "incremental";
 
+/**
+ * DataRecord represents data object that Jitsu will send to a destination.
+ * Jitsu may apply additional transforms and type mappings before saving object to a destination, e.g.:
+ * for SQL based data warehouse Jitsu will flatten hierarchical object structure to a single row object
+ * while __id field value will be used to fill eventn_ctx_event_id primary key
+ */
 declare type DataRecord = {
   /**
    * Unique id of the record. The id of the same record should persist between run
@@ -60,6 +67,11 @@ declare type DataRecord = {
    * Values. Nested values are not allowed
    */
   [propName: string]: any;
+};
+
+declare type LogRecord = {
+  level: JitsuLogLevel;
+  message: string;
 };
 
 /**
@@ -107,6 +119,8 @@ declare type JitsuDataMessage<T extends JitsuDataMessageType, P> = {
  * the record with same id will be replaced. Id is DataRecord.__id
  */
 declare type AddRecordMessage = JitsuDataMessage<"record", DataRecord>;
+
+declare type LogMessage = JitsuDataMessage<"log", LogRecord>;
 /**
  * Clears underlying table. Removes all records. Equivalent of 'TRUNCATE TABLE'
  */
@@ -145,6 +159,7 @@ declare type StreamSink = {
    */
   msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>);
 
+  log(level: JitsuLogLevel, message: string);
   /**
    * Adds data record to stream. Alias for msg({type: "record",  message: record})
    * @param record record
@@ -170,6 +185,9 @@ declare type SourceCatalog<Config = Record<string, any>, StreamConfig = Record<s
   config: Config
 ) => Promise<StreamInstance<StreamConfig>[]>;
 
+/**
+ * The main function that pulls data and convert it to the messages send to streamSink.
+ */
 declare type StreamReader<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
   sourceConfig: Config,
   streamType: string,
