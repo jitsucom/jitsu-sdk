@@ -81,7 +81,7 @@ async function validator(config: RedisConfig): Promise<ConfigValidationResult> {
 const sourceCatalog: SourceCatalog<RedisConfig, HashStreamConfig> = async (config: RedisConfig) => {
   return [
     {
-      streamName: "hash",
+      type: "hash",
       mode: "full_sync",
       params: [
         {
@@ -193,13 +193,13 @@ function formatNum(num: number): string {
 const redisScanCount = 50000;
 const streamReader: StreamReader<RedisConfig, HashStreamConfig> = async (
   sourceConfig: RedisConfig,
-  streamName: string,
+  streamType: string,
   streamConfiguration: StreamConfiguration<HashStreamConfig>,
   streamSink: StreamSink
 ) => {
   const redis = await connect(sourceConfig);
   try {
-    let redisKeyPattern = streamConfiguration.params.redis_key || "*";
+    let redisKeyPattern = streamConfiguration.parameters.redis_key || "*";
     if (redisKeyPattern.indexOf("*") >= 0) {
       let keys = await redis.dbSize();
       console.log(`Going to scan through ${formatNum(keys)}, matching pattern '${redisKeyPattern}'`);

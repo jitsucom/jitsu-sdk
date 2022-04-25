@@ -117,9 +117,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
 
   streams.forEach(stream => {
     let paramsDocs = (stream.params ?? []).map(param => `${param.id} - ${param.displayName}`).join(", ");
-    getLog().info(
-      `🌊 Stream: ${chalk.bold(stream.streamName)}. Parameters: ${paramsDocs.length > 0 ? paramsDocs : "none"}`
-    );
+    getLog().info(`🌊 Stream: ${chalk.bold(stream.type)}. Parameters: ${paramsDocs.length > 0 ? paramsDocs : "none"}`);
   });
   let stream;
   let streamConfigObject = cliOpts.streamConfig && JSON5.parse(cliOpts.streamConfig);
@@ -134,11 +132,11 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
       return {
         success: false,
         message: `Connector defines multiple streams (${streams.map(
-          s => s.streamName
+          s => s.type
         )}). Specify stream name as as: -s {name: 'name', ...}`,
       };
     }
-    stream = streams.find(stream => stream.streamName === streamConfigObject?.name);
+    stream = streams.find(stream => stream.type === streamConfigObject?.name);
     if (!stream) {
       return { success: false, message: `Stream with ${streamConfigObject?.name} is not found` };
     }
@@ -151,7 +149,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   await extension.streamReader(
     configObject,
     stream.streamName,
-    { params: streamConfigObject },
+    { parameters: streamConfigObject },
     makeStreamSink({
       msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
         if (msg.type === "record") {

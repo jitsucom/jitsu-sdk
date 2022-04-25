@@ -62,7 +62,7 @@ function stateService(state: Record<string, any>): StateService {
 /**
  * Makes a simplified version of StreamReader (see above)
  */
-export function stoutStreamReader(stream: StreamReader): StdoutStreamReaderFacade {
+export function stdoutStreamReader(stream: StreamReader): StdoutStreamReaderFacade {
   return async (sourceConfig, streamName, streamConfiguration, state) => {
     await stream(
       sourceConfig,
