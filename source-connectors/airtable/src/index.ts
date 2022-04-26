@@ -35,8 +35,8 @@ const descriptor: ExtensionDescriptor = {
 };
 
 async function validator(config: AirtableConfig): Promise<ConfigValidationResult> {
-  console.log(`Will connect to airtable with apiKey=${config.apiKey} and baseId=${config.baseId}`);
-  const airtable = new Airtable({ apiKey: config.apiKey });
+  // console.log(`Will connect to airtable with apiKey=${config.apiKey} and baseId=${config.baseId}`);
+  // const airtable = new Airtable({ apiKey: config.apiKey });
   // const response = await airtable.base(config.baseId).makeRequest();
   // console.log("Airtable response:" + response);
   return true;
@@ -58,7 +58,7 @@ const sourceCatalog: SourceCatalog<AirtableConfig, TableStreamConfig> = async (c
         {
           id: "fields",
           displayName: "Fields",
-          documentation: "Comma separated list of fields. If empty or undefined - all fields will be downloaded",
+          documentation: "Comma separated list of field names. If empty or undefined - all fields will be downloaded",
           required: false,
         },
       ],
@@ -79,8 +79,13 @@ const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
   const airtable = new Airtable({ apiKey: sourceConfig.apiKey });
 
   let table = airtable.base(sourceConfig.baseId).table(streamConfiguration.parameters.tableId);
-
-  let allRecords = await table.select().all();
+  const selectedFields = streamConfiguration.parameters.fields
+    ? streamConfiguration.parameters.fields.split(",").map(f => f.trim())
+    : [];
+  if (selectedFields.length > 0) {
+    streamSink.log("INFO", "Fields filter: " + JSON.stringify(selectedFields));
+  }
+  let allRecords = await table.select({ fields: selectedFields }).all();
   allRecords.forEach(r => {
     const { id, createdTime, fields } = r._rawJson;
     streamSink.addRecord({
