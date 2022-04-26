@@ -22,7 +22,7 @@ const descriptor: ExtensionDescriptor<AmplitudeConfig> = {
       type: "string",
       required: true,
       documentation: `
-        <>Amplitude API Key from project settings page. Only Amplitude Admins and Managers can view the API Key.</>
+        <div>Amplitude API Key from project settings page. Only Amplitude Admins and Managers can view the API Key.</div>
       `,
     },
     {
@@ -31,9 +31,9 @@ const descriptor: ExtensionDescriptor<AmplitudeConfig> = {
       type: "string",
       required: true,
       documentation: `
-        <>
+        <div>
           Amplitude Secret Key from project settings page. Only Amplitude Admins and Managers can view the Secret Key.
-        </>
+        </div>
       `,
     },
   ],
@@ -46,6 +46,7 @@ async function validator(config: AmplitudeConfig): Promise<ConfigValidationResul
 const sourceCatalog: SourceCatalog<AmplitudeConfig, AmplitudeStreamConfig> = async config => {
   return [
     {
+      type: "table",
       streamName: "table",
       mode: "full_sync",
       params: [

@@ -31,7 +31,19 @@ const descriptor: ExtensionDescriptor<GoogleAnalyticsConfig> = {
       displayName: "Authorization Type",
       id: "auth.type",
       required: true,
-      type: { oneOf: ["OAuth", "Service Account"] },
+      type: {
+        options: [
+          {
+            id: "OAuth",
+            displayName: "OAuth",
+          },
+          {
+            id: "Service Account",
+            displayName: "Service Account",
+          },
+        ],
+        maxOptions: 1,
+      },
       defaultValue: "OAuth",
       documentation: `
         <div>
@@ -99,6 +111,7 @@ async function validator(config: GoogleAnalyticsConfig): Promise<ConfigValidatio
 const sourceCatalog: SourceCatalog<GoogleAnalyticsConfig, GoogleAnalyticsStreamConfig> = async config => {
   return [
     {
+      type: "table",
       streamName: "table",
       mode: "full_sync",
       params: [

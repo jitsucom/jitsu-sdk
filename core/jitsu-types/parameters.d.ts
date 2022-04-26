@@ -1,12 +1,3 @@
-type ConfigParameterType =
-  | "string"
-  | "int"
-  | "json"
-  | "boolean"
-  | "password"
-  | { oneOf: string[] } // not implemented
-  | { severalOf: string[]; max?: number }; // not implemented
-
 export type ConfigurationParameter<T = string> = {
   /**
    * Id (corresponds to key in yaml config)
@@ -46,4 +37,28 @@ export type ConfigurationParameter<T = string> = {
     /** Parent field value for which this field is relevant */
     value: unknown;
   };
+};
+
+type ConfigParameterType =
+  | "string"
+  | "int"
+  | "json"
+  | "boolean"
+  | "password"
+  // | { oneOf: string[] } // not implemented
+  // | { severalOf: string[]; max?: number } // not implemented
+  | ConfigParameterSelection; // not implemented
+
+type ConfigParameterSelection = {
+  options: ConfigParameterSelectionOption[];
+  /**
+   * Maximum options allowed to be selected. Undefined means there's no limit in number of possible
+   * selected fields
+   */
+  maxOptions?: number;
+};
+
+type ConfigParameterSelectionOption = {
+  id: string;
+  displayName: string;
 };

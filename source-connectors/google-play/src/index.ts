@@ -28,7 +28,7 @@ const descriptor: ExtensionDescriptor<GooglePlayConfig> = {
       type: "string",
       required: true,
       documentation: `
-        <>
+        <div>
           <b>Google Cloud Storage Bucket ID:</b>
           <br />
           Sign in to your Google Play account.
@@ -47,7 +47,19 @@ const descriptor: ExtensionDescriptor<GooglePlayConfig> = {
       displayName: "Authorization Type",
       id: "auth.type",
       required: true,
-      type: { oneOf: ["OAuth", "Service Account"] },
+      type: {
+        options: [
+          {
+            id: "OAuth",
+            displayName: "OAuth",
+          },
+          {
+            id: "Service Account",
+            displayName: "Service Account",
+          },
+        ],
+        maxOptions: 1,
+      },
       defaultValue: "OAuth",
       documentation: `
         <p>
@@ -115,7 +127,7 @@ const descriptor: ExtensionDescriptor<GooglePlayConfig> = {
       },
       required: true,
       documentation: `
-        <>
+        <div>
           A Google Play user with permissions on the Google Play account you want to access. Google Play does not support
           using service accounts without impersonation.
         </>
@@ -131,6 +143,7 @@ async function validator(config: GooglePlayConfig): Promise<ConfigValidationResu
 const sourceCatalog: SourceCatalog<GooglePlayConfig, GooglePlayStreamConfig> = async config => {
   return [
     {
+      type: "table",
       streamName: "table",
       mode: "full_sync",
       params: [

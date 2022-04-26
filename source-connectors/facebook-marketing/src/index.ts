@@ -15,7 +15,7 @@ const descriptor: ExtensionDescriptor<FacebookMarketingConfig> = {
   id: "facebook",
   displayName: "Facebook Marketing Source",
   description: `
-    <>
+    <div>
       The Facebook connector pulls data from{" "}
       <a href="https://developers.facebook.com/docs/marketing-api/insights/">Facebook Insights API</a>. The connector
       is highly configurable and can pull data broken down by any dimensions from ads-, adset-, campaign- or
@@ -29,7 +29,7 @@ const descriptor: ExtensionDescriptor<FacebookMarketingConfig> = {
       type: "string",
       required: true,
       documentation: `
-        <>
+        <div>
           <a target="_blank" href="https://www.facebook.com/business/help/1492627900875762" rel="noreferrer">
             How to get Facebook Account ID
           </a>
@@ -42,7 +42,7 @@ const descriptor: ExtensionDescriptor<FacebookMarketingConfig> = {
       type: "password",
       required: true,
       documentation: `
-        <>
+        <div>
           <a
             target="_blank"
             href="https://developers.facebook.com/docs/pages/access-tokens/#get-a-long-lived-user-access-token"
@@ -63,6 +63,7 @@ async function validator(config: FacebookMarketingConfig): Promise<ConfigValidat
 const sourceCatalog: SourceCatalog<FacebookMarketingConfig, FacebookMarketingStreamConfig> = async config => {
   return [
     {
+      type: "table",
       streamName: "table",
       mode: "full_sync",
       params: [

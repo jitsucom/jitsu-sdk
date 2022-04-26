@@ -29,7 +29,7 @@ const descriptor: ExtensionDescriptor<GoogleAdsConfig> = {
       type: "password",
       required: true,
       documentation: `
-        <>
+        <div>
           Standalone Open-Source instances of Jitsu require a special Developer Token to work with Google Ads API.
           <br />
           Please read the official documentation from Google:{" "}
@@ -63,7 +63,7 @@ const descriptor: ExtensionDescriptor<GoogleAdsConfig> = {
       type: "string",
       required: true,
       documentation: `
-        <>
+        <div>
           The client customer ID is the account number of the Google Ads client account you want to pull data from. Pass
           it without '-' symbols.
         </>
@@ -75,7 +75,7 @@ const descriptor: ExtensionDescriptor<GoogleAdsConfig> = {
       type: "string",
       required: false,
       documentation: `
-        <>
+        <div>
           For Google Ads API calls made by a manager to a client account (that is, when logging in as a manager to make
           API calls to one of its client accounts), you also need to supply the Manager Customer Id. This value
           represents the Google Ads customer ID of the manager making the API call. Pass it without '-' symbols.
@@ -86,7 +86,19 @@ const descriptor: ExtensionDescriptor<GoogleAdsConfig> = {
       displayName: "Authorization Type",
       id: "auth.type",
       required: true,
-      type: { oneOf: ["OAuth", "Service Account"] },
+      type: {
+        options: [
+          {
+            id: "OAuth",
+            displayName: "OAuth",
+          },
+          {
+            id: "Service Account",
+            displayName: "Service Account",
+          },
+        ],
+        maxOptions: 1,
+      },
       defaultValue: "OAuth",
       documentation: `
         <div>
@@ -154,7 +166,7 @@ const descriptor: ExtensionDescriptor<GoogleAdsConfig> = {
       },
       required: true,
       documentation: `
-        <>
+        <div>
           A Google Ads user with permissions on the Google Ads account you want to access. Google Ads does not support
           using service accounts without impersonation.
         </>
@@ -170,6 +182,7 @@ async function validator(config: GoogleAdsConfig): Promise<ConfigValidationResul
 const sourceCatalog: SourceCatalog<GoogleAdsConfig, GoogleAdsStreamConfig> = async config => {
   return [
     {
+      type: "table",
       streamName: "table",
       mode: "full_sync",
       params: [
