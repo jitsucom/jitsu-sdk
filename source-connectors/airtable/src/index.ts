@@ -1,6 +1,7 @@
 import { SourceCatalog, StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
 import Airtable, { Record } from "airtable";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
+import { QueryParams } from "airtable/lib/query_params";
 
 export interface AirtableConfig {
   apiKey: string;
@@ -9,6 +10,7 @@ export interface AirtableConfig {
 
 export interface TableStreamConfig {
   tableId: string;
+  viewId?: string;
   fields?: string;
 }
 
@@ -56,6 +58,13 @@ const sourceCatalog: SourceCatalog<AirtableConfig, TableStreamConfig> = async (c
           required: true,
         },
         {
+          id: "viewId",
+          displayName: "View Id",
+          documentation:
+            "Read how to get view id: https://support.airtable.com/hc/en-us/articles/4405741487383-Understanding-Airtable-IDs",
+          required: false,
+        },
+        {
           id: "fields",
           displayName: "Fields",
           documentation: "Comma separated list of field names. If empty or undefined - all fields will be downloaded",
@@ -82,10 +91,15 @@ const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
   const selectedFields = streamConfiguration.parameters.fields
     ? streamConfiguration.parameters.fields.split(",").map(f => f.trim())
     : [];
+  let selectParams: QueryParams<any> = {};
   if (selectedFields.length > 0) {
     streamSink.log("INFO", "Fields filter: " + JSON.stringify(selectedFields));
+    selectParams.fields = selectedFields;
   }
-  let allRecords = await table.select({ fields: selectedFields }).all();
+  if (streamConfiguration.parameters.viewId) {
+    selectParams.view = streamConfiguration.parameters.viewId;
+  }
+  let allRecords = await table.select(selectParams).all();
   allRecords.forEach(r => {
     const { id, createdTime, fields } = r._rawJson;
     streamSink.addRecord({
