@@ -29,7 +29,7 @@ a detailed guide on extendintg Jitsu below
 
 ### To run a source connector 
 
-`yarn jitsu-cli extension exec-src source-connectors/[source-name] -c {} -s`. The command:
+`yarn jitsu-cli extension exec-src -d source-connectors/[source-name] -c {} -s`. The command:
   * Builds `jitsu-cli`
   * Builds source connector with freshly built `jitsu-cli`
   * Runs source connector with given config
