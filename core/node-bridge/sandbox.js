@@ -46,13 +46,6 @@ function sandbox({ globals = {}, file } = {}) {
     sandbox: {
       queueMicrotask: queueMicrotask,
       self: {},
-      process: {
-        versions: process.versions,
-        version: process.version,
-        stderr: process.stderr,
-        stdout: process.stdout,
-        env: {},
-      },
       ...globals,
     },
     require: {
@@ -85,6 +78,15 @@ function sandbox({ globals = {}, file } = {}) {
       mock: {
         fs: mockModule("fs", { ...throwOnMethods("fs", ["readFile", "realpath", "lstat"]) }),
         os: mockModule("os", { platform: os.platform, EOL: os.EOL }),
+        /** This mock is due to `@googleapis` require 'process' as a module */
+        process: mockModule("process", {
+          env: {},
+          versions: process.versions,
+          version: process.version,
+          stderr: process.stderr,
+          stdout: process.stdout,
+          emitWarning: process.emitWarning,
+        }),
         child_process: {},
       },
       resolve: moduleName => {
