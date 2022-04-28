@@ -3,7 +3,14 @@ import { SegmentEvent } from "@segment/analytics-next";
 import { JitsuDestinationHints, CanonicalSqlTypeHint, SqlTypeHint, TableObject } from "@jitsu/types/sql-hints";
 import { JitsuToSegmentMapper, JitsuToSegmentOpts, SegmentEventType, SegmentTableObject } from "@jitsu/types/segment";
 import pkg from "../package.json";
-import { DataRecord, DeleteRecords, JitsuDataMessage, JitsuDataMessageType, StreamSink } from "@jitsu/types/sources";
+import {
+  DataRecord,
+  DeleteRecords,
+  JitsuDataMessage,
+  JitsuDataMessageType,
+  JitsuLogLevel,
+  StreamSink,
+} from "@jitsu/types/sources";
 
 export const segmentEventsTypes: Record<SegmentEventType, boolean> = {
   alias: true,
@@ -240,6 +247,9 @@ export function flatten(obj: any, { separator = "_", skipArrays = false } = {}, 
 export const stdoutStreamSink: StreamSink = {
   addRecord(record: DataRecord) {
     this.msg({ type: "record", message: record });
+  },
+  log(level: JitsuLogLevel, message: string) {
+    this.msg({ type: "log", message: { level: level, message: message } });
   },
   clearStream() {
     this.msg({ type: "clear_stream" });

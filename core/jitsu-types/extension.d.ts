@@ -129,7 +129,6 @@ export declare type ConfigValidator<Config = Record<string, any>> = (config: Con
 /**
  * Destination function. The adapter accepts JitsuEvent and returns a set of HTTP request.
  *
- * Avoid using `fetch` if possible. Just return
  * @param event incoming event
  * @param context context of the processing
  */

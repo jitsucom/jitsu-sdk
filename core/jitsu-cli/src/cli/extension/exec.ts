@@ -148,12 +148,14 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
 
   await extension.streamReader(
     configObject,
-    stream.streamName,
+    stream.type,
     { parameters: streamConfigObject },
     makeStreamSink({
       msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
         if (msg.type === "record") {
           add(resultTable, msg.message);
+        } else if (msg.type === "log") {
+          console[msg.message?.["level"].toLowerCase()]?.(msg.message?.["message"]);
         }
       },
     }),
@@ -167,7 +169,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
     }
   );
 
-  console.log(resultTable.rows);
+  console.log(JSON.stringify(resultTable.rows, null, 2));
 
   console.log(
     "Special column types: \n" +
@@ -201,7 +203,7 @@ function add(t: Table, rec: any) {
       }
       newRow[key] = Array.isArray(val) ? JSON.stringify(val) : val;
     } else {
-      const columnName = key.substring("__sql_type".length);
+      const columnName = key.substring("__sql_type_".length);
       if (t.columns[columnName] === undefined) {
         t.columns[columnName] = { types: [] };
       }
