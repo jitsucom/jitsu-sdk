@@ -15,7 +15,7 @@
  *  - Stream configuration (see StreamConfiguration template variable). Stream might be configurable. Example: firebase 'users'
  *    is not configurable stream, but firestore is parameterized by collection (equivalent to table in SQL terms)
  *  - A pair of stream and it's configuration makes a "stream instance"
- *  - Each stream can have a multiple instance
+ *  - Each stream can have multiple instances
  *  - Each stream instance will be mapped to a table in destination database
  *
  *  Source also is represented by functions, which define a business logic of working with underlying API or database. The

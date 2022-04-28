@@ -29,7 +29,7 @@ a detailed guide on extendintg Jitsu below
 
 ### To run a source connector 
 
-`yarn jitsu-cli exec-src source-connectors/[source-name] -c {} -s`. The command:
+`yarn jitsu-cli extension exec-src source-connectors/[source-name] -c {} -s`. The command:
   * Builds `jitsu-cli`
   * Builds source connector with freshly built `jitsu-cli`
   * Runs source connector with given config
@@ -42,8 +42,8 @@ Other related commands:
 ### To add module
 
 **Don't use `yarn add`**!
- * `yarn lerna add @rollup/plugin-inject --scope <package> [--dev]` to add dependency to single package
- * `yarn lerna add @rollup/plugin-inject [--dev]` to add dependency to single package
+ * `yarn lerna add <module> --scope <package> [--dev]` to add dependency to single package. Run `yarn lerna list` to get a list of available packages (scopes)
+ * `yarn lerna add <module> [--dev]` to add dependency all packages
  * `--dev` adds package as `devDependency`
 
 

@@ -1,5 +1,3 @@
-type ConfigParameterType = "string" | "int" | "json" | "boolean" | "password";
-
 export type ConfigurationParameter<T = string> = {
   /**
    * Id (corresponds to key in yaml config)
@@ -30,4 +28,23 @@ export type ConfigurationParameter<T = string> = {
    * Text of documentation hint in UI. Can contain HTML
    */
   documentation?: string;
+  /**
+   * Defines if the field can be accepted depending on the parent field value
+   */
+  relevantIf?: {
+    /** Parent field id */
+    field: string;
+    /** Parent field value for which this field is relevant */
+    value: unknown;
+  };
 };
+
+export type ConfigParameterType =
+  | "string"
+  | "int"
+  | "json"
+  | "boolean"
+  | "password"
+  | "isoUtcDate" // not yet implemented by the extension runner engine
+  | { oneOf: Readonly<string[]> } // not yet implemented by the extension runner engine and front-end
+  | { severalOf: Readonly<string[]>; max?: number }; // not yet implemented by the extension runner engine and front-end 

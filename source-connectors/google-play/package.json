@@ -1,0 +1,31 @@
+{
+  "name": "jitsu-google-play-source",
+  "version": "0.7.2",
+  "description": "Google Ads Source for Jitsu",
+  "main": "dist/google-play-source.js",
+  "author": "Jitsu Dev Team <dev@jitsu.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jitsucom/jitsu-sdk",
+    "directory": "source-connectors/google-play"
+  },
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "clean": "rm -rf ./dist",
+    "build": "jitsu-cli extension build",
+    "test": "jitsu-cli extension test",
+    "execute": "jitsu-cli extension exec-src",
+    "validate-config": "jitsu-cli extension validate-config"
+  },
+  "devDependencies": {
+    "jitsu-cli": "0.7.2",
+    "@jitsu/jlib": "^0.7.2",
+    "typescript": "^4.5.2",
+    "tslib": "^2.3.1"
+  },
+  "dependencies": {}
+}

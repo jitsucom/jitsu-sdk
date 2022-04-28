@@ -16,6 +16,7 @@
     "test:all": "yarn lerna run test --stream",
 
     "jitsu-cli": "yarn build:core && node core/jitsu-cli/lib/index.js",
+    "jitsu-cli:dev": "node core/jitsu-cli/lib/index.js",
 
     "ci": "yarn prettier:check && yarn build:all && yarn test:all",
 
