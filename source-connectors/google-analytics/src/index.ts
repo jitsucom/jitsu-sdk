@@ -1,19 +1,8 @@
-import { SourceCatalog, StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
-import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
-
-export interface GoogleAnalyticsConfig {
-  view_id: string;
-  "auth.type": string;
-  "auth.client_secret"?: string;
-  "auth.refresh_token"?: string;
-  "auth.client_id"?: string;
-  "auth.service_account_key"?: string;
-}
-
-export interface GoogleAnalyticsStreamConfig {
-  tableId: string;
-  fields?: string;
-}
+import { googleAnalyticsDimensions } from "./dimensions";
+import { googleAnalyticsMetrics } from "./metrics";
+import type { SourceCatalog, StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
+import type { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
+import { getGoogleAnalyticsReportingClient } from "./reporting";
 
 const descriptor: ExtensionDescriptor<GoogleAnalyticsConfig> = {
   id: "google-analytics",
@@ -31,19 +20,7 @@ const descriptor: ExtensionDescriptor<GoogleAnalyticsConfig> = {
       displayName: "Authorization Type",
       id: "auth.type",
       required: true,
-      type: {
-        options: [
-          {
-            id: "OAuth",
-            displayName: "OAuth",
-          },
-          {
-            id: "Service Account",
-            displayName: "Service Account",
-          },
-        ],
-        maxOptions: 1,
-      },
+      type: { oneOf: ["OAuth", "Service Account"] },
       defaultValue: "OAuth",
       documentation: `
         <div>
@@ -80,8 +57,19 @@ const descriptor: ExtensionDescriptor<GoogleAnalyticsConfig> = {
     },
     {
       displayName: "Refresh Token",
+      id: "auth.client_secret",
+      type: "password",
+      relevantIf: {
+        field: "auth.type",
+        value: "OAuth",
+      },
+      required: true,
+      documentation: "Use Jitsu OAuth CLI Util to obtain oauth credentials (https://github.com/jitsucom/oauthcli)",
+    },
+    {
+      displayName: "Refresh Token",
       id: "auth.refresh_token",
-      type: "string",
+      type: "password",
       relevantIf: {
         field: "auth.type",
         value: "OAuth",
@@ -111,66 +99,71 @@ async function validator(config: GoogleAnalyticsConfig): Promise<ConfigValidatio
 const sourceCatalog: SourceCatalog<GoogleAnalyticsConfig, GoogleAnalyticsStreamConfig> = async config => {
   return [
     {
-      type: "table",
-      streamName: "table",
-      mode: "full_sync",
+      type: "report",
+      supportedModes: ["full_sync"],
       params: [
-        // {
-        //   id: "tableId",
-        //   displayName: "GoogleAnalytics Id",
-        //   documentation:
-        //     "Read how to get table id: https://support.airtable.com/hc/en-us/articles/4405741487383-Understanding-Airtable-IDs",
-        //   required: true,
-        // },
-        // {
-        //   id: "fields",
-        //   displayName: "Fields",
-        //   documentation: "Comma separated list of fields. If empty or undefined - all fields will be downloaded",
-        //   required: false,
-        // },
+        {
+          id: "dimensions",
+          displayName: "Dimensions",
+          type: {
+            severalOf: googleAnalyticsDimensions,
+            max: 7,
+          },
+          documentation:
+            "Use this tool to check dimensions compatibility: https://ga-dev-tools.appspot.com/dimensions-metrics-explorer/",
+          required: false,
+        },
+        {
+          id: "metrics",
+          displayName: "Metrics",
+          type: {
+            severalOf: googleAnalyticsMetrics,
+            max: 20,
+          },
+          documentation:
+            "Use this tool to check metrics compatibility: https://ga-dev-tools.appspot.com/dimensions-metrics-explorer/",
+          required: false,
+        },
       ],
     },
   ];
 };
 
-function sanitizeKey(key: any) {
-  return key.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-}
-
-function flatten(obj: any, path: string[] = []) {
-  if (typeof obj !== "object") {
-    throw new Error(`Can't flatten an object, expected object, but got" ${typeof obj}: ${obj}`);
-  }
-  if (Array.isArray(obj)) {
-    return obj;
-  }
-  const res = {};
-
-  for (let [key, value] of Object.entries(obj)) {
-    key = sanitizeKey(key);
-    if (typeof value === "object" && !Array.isArray(value)) {
-      Object.entries(flatten(value, [...path, key])).forEach(
-        ([subKey, subValue]) => (res[key + "_" + subKey] = subValue)
-      );
-    } else if (typeof value == "function") {
-      throw new Error(`Can't flatten object with function as a value of ${key}. Path to node: ${path.join(".")}`);
-    } else {
-      res[key] = value;
-    }
-  }
-  return res;
-}
-
 const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamConfig> = async (
   sourceConfig: GoogleAnalyticsConfig,
-  streamName: string,
+  streamType: string,
   streamConfiguration: StreamConfiguration<GoogleAnalyticsStreamConfig>,
   streamSink: StreamSink,
   services: { state: StateService }
 ) => {
-  if (streamName !== "table") {
-    throw new Error(`${streamName} streams is not supported`);
-  }
+  // if (streamType !== "report") {
+  //   throw new Error(`${streamType} streams is not supported`);
+  // }
+
+  const ga = await getGoogleAnalyticsReportingClient(sourceConfig);
+  console.log("GA authorisation successful");
+  const reports = ga.reports.batchGet({
+    requestBody: {
+      reportRequests: [
+        {
+          dimensions: streamConfiguration.parameters.dimensions.map(dimension => ({ name: dimension })),
+          metrics: streamConfiguration.parameters.metrics.map(metric => ({ expression: metric })),
+        },
+      ],
+    },
+  });
+  console.log("Fetched reports successfully");
+
+  streamSink.addRecord({
+    __id: "testId",
+    srcConfig: sourceConfig,
+    type: streamType,
+    config: streamConfiguration,
+    streamMode: streamConfiguration.mode,
+    "config.params.dimensions": streamConfiguration.parameters.dimensions,
+    "config.params.metrics": streamConfiguration.parameters.metrics,
+    reports,
+  });
   // const airtable = new Airtable({ apiKey: sourceConfig.apiKey });
 
   // let table = airtable.base(sourceConfig.baseId).table(streamConfiguration.params.tableId);
@@ -188,4 +181,4 @@ const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamCon
   // });
 };
 
-export { streamReader, sourceCatalog, descriptor, validator };
+export { descriptor, validator, sourceCatalog, streamReader };

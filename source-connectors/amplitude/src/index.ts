@@ -6,10 +6,7 @@ export interface AmplitudeConfig {
   secret_key: string;
 }
 
-export interface AmplitudeStreamConfig {
-  tableId: string;
-  fields?: string;
-}
+export interface AmplitudeStreamConfig {}
 
 const descriptor: ExtensionDescriptor<AmplitudeConfig> = {
   id: "amplitude",
@@ -21,20 +18,14 @@ const descriptor: ExtensionDescriptor<AmplitudeConfig> = {
       id: "api_key",
       type: "string",
       required: true,
-      documentation: `
-        <div>Amplitude API Key from project settings page. Only Amplitude Admins and Managers can view the API Key.</div>
-      `,
+      documentation: `Amplitude API Key from project settings page. Only Amplitude Admins and Managers can view the API Key.`,
     },
     {
       displayName: "Secret Key",
       id: "secret_key",
       type: "string",
       required: true,
-      documentation: `
-        <div>
-          Amplitude Secret Key from project settings page. Only Amplitude Admins and Managers can view the Secret Key.
-        </div>
-      `,
+      documentation: `Amplitude Secret Key from project settings page. Only Amplitude Admins and Managers can view the Secret Key.`,
     },
   ],
 };
@@ -46,81 +37,42 @@ async function validator(config: AmplitudeConfig): Promise<ConfigValidationResul
 const sourceCatalog: SourceCatalog<AmplitudeConfig, AmplitudeStreamConfig> = async config => {
   return [
     {
+      type: "active_users",
+      supportedModes: ["full_sync"],
+    },
+    {
+      type: "annotations",
+      supportedModes: ["full_sync"],
+    },
+    {
+      type: "average_sessions",
+      supportedModes: ["full_sync"],
+    },
+    {
+      type: "cohorts",
+      supportedModes: ["full_sync"],
+    },
+    {
+      type: "events",
+      supportedModes: ["full_sync"],
+    },
+    {
+      type: "new_users",
+      supportedModes: ["full_sync"],
+    },
+    {
       type: "table",
-      streamName: "table",
-      mode: "full_sync",
-      params: [
-        // {
-        //   id: "tableId",
-        //   displayName: "Amplitude Id",
-        //   documentation:
-        //     "Read how to get table id: https://support.airtable.com/hc/en-us/articles/4405741487383-Understanding-Airtable-IDs",
-        //   required: true,
-        // },
-        // {
-        //   id: "fields",
-        //   displayName: "Fields",
-        //   documentation: "Comma separated list of fields. If empty or undefined - all fields will be downloaded",
-        //   required: false,
-        // },
-      ],
+      supportedModes: ["full_sync"],
     },
   ];
 };
 
-function sanitizeKey(key: any) {
-  return key.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-}
-
-function flatten(obj: any, path: string[] = []) {
-  if (typeof obj !== "object") {
-    throw new Error(`Can't flatten an object, expected object, but got" ${typeof obj}: ${obj}`);
-  }
-  if (Array.isArray(obj)) {
-    return obj;
-  }
-  const res = {};
-
-  for (let [key, value] of Object.entries(obj)) {
-    key = sanitizeKey(key);
-    if (typeof value === "object" && !Array.isArray(value)) {
-      Object.entries(flatten(value, [...path, key])).forEach(
-        ([subKey, subValue]) => (res[key + "_" + subKey] = subValue)
-      );
-    } else if (typeof value == "function") {
-      throw new Error(`Can't flatten object with function as a value of ${key}. Path to node: ${path.join(".")}`);
-    } else {
-      res[key] = value;
-    }
-  }
-  return res;
-}
-
 const streamReader: StreamReader<AmplitudeConfig, AmplitudeStreamConfig> = async (
   sourceConfig: AmplitudeConfig,
-  streamName: string,
+  streamType: string,
   streamConfiguration: StreamConfiguration<AmplitudeStreamConfig>,
   streamSink: StreamSink,
   services: { state: StateService }
-) => {
-  if (streamName !== "table") {
-    throw new Error(`${streamName} streams is not supported`);
-  }
-  // const airtable = new Airtable({ apiKey: sourceConfig.apiKey });
-
-  // let table = airtable.base(sourceConfig.baseId).table(streamConfiguration.params.tableId);
-
-  // let allRecords = await table.select().all();
-  // allRecords.forEach(r => {
-  //   const { id, createdTime, fields } = r._rawJson;
-  //   let flatRow = flatten(fields);
-  //   streamSink.addRecord({
-  //     __id: id,
-  //     created: new Date(createdTime),
-  //     __sql_type_created: "TIMESTAMPZ",
-  //     ...flatRow,
-  //   });
-  // });
-};
+) => {};
 
 export { streamReader, sourceCatalog, descriptor, validator };

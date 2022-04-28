@@ -7,8 +7,8 @@ export interface FacebookMarketingConfig {
 }
 
 export interface FacebookMarketingStreamConfig {
-  tableId: string;
-  fields?: string;
+  fields: string;
+  level: string;
 }
 
 const descriptor: ExtensionDescriptor<FacebookMarketingConfig> = {
@@ -20,7 +20,7 @@ const descriptor: ExtensionDescriptor<FacebookMarketingConfig> = {
       <a href="https://developers.facebook.com/docs/marketing-api/insights/">Facebook Insights API</a>. The connector
       is highly configurable and can pull data broken down by any dimensions from ads-, adset-, campaign- or
       account-level data
-    </>
+    </div>
   `,
   configurationParameters: [
     {
@@ -29,11 +29,9 @@ const descriptor: ExtensionDescriptor<FacebookMarketingConfig> = {
       type: "string",
       required: true,
       documentation: `
-        <div>
-          <a target="_blank" href="https://www.facebook.com/business/help/1492627900875762" rel="noreferrer">
-            How to get Facebook Account ID
-          </a>
-        </>
+        <a target="_blank" href="https://www.facebook.com/business/help/1492627900875762" rel="noreferrer">
+          How to get Facebook Account ID
+        </a>
       `,
     },
     {
@@ -42,15 +40,13 @@ const descriptor: ExtensionDescriptor<FacebookMarketingConfig> = {
       type: "password",
       required: true,
       documentation: `
-        <div>
-          <a
-            target="_blank"
-            href="https://developers.facebook.com/docs/pages/access-tokens/#get-a-long-lived-user-access-token"
-            rel="noreferrer"
-          >
-            How to get Facebook Access Token
-          </a>
-        </>
+        <a
+          target="_blank"
+          href="https://developers.facebook.com/docs/pages/access-tokens/#get-a-long-lived-user-access-token"
+          rel="noreferrer"
+        >
+          How to get Facebook Access Token
+        </a>
       `,
     },
   ],
@@ -63,23 +59,46 @@ async function validator(config: FacebookMarketingConfig): Promise<ConfigValidat
 const sourceCatalog: SourceCatalog<FacebookMarketingConfig, FacebookMarketingStreamConfig> = async config => {
   return [
     {
-      type: "table",
-      streamName: "table",
-      mode: "full_sync",
+      type: "ads",
+      supportedModes: ["full_sync"],
       params: [
-        // {
-        //   id: "tableId",
-        //   displayName: "Facebook Id",
-        //   documentation:
-        //     "Read how to get table id: https://support.airtable.com/hc/en-us/articles/4405741487383-Understanding-Airtable-IDs",
-        //   required: true,
-        // },
-        // {
-        //   id: "fields",
-        //   displayName: "Fields",
-        //   documentation: "Comma separated list of fields. If empty or undefined - all fields will be downloaded",
-        //   required: false,
-        // },
+        {
+          // applyOnlyTo: "ads",
+          displayName: "Report Fields",
+          id: "fields",
+          // prettier-ignore
+          type: { severalOf: ['bid_amount', 'adlabels', 'creative', 'status', 'created_time', 'updated_time', 'targeting', 'effective_status', 'campaign_id', 'adset_id', 'conversion_specs', 'recommendations', 'id', 'bid_info', 'last_updated_by_app_id', 'tracking_specs', 'bid_type', 'name', 'account_id', 'source_ad_id']},
+          required: true,
+          documentation: `Ads fields to download`,
+        },
+        {
+          displayName: "Level of data",
+          id: "level",
+          defaultValue: "ad",
+          type: { oneOf: ["ad", "adset", "campaign", "account"] },
+          documentation: `One of [ad, adset, campaign, account]. Read more: https://developers.facebook.com/docs/marketing-api/reference/adgroup/insights/`,
+        },
+      ],
+    },
+    {
+      type: "insights",
+      supportedModes: ["full_sync"],
+      params: [
+        {
+          displayName: "Report Fields",
+          id: "fields",
+          // prettier-ignore
+          type: { severalOf: ['account_currency', 'account_id', 'account_name', 'ad_id', 'ad_name', 'adset_id', 'adset_name', 'campaign_id', 'campaign_name', 'objective', 'buying_type', 'cpc', 'cpm', 'cpp', 'ctr', 'estimated_ad_recall_rate', 'estimated_ad_recallers', 'reach', 'unique_clicks', 'unique_ctr', 'frequency', 'actions', 'conversions', 'spend', 'impressions']},
+          required: true,
+          documentation: `Insights fields to download`,
+        },
+        {
+          displayName: "Level of data",
+          id: "level",
+          defaultValue: "ad",
+          type: { oneOf: ["ad", "adset", "campaign", "account"] },
+          documentation: `One of [ad, adset, campaign, account]. Read more: https://developers.facebook.com/docs/marketing-api/reference/adgroup/insights/`,
+        },
       ],
     },
   ];
@@ -87,29 +106,10 @@ const sourceCatalog: SourceCatalog<FacebookMarketingConfig, FacebookMarketingStr
 
 const streamReader: StreamReader<FacebookMarketingConfig, FacebookMarketingStreamConfig> = async (
   sourceConfig: FacebookMarketingConfig,
-  streamName: string,
+  streamType: string,
   streamConfiguration: StreamConfiguration<FacebookMarketingStreamConfig>,
   streamSink: StreamSink,
   services: { state: StateService }
-) => {
-  if (streamName !== "table") {
-    throw new Error(`${streamName} streams is not supported`);
-  }
-  // const airtable = new Airtable({ apiKey: sourceConfig.apiKey });
-
-  // let table = airtable.base(sourceConfig.baseId).table(streamConfiguration.params.tableId);
-
-  // let allRecords = await table.select().all();
-  // allRecords.forEach(r => {
-  //   const { id, createdTime, fields } = r._rawJson;
-  //   let flatRow = flatten(fields);
-  //   streamSink.addRecord({
-  //     __id: id,
-  //     created: new Date(createdTime),
-  //     __sql_type_created: "TIMESTAMPZ",
-  //     ...flatRow,
-  //   });
-  // });
-};
+) => {};
 
 export { streamReader, sourceCatalog, descriptor, validator };

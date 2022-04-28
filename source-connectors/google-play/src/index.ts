@@ -11,16 +11,13 @@ export interface GooglePlayConfig {
   "auth.subject"?: string;
 }
 
-export interface GooglePlayStreamConfig {
-  tableId: string;
-  fields?: string;
-}
+export interface GooglePlayStreamConfig {}
 
 const descriptor: ExtensionDescriptor<GooglePlayConfig> = {
   id: "google-analytics",
   displayName: "Google Play Source",
   description:
-    " The Google Play connector can sync <b>earnings</b> (financial report) and <b>sales</b> (statistics about sales).",
+    "The Google Play connector can sync <b>earnings</b> (financial report) and <b>sales</b> (statistics about sales).",
   configurationParameters: [
     {
       displayName: "Bucket ID",
@@ -40,26 +37,14 @@ const descriptor: ExtensionDescriptor<GooglePlayConfig> = {
           Your bucket ID begins with <b>pubsite_prod_</b>
           <br />
           For example: pubsite_prod_123456789876543
-        </>
+        </div>
       `,
     },
     {
       displayName: "Authorization Type",
       id: "auth.type",
       required: true,
-      type: {
-        options: [
-          {
-            id: "OAuth",
-            displayName: "OAuth",
-          },
-          {
-            id: "Service Account",
-            displayName: "Service Account",
-          },
-        ],
-        maxOptions: 1,
-      },
+      type: { oneOf: ["OAuth", "Service Account"] },
       defaultValue: "OAuth",
       documentation: `
         <p>
@@ -126,12 +111,7 @@ const descriptor: ExtensionDescriptor<GooglePlayConfig> = {
         value: "Service Account",
       },
       required: true,
-      documentation: `
-        <div>
-          A Google Play user with permissions on the Google Play account you want to access. Google Play does not support
-          using service accounts without impersonation.
-        </>
-      `,
+      documentation: `A Google Play user with permissions on the Google Play account you want to access. Google Play does not support using service accounts without impersonation.`,
     },
   ],
 };
@@ -143,81 +123,22 @@ async function validator(config: GooglePlayConfig): Promise<ConfigValidationResu
 const sourceCatalog: SourceCatalog<GooglePlayConfig, GooglePlayStreamConfig> = async config => {
   return [
     {
-      type: "table",
-      streamName: "table",
-      mode: "full_sync",
-      params: [
-        // {
-        //   id: "tableId",
-        //   displayName: "GooglePlay Id",
-        //   documentation:
-        //     "Read how to get table id: https://support.airtable.com/hc/en-us/articles/4405741487383-Understanding-Airtable-IDs",
-        //   required: true,
-        // },
-        // {
-        //   id: "fields",
-        //   displayName: "Fields",
-        //   documentation: "Comma separated list of fields. If empty or undefined - all fields will be downloaded",
-        //   required: false,
-        // },
-      ],
+      type: "earnings",
+      supportedModes: ["full_sync"],
+    },
+    {
+      type: "sales",
+      supportedModes: ["full_sync"],
     },
   ];
 };
 
-function sanitizeKey(key: any) {
-  return key.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-}
-
-function flatten(obj: any, path: string[] = []) {
-  if (typeof obj !== "object") {
-    throw new Error(`Can't flatten an object, expected object, but got" ${typeof obj}: ${obj}`);
-  }
-  if (Array.isArray(obj)) {
-    return obj;
-  }
-  const res = {};
-
-  for (let [key, value] of Object.entries(obj)) {
-    key = sanitizeKey(key);
-    if (typeof value === "object" && !Array.isArray(value)) {
-      Object.entries(flatten(value, [...path, key])).forEach(
-        ([subKey, subValue]) => (res[key + "_" + subKey] = subValue)
-      );
-    } else if (typeof value == "function") {
-      throw new Error(`Can't flatten object with function as a value of ${key}. Path to node: ${path.join(".")}`);
-    } else {
-      res[key] = value;
-    }
-  }
-  return res;
-}
-
 const streamReader: StreamReader<GooglePlayConfig, GooglePlayStreamConfig> = async (
   sourceConfig: GooglePlayConfig,
-  streamName: string,
+  streamType: string,
   streamConfiguration: StreamConfiguration<GooglePlayStreamConfig>,
   streamSink: StreamSink,
   services: { state: StateService }
-) => {
-  if (streamName !== "table") {
-    throw new Error(`${streamName} streams is not supported`);
-  }
-  // const airtable = new Airtable({ apiKey: sourceConfig.apiKey });
-
-  // let table = airtable.base(sourceConfig.baseId).table(streamConfiguration.params.tableId);
-
-  // let allRecords = await table.select().all();
-  // allRecords.forEach(r => {
-  //   const { id, createdTime, fields } = r._rawJson;
-  //   let flatRow = flatten(fields);
-  //   streamSink.addRecord({
-  //     __id: id,
-  //     created: new Date(createdTime),
-  //     __sql_type_created: "TIMESTAMPZ",
-  //     ...flatRow,
-  //   });
-  // });
-};
+) => {};
 
 export { streamReader, sourceCatalog, descriptor, validator };

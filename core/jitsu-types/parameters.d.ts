@@ -39,26 +39,12 @@ export type ConfigurationParameter<T = string> = {
   };
 };
 
-type ConfigParameterType =
+export type ConfigParameterType =
   | "string"
   | "int"
   | "json"
   | "boolean"
   | "password"
-  // | { oneOf: string[] } // not implemented
-  // | { severalOf: string[]; max?: number } // not implemented
-  | ConfigParameterSelection; // not implemented
-
-type ConfigParameterSelection = {
-  options: ConfigParameterSelectionOption[];
-  /**
-   * Maximum options allowed to be selected. Undefined means there's no limit in number of possible
-   * selected fields
-   */
-  maxOptions?: number;
-};
-
-type ConfigParameterSelectionOption = {
-  id: string;
-  displayName: string;
-};
+  | "isoUtcDate" // not yet implemented by the extension runner engine
+  | { oneOf: Readonly<string[]> } // not yet implemented by the extension runner engine and front-end
+  | { severalOf: Readonly<string[]>; max?: number }; // not yet implemented by the extension runner engine and front-end 
