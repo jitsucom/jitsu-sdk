@@ -10,3 +10,14 @@ interface GoogleAnalyticsStreamConfig {
   dimensions: string[];
   metrics: string[];
 }
+
+/**
+ * `keys` - dimensions or metrics name
+ * `values` - respective dimension or metric report
+ */
+ type GAnalyticsEvent = Map<string, any>;
+
+/**
+ * Resolves `Promise<T>` type to `T` type
+ * @todo move to Jitsu types */
+type Resolve<T> = T extends Promise<infer A> ? A : T;

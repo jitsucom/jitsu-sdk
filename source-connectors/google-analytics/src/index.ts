@@ -1,133 +1,11 @@
-import { googleAnalyticsDimensions } from "./dimensions";
-import { googleAnalyticsMetrics } from "./metrics";
-import type { SourceCatalog, StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
-import type { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
-import { getGoogleAnalyticsReportingClient } from "./reporting";
+import { getGoogleAnalyticsReportingClient } from "./client";
 
-const descriptor: ExtensionDescriptor<GoogleAnalyticsConfig> = {
-  id: "google-analytics",
-  displayName: "Google Analytics Source",
-  description: "This source pulls data from Google Analytics API",
-  configurationParameters: [
-    {
-      displayName: "View ID",
-      id: "view_id",
-      required: true,
-      documentation:
-        "Read on how to find Google Analytics View ID here: https://jitsu.com/docs/sources-configuration/google-analytics#how-to-find-google-analytics-view-id",
-    },
-    {
-      displayName: "Authorization Type",
-      id: "auth.type",
-      required: true,
-      type: { oneOf: ["OAuth", "Service Account"] },
-      defaultValue: "OAuth",
-      documentation: `
-        <div>
-          Jitsu provides two types for authorizing access to Google Services:
-          <ul>
-            <li>
-              <b>OAuth</b> — you'll need to provide Client Secret / Client Id (you can obtain in in Google Cloud
-              Console) and get a refresh token. Jitsu developed a small{" "}
-              <a href="https://github.com/jitsucom/oauthcli">CLI utility to obtain those tokens</a>
-            </li>
-            <li>
-              <b>Service Account</b> — you'll a){" "}
-              <a href="https://cloud.google.com/iam/docs/creating-managing-service-account-keys">
-                create a service account in Google Cloud Console
-              </a>{" "}
-              b) share google resource (such as ocument or analytics property) with this account (account email look
-              like <code>[username]@jitsu-customers.iam.gserviceaccount.com</code>) c) put Service Account Key JSON
-              (available in Google Cloud Console) in the field below
-            </li>
-          </ul>
-        </div>
-        `,
-    },
-    {
-      displayName: "OAuth Client ID",
-      id: "auth.client_id",
-      type: "password",
-      relevantIf: {
-        field: "auth.type",
-        value: "OAuth",
-      },
-      required: true,
-      documentation: "Use Jitsu OAuth CLI Util to obtain oauth credentials (https://github.com/jitsucom/oauthcli)",
-    },
-    {
-      displayName: "Refresh Token",
-      id: "auth.client_secret",
-      type: "password",
-      relevantIf: {
-        field: "auth.type",
-        value: "OAuth",
-      },
-      required: true,
-      documentation: "Use Jitsu OAuth CLI Util to obtain oauth credentials (https://github.com/jitsucom/oauthcli)",
-    },
-    {
-      displayName: "Refresh Token",
-      id: "auth.refresh_token",
-      type: "password",
-      relevantIf: {
-        field: "auth.type",
-        value: "OAuth",
-      },
-      required: true,
-      documentation: "Use Jitsu OAuth CLI Util to obtain oauth credentials (https://github.com/jitsucom/oauthcli)",
-    },
-    {
-      displayName: "Auth (Service account key JSON)",
-      id: "auth.service_account_key",
-      type: "json",
-      relevantIf: {
-        field: "auth.type",
-        value: "Service Account",
-      },
-      required: true,
-      documentation:
-        "Use Google Cloud Console to create Service Account get Service Key JSON (https://cloud.google.com/iam/docs/creating-managing-service-account-keys)",
-    },
-  ],
-};
+import { googleAnalyticsDescriptor as descriptor } from "./descriptor";
+import { googleAnalyticsValidator as validator } from "./validator";
+import { googleAnalyticsSourceCatalog as sourceCatalog } from "./catalog";
 
-async function validator(config: GoogleAnalyticsConfig): Promise<ConfigValidationResult> {
-  return true;
-}
-
-const sourceCatalog: SourceCatalog<GoogleAnalyticsConfig, GoogleAnalyticsStreamConfig> = async config => {
-  return [
-    {
-      type: "report",
-      supportedModes: ["full_sync"],
-      params: [
-        {
-          id: "dimensions",
-          displayName: "Dimensions",
-          type: {
-            severalOf: googleAnalyticsDimensions,
-            max: 7,
-          },
-          documentation:
-            "Use this tool to check dimensions compatibility: https://ga-dev-tools.appspot.com/dimensions-metrics-explorer/",
-          required: false,
-        },
-        {
-          id: "metrics",
-          displayName: "Metrics",
-          type: {
-            severalOf: googleAnalyticsMetrics,
-            max: 20,
-          },
-          documentation:
-            "Use this tool to check metrics compatibility: https://ga-dev-tools.appspot.com/dimensions-metrics-explorer/",
-          required: false,
-        },
-      ],
-    },
-  ];
-};
+import type { GAnalyticsReport, GAnalyticsReportRow } from "./client";
+import type { StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
 
 const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamConfig> = async (
   sourceConfig: GoogleAnalyticsConfig,
@@ -136,49 +14,137 @@ const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamCon
   streamSink: StreamSink,
   services: { state: StateService }
 ) => {
-  // if (streamType !== "report") {
-  //   throw new Error(`${streamType} streams is not supported`);
-  // }
+  if (streamType !== "report") {
+    throw new Error(`${streamType} streams is not supported`);
+  }
 
-  const ga = await getGoogleAnalyticsReportingClient(sourceConfig);
-  console.log("GA authorisation successful");
-  const reports = ga.reports.batchGet({
+  const gaClient = await getGoogleAnalyticsReportingClient(sourceConfig);
+
+  /**
+   * Report in the format the same as in GO implementation
+   */
+  const report: GAnalyticsEvent[] = await loadReport(gaClient, sourceConfig, streamConfiguration);
+
+  // streamSink.addRecord({});
+};
+
+export { descriptor, validator, sourceCatalog, streamReader };
+
+/**
+ *
+ * Utils
+ *
+ */
+
+const loadReport = async (
+  gaClient: Resolve<ReturnType<typeof getGoogleAnalyticsReportingClient>>,
+  sourceConfig: GoogleAnalyticsConfig,
+  streamConfiguration: StreamConfiguration<GoogleAnalyticsStreamConfig>
+) => {
+  const result: GAnalyticsEvent[] = [];
+
+  let nextPageToken: string | null | undefined = null;
+  do {
+    const report = await fetchReport(gaClient, sourceConfig, streamConfiguration, nextPageToken);
+
+    const header = report?.columnHeader;
+    const dimHeaders = header?.dimensions ?? [];
+    const metricHeaders = header?.metricHeader?.metricHeaderEntries ?? [];
+    const rows = report?.data?.rows;
+
+    rows?.forEach(row => {
+      const gaEventWithDims = getGAEventWithDimensions(row, dimHeaders);
+      const gaEventWithMetrics = getGAEventWithMetrics(row, metricHeaders);
+      result.push(mergeMaps(gaEventWithDims, gaEventWithMetrics));
+    });
+
+    nextPageToken = report?.nextPageToken;
+  } while (nextPageToken);
+
+  return result;
+};
+
+const fetchReport = async (
+  gaClient: Resolve<ReturnType<typeof getGoogleAnalyticsReportingClient>>,
+  sourceConfig: GoogleAnalyticsConfig,
+  streamConfiguration: StreamConfiguration<GoogleAnalyticsStreamConfig>,
+  nextPageToken: string | null | undefined
+): Promise<GAnalyticsReport | undefined> => {
+  const response = await gaClient.reports.batchGet({
     requestBody: {
       reportRequests: [
         {
+          viewId: sourceConfig.view_id,
           dimensions: streamConfiguration.parameters.dimensions.map(dimension => ({ name: dimension })),
           metrics: streamConfiguration.parameters.metrics.map(metric => ({ expression: metric })),
+          pageSize: 40000,
+          pageToken: nextPageToken,
         },
       ],
     },
   });
-  console.log("Fetched reports successfully");
-
-  streamSink.addRecord({
-    __id: "testId",
-    srcConfig: sourceConfig,
-    type: streamType,
-    config: streamConfiguration,
-    streamMode: streamConfiguration.mode,
-    "config.params.dimensions": streamConfiguration.parameters.dimensions,
-    "config.params.metrics": streamConfiguration.parameters.metrics,
-    reports,
-  });
-  // const airtable = new Airtable({ apiKey: sourceConfig.apiKey });
-
-  // let table = airtable.base(sourceConfig.baseId).table(streamConfiguration.params.tableId);
-
-  // let allRecords = await table.select().all();
-  // allRecords.forEach(r => {
-  //   const { id, createdTime, fields } = r._rawJson;
-  //   let flatRow = flatten(fields);
-  //   streamSink.addRecord({
-  //     __id: id,
-  //     created: new Date(createdTime),
-  //     __sql_type_created: "TIMESTAMPZ",
-  //     ...flatRow,
-  //   });
-  // });
+  return response.data.reports?.[0];
 };
 
-export { descriptor, validator, sourceCatalog, streamReader };
+const getGAEventWithDimensions = (row: GAnalyticsReportRow, dimHeaders: string[]): GAnalyticsEvent => {
+  const gaEvent: GAnalyticsEvent = new Map();
+  const dims = row.dimensions ?? [];
+  for (let idx = 0; idx < dimHeaders.length && idx < dims.length; idx++) {
+    gaEvent.set(trimPrefix(dimHeaders[idx], GA_FIELDS_PREFIX), dims[idx]);
+  }
+  return gaEvent;
+};
+
+const getGAEventWithMetrics = (
+  row: GAnalyticsReportRow,
+  metricHeaders: { name?: string | null }[]
+): GAnalyticsEvent => {
+  const gaEvent: GAnalyticsEvent = new Map();
+  const metrics = row.metrics ?? [];
+
+  metrics.forEach(metric => {
+    const metricValues = metric.values ?? [];
+    for (let idx = 0; idx < metricHeaders.length && idx < metricValues.length; idx++) {
+      const fieldName = trimPrefix(metricHeaders[idx].name ?? "", GA_FIELDS_PREFIX);
+      const stringValue = metricValues[idx];
+      const converter = GA_METRICS_CAST[metricHeaders[idx].name ?? ""];
+      const value = converter ? converter(stringValue) : stringValue;
+      gaEvent.set(fieldName, value);
+    }
+  });
+
+  return gaEvent;
+};
+
+const mergeMaps = <K, V>(...maps: Map<K, V>[]): Map<K, V> => {
+  const result = new Map();
+  maps.forEach(map => map.forEach((k, v) => result.set(k, v)));
+  return result;
+};
+
+const trimPrefix = (value: string, prefix: string): string =>
+  value.startsWith(prefix) ? value.slice(prefix.length) : value;
+
+const GA_METRICS_CAST = {
+  "ga:sessions": parseInt,
+  "ga:users": parseInt,
+  "ga:hits": parseInt,
+  "ga:visitors": parseInt,
+  "ga:bounces": parseInt,
+  "ga:goal1Completions": parseInt,
+  "ga:goal2Completions": parseInt,
+  "ga:goal3Completions": parseInt,
+  "ga:goal4Completions": parseInt,
+  "ga:adClicks": parseInt,
+  "ga:newUsers": parseInt,
+  "ga:pageviews": parseInt,
+  "ga:uniquePageviews": parseInt,
+  "ga:transactions": parseInt,
+  "ga:adCost": parseInt,
+  "ga:avgSessionDuration": parseInt,
+  "ga:timeOnPage": parseInt,
+  "ga:avgTimeOnPage": parseInt,
+  "ga:transactionRevenue": parseInt,
+} as const;
+
+const GA_FIELDS_PREFIX = "ga:" as const;
