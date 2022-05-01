@@ -46,13 +46,7 @@ function sandbox({ globals = {}, file } = {}) {
     sandbox: {
       queueMicrotask: queueMicrotask,
       self: {},
-      process: {
-        versions: process.versions,
-        version: process.version,
-        stderr: process.stderr,
-        stdout: process.stdout,
-        env: {},
-      },
+      process: processOverloads,
       ...globals,
     },
     require: {
@@ -85,6 +79,7 @@ function sandbox({ globals = {}, file } = {}) {
       mock: {
         fs: mockModule("fs", { ...throwOnMethods("fs", ["readFile", "realpath", "lstat"]) }),
         os: mockModule("os", { platform: os.platform, EOL: os.EOL }),
+        process: mockModule("process", processOverloads),
         child_process: {},
       },
       resolve: moduleName => {
@@ -97,5 +92,19 @@ function sandbox({ globals = {}, file } = {}) {
     },
   });
 }
+
+/**
+ * @explanation
+ * `@googleapis` require 'process' both as a module and as a global var, therefore the same overloads are provided
+ * via `sanbox.process` and `mock.process` config variables
+ **/
+const processOverloads = {
+  env: {},
+  versions: process.versions,
+  version: process.version,
+  stderr: process.stderr,
+  stdout: process.stdout,
+  emitWarning: process.emitWarning,
+};
 
 exports.sandbox = sandbox;
