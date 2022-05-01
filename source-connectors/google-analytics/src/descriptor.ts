@@ -32,7 +32,7 @@ export const googleAnalyticsDescriptor: ExtensionDescriptor<GoogleAnalyticsConfi
               <a href="https://cloud.google.com/iam/docs/creating-managing-service-account-keys">
                 create a service account in Google Cloud Console
               </a>{" "}
-              b) share google resource (such as ocument or analytics property) with this account (account email look
+              b) share google resource (such as document or analytics property) with this account (account email will look
               like <code>[username]@jitsu-customers.iam.gserviceaccount.com</code>) c) put Service Account Key JSON
               (available in Google Cloud Console) in the Service Account Key JSON configuration field.
             </li>
