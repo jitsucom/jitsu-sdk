@@ -14,7 +14,7 @@ export const googleAnalyticsDescriptor: ExtensionDescriptor<GoogleAnalyticsConfi
     },
     {
       displayName: "Authorization Type",
-      id: "auth.type",
+      id: "auth_type",
       required: true,
       type: { oneOf: ["OAuth", "Service Account"] },
       defaultValue: "OAuth",
@@ -42,10 +42,21 @@ export const googleAnalyticsDescriptor: ExtensionDescriptor<GoogleAnalyticsConfi
     },
     {
       displayName: "OAuth Client ID",
-      id: "auth.client_id",
-      type: "password",
+      id: "client_id",
+      type: "oauthSecret",
       relevantIf: {
-        field: "auth.type",
+        field: "auth_type",
+        value: "OAuth",
+      },
+      required: true,
+      documentation: "Use Jitsu OAuth CLI Util to obtain oauth credentials (https://github.com/jitsucom/oauthcli)",
+    },
+    {
+      displayName: "OAuth Client Secret",
+      id: "client_secret",
+      type: "oauthSecret",
+      relevantIf: {
+        field: "auth_type",
         value: "OAuth",
       },
       required: true,
@@ -53,21 +64,10 @@ export const googleAnalyticsDescriptor: ExtensionDescriptor<GoogleAnalyticsConfi
     },
     {
       displayName: "Refresh Token",
-      id: "auth.client_secret",
-      type: "password",
+      id: "refresh_token",
+      type: "oauthSecret",
       relevantIf: {
-        field: "auth.type",
-        value: "OAuth",
-      },
-      required: true,
-      documentation: "Use Jitsu OAuth CLI Util to obtain oauth credentials (https://github.com/jitsucom/oauthcli)",
-    },
-    {
-      displayName: "Refresh Token",
-      id: "auth.refresh_token",
-      type: "password",
-      relevantIf: {
-        field: "auth.type",
+        field: "auth_type",
         value: "OAuth",
       },
       required: true,
@@ -75,10 +75,10 @@ export const googleAnalyticsDescriptor: ExtensionDescriptor<GoogleAnalyticsConfi
     },
     {
       displayName: "Service Account Key JSON",
-      id: "auth.service_account_key",
+      id: "service_account_key",
       type: "json",
       relevantIf: {
-        field: "auth.type",
+        field: "auth_type",
         value: "Service Account",
       },
       required: true,

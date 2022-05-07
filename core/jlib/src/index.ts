@@ -248,6 +248,9 @@ export const stdoutStreamSink: StreamSink = {
   addRecord(record: DataRecord) {
     this.msg({ type: "record", message: record });
   },
+  changeState(newState: Record<string, any>) {
+    this.msg({ type: "state", message: newState });
+  },
   log(level: JitsuLogLevel, message: string) {
     this.msg({ type: "log", message: { level: level, message: message } });
   },

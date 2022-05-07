@@ -32,5 +32,8 @@
     "@jitsu/node-bridge": "0.7.2",
     "@segment/analytics-next": "^1.32.1",
     "@types/jquery": "^3.5.10"
+  },
+  "dependencies": {
+    "object-hash": "^3.0.0"
   }
 }

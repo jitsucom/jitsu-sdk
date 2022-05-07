@@ -6,6 +6,8 @@ import { googleAnalyticsSourceCatalog as sourceCatalog } from "./catalog";
 
 import type { GAnalyticsReport, GAnalyticsReportRow } from "./client";
 import type { StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
+import { buildSignatureId } from "@jitsu/jlib/lib/sources-lib";
+import { flatten } from "@jitsu/jlib";
 
 const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamConfig> = async (
   sourceConfig: GoogleAnalyticsConfig,
@@ -17,15 +19,37 @@ const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamCon
   if (streamType !== "report") {
     throw new Error(`${streamType} streams is not supported`);
   }
-
   const gaClient = await getGoogleAnalyticsReportingClient(sourceConfig);
 
+  let previousEndDate = new Date();
+  const previousEndDateState = services.state.get("previous_end_date");
+  let needCleanUp = false;
+  if (previousEndDateState) {
+    needCleanUp = true; //previous syncs detected
+    previousEndDate = new Date(previousEndDateState);
+    streamSink.log("INFO", "Previous end date from state: " + previousEndDate.toISOString());
+  }
+  const startDate = new Date(
+    previousEndDate.getTime() - 1000 * 60 * 60 * 24 * (sourceConfig.refresh_window_days || 30)
+  );
+  const endDate = new Date();
   /**
    * Report in the format the same as in GO implementation
    */
-  const report: GAnalyticsEvent[] = await loadReport(gaClient, sourceConfig, streamConfiguration);
+  const report: GAnalyticsEvent[] = await loadReport(gaClient, sourceConfig, streamConfiguration, startDate, endDate);
 
-  // streamSink.addRecord({});
+  streamSink.newTransaction();
+  if (needCleanUp) {
+    streamSink.deleteRecords("_timestamp >= ?", startDate.toISOString());
+  }
+  report.forEach(r => {
+    streamSink.addRecord({
+      __id: buildSignatureId(r),
+      _timestamp: startDate.toISOString(),
+      ...r,
+    });
+  });
+  services.state.set("previous_end_date", endDate);
 };
 
 export { descriptor, validator, sourceCatalog, streamReader };
@@ -39,13 +63,15 @@ export { descriptor, validator, sourceCatalog, streamReader };
 const loadReport = async (
   gaClient: Resolve<ReturnType<typeof getGoogleAnalyticsReportingClient>>,
   sourceConfig: GoogleAnalyticsConfig,
-  streamConfiguration: StreamConfiguration<GoogleAnalyticsStreamConfig>
+  streamConfiguration: StreamConfiguration<GoogleAnalyticsStreamConfig>,
+  startDate: Date,
+  endDate: Date
 ) => {
   const result: GAnalyticsEvent[] = [];
 
   let nextPageToken: string | null | undefined = null;
   do {
-    const report = await fetchReport(gaClient, sourceConfig, streamConfiguration, nextPageToken);
+    const report = await fetchReport(gaClient, sourceConfig, streamConfiguration, startDate, endDate, nextPageToken);
 
     const header = report?.columnHeader;
     const dimHeaders = header?.dimensions ?? [];
@@ -55,7 +81,7 @@ const loadReport = async (
     rows?.forEach(row => {
       const gaEventWithDims = getGAEventWithDimensions(row, dimHeaders);
       const gaEventWithMetrics = getGAEventWithMetrics(row, metricHeaders);
-      result.push(mergeMaps(gaEventWithDims, gaEventWithMetrics));
+      result.push({ ...gaEventWithDims, ...gaEventWithMetrics });
     });
 
     nextPageToken = report?.nextPageToken;
@@ -68,8 +94,14 @@ const fetchReport = async (
   gaClient: Resolve<ReturnType<typeof getGoogleAnalyticsReportingClient>>,
   sourceConfig: GoogleAnalyticsConfig,
   streamConfiguration: StreamConfiguration<GoogleAnalyticsStreamConfig>,
+  startDate: Date,
+  endDate: Date,
   nextPageToken: string | null | undefined
 ): Promise<GAnalyticsReport | undefined> => {
+  const dateRange = {
+    startDate: startDate.toISOString().substring(0, 10),
+    endDate: endDate.toISOString().substring(0, 10),
+  };
   const response = await gaClient.reports.batchGet({
     requestBody: {
       reportRequests: [
@@ -79,6 +111,7 @@ const fetchReport = async (
           metrics: streamConfiguration.parameters.metrics.map(metric => ({ expression: metric })),
           pageSize: 40000,
           pageToken: nextPageToken,
+          dateRanges: [dateRange],
         },
       ],
     },
@@ -87,10 +120,10 @@ const fetchReport = async (
 };
 
 const getGAEventWithDimensions = (row: GAnalyticsReportRow, dimHeaders: string[]): GAnalyticsEvent => {
-  const gaEvent: GAnalyticsEvent = new Map();
+  const gaEvent: GAnalyticsEvent = {};
   const dims = row.dimensions ?? [];
   for (let idx = 0; idx < dimHeaders.length && idx < dims.length; idx++) {
-    gaEvent.set(trimPrefix(dimHeaders[idx], GA_FIELDS_PREFIX), dims[idx]);
+    gaEvent[trimPrefix(dimHeaders[idx], GA_FIELDS_PREFIX)] = dims[idx];
   }
   return gaEvent;
 };
@@ -99,7 +132,7 @@ const getGAEventWithMetrics = (
   row: GAnalyticsReportRow,
   metricHeaders: { name?: string | null }[]
 ): GAnalyticsEvent => {
-  const gaEvent: GAnalyticsEvent = new Map();
+  const gaEvent: GAnalyticsEvent = {};
   const metrics = row.metrics ?? [];
 
   metrics.forEach(metric => {
@@ -109,17 +142,11 @@ const getGAEventWithMetrics = (
       const stringValue = metricValues[idx];
       const converter = GA_METRICS_CAST[metricHeaders[idx].name ?? ""];
       const value = converter ? converter(stringValue) : stringValue;
-      gaEvent.set(fieldName, value);
+      gaEvent[fieldName] = value;
     }
   });
 
   return gaEvent;
-};
-
-const mergeMaps = <K, V>(...maps: Map<K, V>[]): Map<K, V> => {
-  const result = new Map();
-  maps.forEach(map => map.forEach((k, v) => result.set(k, v)));
-  return result;
 };
 
 const trimPrefix = (value: string, prefix: string): string =>
@@ -140,11 +167,12 @@ const GA_METRICS_CAST = {
   "ga:pageviews": parseInt,
   "ga:uniquePageviews": parseInt,
   "ga:transactions": parseInt,
-  "ga:adCost": parseInt,
-  "ga:avgSessionDuration": parseInt,
-  "ga:timeOnPage": parseInt,
-  "ga:avgTimeOnPage": parseInt,
-  "ga:transactionRevenue": parseInt,
+
+  "ga:adCost": parseFloat,
+  "ga:avgSessionDuration": parseFloat,
+  "ga:timeOnPage": parseFloat,
+  "ga:avgTimeOnPage": parseFloat,
+  "ga:transactionRevenue": parseFloat,
 } as const;
 
 const GA_FIELDS_PREFIX = "ga:" as const;

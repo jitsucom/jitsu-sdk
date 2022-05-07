@@ -1,10 +1,13 @@
 interface GoogleAnalyticsConfig {
   view_id: string;
-  "auth.type": "OAuth" | "Service Account";
-  "auth.client_secret"?: string;
-  "auth.refresh_token"?: string;
-  "auth.client_id"?: string;
-  "auth.service_account_key"?: string;
+  refresh_window_days?: number;
+  auth: {
+    type: "OAuth" | "Service Account";
+    client_secret?: string;
+    refresh_token?: string;
+    client_id?: string;
+    service_account_key?: string;
+  };
 }
 interface GoogleAnalyticsStreamConfig {
   dimensions: string[];
@@ -15,7 +18,7 @@ interface GoogleAnalyticsStreamConfig {
  * `keys` - dimensions or metrics name
  * `values` - respective dimension or metric report
  */
- type GAnalyticsEvent = Map<string, any>;
+type GAnalyticsEvent = Record<string, any>;
 
 /**
  * Resolves `Promise<T>` type to `T` type

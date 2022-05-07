@@ -1012,7 +1012,7 @@
   resolved "https://registry.yarnpkg.com/@gar/promisify/-/promisify-1.1.3.tgz#555193ab2e3bb3b6adc3d551c9c030d9e860daf6"
   integrity sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==
 
-"@google-cloud/firestore@^4.5.0":
+"@google-cloud/firestore@^4.15.1":
   version "4.15.1"
   resolved "https://registry.yarnpkg.com/@google-cloud/firestore/-/firestore-4.15.1.tgz#ed764fc76823ce120e68fe8c27ef1edd0650cd93"
   integrity sha512-2PWsCkEF1W02QbghSeRsNdYKN1qavrHBP3m72gPDMHQSYrGULOaTi7fSJquQmAtc4iPVB2/x6h80rdLHTATQtA==
@@ -1040,10 +1040,10 @@
   resolved "https://registry.yarnpkg.com/@google-cloud/promisify/-/promisify-2.0.4.tgz#9d8705ecb2baa41b6b2673f3a8e9b7b7e1abc52a"
   integrity sha512-j8yRSSqswWi1QqUGKVEKOG03Q7qOoZP6/h2zN2YO+F5h2+DHU0bSrHCK9Y7lo2DI9fBd8qGAw795sf+3Jva4yA==
 
-"@google-cloud/storage@^5.3.0":
-  version "5.19.3"
-  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-5.19.3.tgz#0624f57a7ed5a4e3e0e23d5aaab849cb015f903a"
-  integrity sha512-l+8X0BoA7rg9jyZaS4p2DwMg1Ivju+VAL6PeQZE1u2q52LQ0KemrZmdQWhtrplHYo8UdYtqpbj4A6Fc5fKDZdg==
+"@google-cloud/storage@^5.18.3":
+  version "5.19.4"
+  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-5.19.4.tgz#d3377f03b575c66f61e2782ffd0f65419a30ebe0"
+  integrity sha512-Jz7ugcPHhsEmMVvIxM9uoBsdEbKIYwDkh3u07tifsIymEWs47F4/D6+/Tv/W7kLhznqjyOjVJ/0frtBeIC0lJA==
   dependencies:
     "@google-cloud/paginator" "^3.0.7"
     "@google-cloud/projectify" "^2.0.0"
@@ -5059,10 +5059,10 @@ find-up@^5.0.0:
     locate-path "^6.0.0"
     path-exists "^4.0.0"
 
-firebase-admin@^10.0.2:
-  version "10.0.2"
-  resolved "https://registry.yarnpkg.com/firebase-admin/-/firebase-admin-10.0.2.tgz#d1142fb40738fa9b62f6625c4e3fc8cbc0ba61c6"
-  integrity sha512-MLH0SPmC4L0aCHvPjs1KThraru/T84T3hxiPY3uCH7NZEgE/T5n4GwecwU3RcM3X+br75BIBY7qhaR5uCxhdXA==
+firebase-admin@^10.1.0:
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/firebase-admin/-/firebase-admin-10.1.0.tgz#53b1f9c16e7dc6b7e04494f4f3740fbde77990d8"
+  integrity sha512-4i4wu+EFgNfY4+D4DxXkZcmbD832ozUMNvHMkOFQrf8upyp51n6jrDJS+wLok9sd62yeqcImbnsLOympGlISPA==
   dependencies:
     "@firebase/database-compat" "^0.1.1"
     "@firebase/database-types" "^0.9.3"
@@ -5070,10 +5070,10 @@ firebase-admin@^10.0.2:
     dicer "^0.3.0"
     jsonwebtoken "^8.5.1"
     jwks-rsa "^2.0.2"
-    node-forge "^1.0.0"
+    node-forge "^1.3.1"
   optionalDependencies:
-    "@google-cloud/firestore" "^4.5.0"
-    "@google-cloud/storage" "^5.3.0"
+    "@google-cloud/firestore" "^4.15.1"
+    "@google-cloud/storage" "^5.18.3"
 
 forever-agent@~0.6.1:
   version "0.6.1"
@@ -7207,7 +7207,7 @@ node-fetch@^3.1.0:
     fetch-blob "^3.1.4"
     formdata-polyfill "^4.0.10"
 
-node-forge@^1.0.0, node-forge@^1.3.1:
+node-forge@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
   integrity sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==

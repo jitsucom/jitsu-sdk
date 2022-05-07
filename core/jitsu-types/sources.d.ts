@@ -27,13 +27,7 @@
 import { ConfigurationParameter } from "./parameters";
 import { SqlTypeHint, SqlTypeHintKey } from "./sql-hints";
 
-declare type JitsuDataMessageType =
-  | "record"
-  | "clear_stream"
-  | "delete_records"
-  | "new_transaction"
-  | "change_state"
-  | "log";
+declare type JitsuDataMessageType = "record" | "clear_stream" | "delete_records" | "new_transaction" | "state" | "log";
 
 declare type JitsuLogLevel = "INFO" | "WARN" | "DEBUG" | "ERROR";
 
@@ -143,15 +137,7 @@ declare type NewTransactionMessage = JitsuDataMessage<"new_transaction", never>;
  *
  * Don't us it directly, it's an internal message
  */
-declare type ChangeStateMessage = JitsuDataMessage<
-  "change_state",
-  {
-    key: string;
-    value: any;
-    //set to negative to delete the key, undefined means the key never expires
-    expireMs?: number;
-  }
->;
+declare type StateMessage = JitsuDataMessage<"state", Record<string, any>>;
 
 declare type StreamSink = {
   /**
@@ -165,6 +151,10 @@ declare type StreamSink = {
    * @param record record
    */
   addRecord(record: DataRecord);
+  /**
+   * Report that persistent state was changed and provide an object representing current state.
+   */
+  changeState(newState: Record<string, any>);
   /**
    * Alias for ClearStreamMessage
    */
@@ -223,5 +213,5 @@ declare type WebHookHandler<Config = Record<string, any>, StreamConfig = Record<
  */
 declare type StateService = {
   get(key: string): any;
-  set(key: string, object: any, opts: { expireInMs?: number });
+  set(key: string, object: any);
 };

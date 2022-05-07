@@ -9,7 +9,7 @@ export const googleAnalyticsSourceCatalog: SourceCatalog<
   return [
     {
       type: "report",
-      supportedModes: ["full_sync"],
+      supportedModes: ["incremental"],
       params: [
         {
           id: "dimensions",

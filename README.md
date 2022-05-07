@@ -35,8 +35,8 @@ a detailed guide on extendintg Jitsu below
   * Runs source connector with given config
 
 Other related commands:
- * `yarn jitsu-cli build source-connectors/[source-name]` - build source connector, do not run it
- * `yarn jitsu-cli test source-connectors/[source-name]` - build source connector, do not run it
+ * `yarn jitsu-cli extension build source-connectors/[source-name]` - build source connector, do not run it
+ * `yarn jitsu-cli extension test source-connectors/[source-name]` - build source connector, do not run it
 
 
 ### To add module

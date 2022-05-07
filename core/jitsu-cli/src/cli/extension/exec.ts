@@ -161,7 +161,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
     }),
     {
       state: {
-        set(key: string, object: any, opts: { expireInMs?: number }) {},
+        set(key: string, object: any) {},
         get(key: string): any {
           return undefined;
         },
