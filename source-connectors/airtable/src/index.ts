@@ -100,6 +100,7 @@ const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
     selectParams.view = streamConfiguration.parameters.viewId;
   }
   let allRecords = await table.select(selectParams).all();
+  streamSink.clearStream();
   allRecords.forEach(r => {
     const { id, createdTime, fields } = r._rawJson;
     streamSink.addRecord({

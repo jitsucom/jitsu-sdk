@@ -72,21 +72,25 @@ declare type LogRecord = {
  * Command to delete data based on parameter conditions, see "delete_records" message
  */
 declare type DeleteRecords = {
-  whenConditions: Condition;
+  whenConditions: Condition[];
+  joinCondition: "AND" | "OR";
 };
 
+declare type WhenClause = "=" | "<>" | ">" | "<" | ">=" | "<=";
 /**
  * SQL Condition for clearing the data, see
  */
 declare type Condition = {
   /**
-   * Condition expression. Use placeholders instead of values
+   * Condition field name
    */
-  expression: string;
+  field: string;
   /**
-   * Condition values, placeholders for ?
+   * Field value
    */
-  values: any[];
+  value: any;
+
+  clause: WhenClause;
 };
 
 declare type StreamInstance<StreamConfig = Record<string, any>> = {
@@ -168,7 +172,7 @@ declare type StreamSink = {
   /**
    * Alias for DeleteRecordsMessage
    */
-  deleteRecords(condition: string, values: any[] | any);
+  deleteRecords(field: string, clause: WhenClause, value: any);
 };
 
 declare type SourceCatalog<Config = Record<string, any>, StreamConfig = Record<string, any>> = (

@@ -1,4 +1,5 @@
 import {
+  Condition,
   DataRecord,
   JitsuDataMessage,
   JitsuDataMessageType,
@@ -7,6 +8,7 @@ import {
   StreamConfiguration,
   StreamReader,
   StreamSink,
+  WhenClause,
 } from "@jitsu/types/sources";
 const hash = require("object-hash");
 
@@ -24,14 +26,12 @@ export function makeStreamSink(msg: Pick<StreamSink, "msg">): StreamSink {
     clearStream() {
       msg.msg({ type: "clear_stream" });
     },
-    deleteRecords(condition: string, values: any) {
+    deleteRecords(field: string, clause: WhenClause, value: any) {
       msg.msg({
         type: "delete_records",
         message: {
-          whenCondition: {
-            expression: condition,
-            values: Array.isArray(values) ? values : [values],
-          },
+          joinCondition: "AND",
+          whenConditions: [{ field: field, clause: clause, value: value }],
         },
       });
     },

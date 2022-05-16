@@ -19,6 +19,8 @@ const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamCon
   if (streamType !== "report") {
     throw new Error(`${streamType} streams is not supported`);
   }
+  streamSink.log("INFO", "Source config: " + JSON.stringify(sourceConfig));
+
   const gaClient = await getGoogleAnalyticsReportingClient(sourceConfig);
 
   let previousEndDate = new Date();
@@ -37,15 +39,18 @@ const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamCon
    * Report in the format the same as in GO implementation
    */
   const report: GAnalyticsEvent[] = await loadReport(gaClient, sourceConfig, streamConfiguration, startDate, endDate);
-
+  if (streamConfiguration.mode === "full_sync") {
+    streamSink.clearStream();
+    needCleanUp = false;
+  }
   streamSink.newTransaction();
   if (needCleanUp) {
-    streamSink.deleteRecords("_timestamp >= ?", startDate.toISOString());
+    streamSink.deleteRecords("_timestamp", ">=", previousEndDate.toISOString());
   }
   report.forEach(r => {
     streamSink.addRecord({
       __id: buildSignatureId(r),
-      _timestamp: startDate.toISOString(),
+      _timestamp: endDate.toISOString(),
       ...r,
     });
   });

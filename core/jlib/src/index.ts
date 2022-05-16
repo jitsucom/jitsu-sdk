@@ -4,12 +4,14 @@ import { JitsuDestinationHints, CanonicalSqlTypeHint, SqlTypeHint, TableObject }
 import { JitsuToSegmentMapper, JitsuToSegmentOpts, SegmentEventType, SegmentTableObject } from "@jitsu/types/segment";
 import pkg from "../package.json";
 import {
+  Condition,
   DataRecord,
   DeleteRecords,
   JitsuDataMessage,
   JitsuDataMessageType,
   JitsuLogLevel,
   StreamSink,
+  WhenClause,
 } from "@jitsu/types/sources";
 
 export const segmentEventsTypes: Record<SegmentEventType, boolean> = {
@@ -257,13 +259,13 @@ export const stdoutStreamSink: StreamSink = {
   clearStream() {
     this.msg({ type: "clear_stream" });
   },
-  deleteRecords(condition: string, values: any) {
+  deleteRecords(field: string, clause: WhenClause, value: any) {
     this.msg({
       type: "delete_records",
       message: {
         whenCondition: {
-          expression: condition,
-          values: Array.isArray(values) ? values : [values],
+          joinCondition: "AND",
+          whenConditions: [{ field: field, clause: clause, value: value }],
         },
       },
     });
@@ -291,7 +293,7 @@ export const chunkedStreamSink = (streamSink: StreamSink) => {
     startChunk(chunk: string) {
       this.currentChunk = chunk;
       streamSink.newTransaction();
-      streamSink.deleteRecords("__chunk = ?", chunk);
+      streamSink.deleteRecords("__chunk", "=", chunk);
     },
   };
 };

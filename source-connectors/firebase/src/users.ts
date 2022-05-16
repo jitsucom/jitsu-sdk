@@ -19,6 +19,7 @@ export async function streamUsers(firebaseApp: App, streamSink: StreamSink) {
         listResult.pageToken ? "Will continue iteration" : "This is the last batch"
       }`
     );
+    streamSink.clearStream();
     listResult.users.forEach(user => {
       streamSink.addRecord({
         __id: user.uid,
