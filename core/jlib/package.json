@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/jlib",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "Utility functions designed to outsource some processing logic from Server to JS",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
   "publishConfig": {
@@ -28,8 +28,8 @@
     "url": "https://github.com/jitsucom/jitsu/issues"
   },
   "devDependencies": {
+    "@jitsu/node-bridge": "^0.7.3",
     "@rollup/plugin-json": "^4.1.0",
-    "@jitsu/node-bridge": "0.7.2",
     "@segment/analytics-next": "^1.32.1",
     "@types/jquery": "^3.5.10"
   },

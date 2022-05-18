@@ -1,6 +1,6 @@
 {
   "name": "jitsu-cli",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "publishConfig": {
     "access": "public"
   },
@@ -42,7 +42,7 @@
     "ts-node": "^10.4.0"
   },
   "dependencies": {
-    "@jitsu/jlib": "0.7.2",
+    "@jitsu/jlib": "^0.7.3",
     "@rollup/plugin-commonjs": "^22.0.0-14",
     "@rollup/plugin-inject": "^4.0.4",
     "@rollup/plugin-json": "^4.1.0",

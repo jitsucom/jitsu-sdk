@@ -1,6 +1,6 @@
 {
   "name": "jitsu-airtable-source",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "Airtable Source for Jitsu",
   "main": "dist/airtable-source.js",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
@@ -22,10 +22,10 @@
     "validate-config": "jitsu-cli extension validate-config"
   },
   "devDependencies": {
-    "jitsu-cli": "0.7.2",
-    "@jitsu/jlib": "^0.7.2",
-    "typescript": "^4.5.2",
-    "tslib": "^2.3.1"
+    "@jitsu/jlib": "^0.7.3",
+    "jitsu-cli": "^0.7.3",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.2"
   },
   "dependencies": {
     "airtable": "0.11.3"
