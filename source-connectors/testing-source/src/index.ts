@@ -21,10 +21,10 @@ const descriptor: ExtensionDescriptor<TestingConfig> = {
 
 async function validator(config: TestingConfig): Promise<ConfigValidationResult> {
   if (config.data) {
-    return true
+    return true;
   }
 
-  throw new Error("data must not be empty")
+  throw new Error("data must not be empty");
 }
 
 const sourceCatalog: SourceCatalog<TestingConfig, TestingConfig> = async (config: TestingConfig) => {
@@ -40,12 +40,12 @@ const streamReader: StreamReader<TestingConfig, TestingConfig> = async (
   streamSink.addRecord({
     __id: "1",
     data: sourceConfig.data,
-  })
+  });
 
   streamSink.addRecord({
     __id: "2",
     data: sourceConfig.data,
-  })
+  });
 };
 
 export { sourceCatalog, streamReader, descriptor, validator };
