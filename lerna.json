@@ -10,7 +10,8 @@
   "command": {
     "version": {
       "allowBranch": [
-        "main"
+        "main",
+        "feature/693_sources_sdk"
       ],
       "message": "chore: update to version %s, auto-commit by lerna [ci skip] "
     }
