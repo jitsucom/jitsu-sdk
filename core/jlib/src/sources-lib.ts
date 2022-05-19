@@ -13,21 +13,43 @@ import {
 const hash = require("object-hash");
 
 export function makeStreamSink(msg: Pick<StreamSink, "msg">): StreamSink {
+  let recordsAdded = 0;
+  let transactionNumber = 0;
+
   return {
     addRecord(record: DataRecord) {
-      msg.msg({ type: "record", message: record });
+      if (transactionNumber == 0) {
+        //implicit transaction creation
+        transactionNumber = 1;
+      }
+      this.msg({ type: "record", message: record });
     },
     changeState(newState: Record<string, any>) {
-      msg.msg({ type: "state", message: newState });
+      this.msg({ type: "state", message: newState });
     },
     log(level: JitsuLogLevel, message: string) {
-      msg.msg({ type: "log", message: { level: level, message: message } });
+      this.msg({ type: "log", message: { level: level, message: message } });
     },
     clearStream() {
-      msg.msg({ type: "clear_stream" });
+      if (transactionNumber > 1 || recordsAdded > 0) {
+        throw new Error(
+          '"clear_stream" message allowed only in the first transaction and before any "record" message added. Current transaction number: ' +
+            transactionNumber +
+            " Records added: " +
+            recordsAdded
+        );
+      }
+      this.msg({ type: "clear_stream" });
     },
     deleteRecords(field: string, clause: WhenClause, value: any) {
-      msg.msg({
+      if (recordsAdded > 0) {
+        throw new Error('"delete_records" message must precede any "record" message in transaction.');
+      }
+      if (transactionNumber == 0) {
+        //implicit transaction creation
+        transactionNumber = 1;
+      }
+      this.msg({
         type: "delete_records",
         message: {
           joinCondition: "AND",
@@ -36,9 +58,16 @@ export function makeStreamSink(msg: Pick<StreamSink, "msg">): StreamSink {
       });
     },
     newTransaction() {
+      recordsAdded = 0;
+      transactionNumber++;
       this.msg({ type: "new_transaction" });
     },
-    ...msg,
+    msg<T extends JitsuDataMessageType, P>(m: JitsuDataMessage<T, P>) {
+      if (m.type === "record") {
+        recordsAdded++;
+      }
+      msg.msg(m);
+    },
   };
 }
 

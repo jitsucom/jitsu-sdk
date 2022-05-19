@@ -121,10 +121,11 @@ declare type AddRecordMessage = JitsuDataMessage<"record", DataRecord>;
 declare type LogMessage = JitsuDataMessage<"log", LogRecord>;
 /**
  * Clears underlying table. Removes all records. Equivalent of 'TRUNCATE TABLE'
+ * ClearStreamMessage may be used only in the first transaction for stream and must precede any AddRecordMessage
  */
 declare type ClearStreamMessage = JitsuDataMessage<"clear_stream", never>;
 /**
- * Delete records based on condition
+ * Delete records based on condition. Delete message must precede any AddRecordMessage in transaction
  */
 declare type DeleteRecordsMessage = JitsuDataMessage<"delete_records", DeleteRecords>;
 /**

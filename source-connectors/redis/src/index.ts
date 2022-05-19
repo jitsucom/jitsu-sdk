@@ -82,7 +82,7 @@ const sourceCatalog: SourceCatalog<RedisConfig, HashStreamConfig> = async (confi
   return [
     {
       type: "hash",
-      mode: "full_sync",
+      supportedModes: ["full_sync"],
       params: [
         {
           id: "redis_key",
@@ -184,14 +184,24 @@ const streamReader: StreamReader<RedisConfig, HashStreamConfig> = async (
       while (true) {
         let scanRes = await redis.scan(cursor, { MATCH: redisKeyPattern, COUNT: redisScanCount });
         scanIterations++;
-        streamSink.log(
-          "INFO",
-          `Scanned ${formatNum(Math.min(scanIterations * redisScanCount, keys))} / ${formatNum(keys)} keys (${formatNum(
-            ((scanIterations * redisScanCount) / keys) * 100
-          )}%). Got ${scanRes.keys.length} keys`
-        );
-        for (const key of scanRes.keys) {
-          await processRedisKey(key, redis, streamSink);
+        if (scanRes.keys.length > 0) {
+          streamSink.newTransaction();
+          streamSink.log(
+            "INFO",
+            `Scanned ${formatNum(Math.min(scanIterations * redisScanCount, keys))} / ${formatNum(
+              keys
+            )} keys (${formatNum(((scanIterations * redisScanCount) / keys) * 100)}%). Got ${scanRes.keys.length} keys`
+          );
+          for (const key of scanRes.keys) {
+            await processRedisKey(key, redis, streamSink);
+          }
+        } else {
+          streamSink.log(
+            "INFO",
+            `Scanned ${formatNum(Math.min(scanIterations * redisScanCount, keys))} / ${formatNum(
+              keys
+            )} keys (${formatNum(((scanIterations * redisScanCount) / keys) * 100)}%). Got ${scanRes.keys.length} keys`
+          );
         }
         cursor = scanRes.cursor;
         if (cursor === 0) {

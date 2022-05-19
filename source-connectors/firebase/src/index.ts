@@ -57,12 +57,12 @@ const sourceCatalog: SourceCatalog<FirebaseConfig> = async () => {
   return [
     {
       type: "users",
-      mode: "full_sync",
+      supportedModes: ["full_sync"],
       params: [],
     },
     {
       type: "firestore",
-      mode: "full_sync",
+      supportedModes: ["full_sync"],
       params: [
         {
           id: "collection",

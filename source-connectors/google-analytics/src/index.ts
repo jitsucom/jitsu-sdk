@@ -19,8 +19,6 @@ const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamCon
   if (streamType !== "report") {
     throw new Error(`${streamType} streams is not supported`);
   }
-  streamSink.log("INFO", "Source config: " + JSON.stringify(sourceConfig));
-
   const gaClient = await getGoogleAnalyticsReportingClient(sourceConfig);
 
   let previousEndDate = new Date();
