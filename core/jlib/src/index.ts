@@ -278,13 +278,14 @@ export const stdoutStreamSink: StreamSink = {
   },
 };
 
-export const chunkedStreamSink = (streamSink: StreamSink) => {
+export const chunkedStreamSink = (streamSink: StreamSink, _chunkNameParameter?: string) => {
   return {
+    ...streamSink,
     currentChunk: "",
-
+    chunkNameParameter: _chunkNameParameter || "__chunk",
     addRecord(record: DataRecord) {
       if (this.currentChunk) {
-        return streamSink.addRecord({ ...record, __chunk: this.currentChunk });
+        return streamSink.addRecord({ ...record, [this.chunkNameParameter]: this.currentChunk });
       } else {
         return streamSink.addRecord(record);
       }
@@ -293,7 +294,7 @@ export const chunkedStreamSink = (streamSink: StreamSink) => {
     startChunk(chunk: string) {
       this.currentChunk = chunk;
       streamSink.newTransaction();
-      streamSink.deleteRecords("__chunk", "=", chunk);
+      streamSink.deleteRecords(this.chunkNameParameter, "=", chunk);
     },
   };
 };

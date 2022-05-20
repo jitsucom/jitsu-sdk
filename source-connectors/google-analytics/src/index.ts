@@ -7,7 +7,8 @@ import { googleAnalyticsSourceCatalog as sourceCatalog } from "./catalog";
 import type { GAnalyticsReport, GAnalyticsReportRow } from "./client";
 import type { StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
 import { buildSignatureId } from "@jitsu/jlib/lib/sources-lib";
-import { flatten } from "@jitsu/jlib";
+import { chunkedStreamSink } from "@jitsu/jlib/lib";
+import { add, sub, isBefore, startOfDay, format } from "date-fns";
 
 const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamConfig> = async (
   sourceConfig: GoogleAnalyticsConfig,
@@ -19,40 +20,43 @@ const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamCon
   if (streamType !== "report") {
     throw new Error(`${streamType} streams is not supported`);
   }
+  const chunkedSink = chunkedStreamSink(streamSink);
+
   const gaClient = await getGoogleAnalyticsReportingClient(sourceConfig);
 
-  let previousEndDate = new Date();
+  const endDate = startOfDay(add(new Date(), { days: 1 }));
+  let previousEndDate = endDate;
   const previousEndDateState = services.state.get("previous_end_date");
-  let needCleanUp = false;
   if (previousEndDateState) {
-    needCleanUp = true; //previous syncs detected
     previousEndDate = new Date(previousEndDateState);
-    streamSink.log("INFO", "Previous end date from state: " + previousEndDate.toISOString());
+    chunkedSink.log("INFO", "Previous end date from state: " + previousEndDate.toISOString());
   }
-  const startDate = new Date(
-    previousEndDate.getTime() - 1000 * 60 * 60 * 24 * (sourceConfig.refresh_window_days || 30)
-  );
-  const endDate = new Date();
+  let startDate = startOfDay(sub(previousEndDate, { days: sourceConfig.refresh_window_days || 30 }));
   /**
    * Report in the format the same as in GO implementation
    */
-  const report: GAnalyticsEvent[] = await loadReport(gaClient, sourceConfig, streamConfiguration, startDate, endDate);
-  if (streamConfiguration.mode === "full_sync") {
-    streamSink.clearStream();
-    needCleanUp = false;
-  }
-  streamSink.newTransaction();
-  if (needCleanUp) {
-    streamSink.deleteRecords("_timestamp", ">=", previousEndDate.toISOString());
-  }
-  report.forEach(r => {
-    streamSink.addRecord({
-      __id: buildSignatureId(r),
-      _timestamp: endDate.toISOString(),
-      ...r,
+  do {
+    const chunk = format(startDate, "yyyyMMdd");
+    chunkedSink.log("INFO", "Loading chunk " + chunk);
+    const report: GAnalyticsEvent[] = await loadReport(
+      gaClient,
+      sourceConfig,
+      streamConfiguration,
+      startDate,
+      startDate
+    );
+    chunkedSink.startChunk(chunk);
+    report.forEach(r => {
+      chunkedSink.addRecord({
+        __id: buildSignatureId(r),
+        ...r,
+      });
     });
-  });
-  services.state.set("previous_end_date", endDate);
+
+    startDate = add(startDate, { days: 1 });
+  } while (isBefore(startDate, endDate));
+
+  services.state.set("previous_end_date", endDate.toISOString());
 };
 
 export { descriptor, validator, sourceCatalog, streamReader };
