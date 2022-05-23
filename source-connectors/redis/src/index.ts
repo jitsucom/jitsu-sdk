@@ -220,7 +220,7 @@ const streamReader: StreamReader<RedisConfig, HashStreamConfig> = async (
 function addRecord(sink: StreamSink, redisKey: string, redisHash: string | null, object: any) {
   sink.addRecord({
     ...object,
-    __id: redisHash ? redisKey + "/" + redisHash : redisKey,
+    $id: redisHash ? redisKey + "/" + redisHash : redisKey,
     redis_key: redisKey,
     redis_hash: redisHash,
   });

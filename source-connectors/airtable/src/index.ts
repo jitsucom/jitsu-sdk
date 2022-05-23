@@ -104,7 +104,7 @@ const streamReader: StreamReader<AirtableConfig, TableStreamConfig> = async (
   allRecords.forEach(r => {
     const { id, createdTime, fields } = r._rawJson;
     streamSink.addRecord({
-      __id: id,
+      $id: id,
       created: new Date(createdTime),
       __sql_type_created: "timestamp with time zone",
       ...fields,

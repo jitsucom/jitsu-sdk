@@ -51,7 +51,15 @@ declare type DataRecord = {
    * If uniqueId cannot be obtained naturally, please use buildSignatureId() helper function (TODO: implement)
    * that builds ID based on sorted field values of the record
    */
-  __id: string;
+  $id: string;
+  /**
+   * Datetime associated with record. It may be entity creation of modification date
+   * or date of reporting data raw.
+   *
+   * For sources that refresh data for specific time window it is important to fill this parameter.
+   * and use DeleteRecord message to clear old rows before adding fresh data.
+   */
+  $recordTimestamp?: Date;
   /**
    * Each field may have an optional SQL type hint to help
    * executor to create SQL table column and properly convert the value
@@ -69,29 +77,17 @@ declare type LogRecord = {
 };
 
 /**
- * Command to delete data based on parameter conditions, see "delete_records" message
+ * Command to delete data based on $recordTimestamp value.
+ * Date range to delete is calculated based on partitionTimestamp and granularity using calendar rules
+ * E.g. for partitionTimestamp = "2022-05-23T16:08:41.212Z" and granularity = "MONTH"
+ * will be deleted data with $recordTimestamp between 2022-05-01 and 2022-05-31 23:59:59.999
  */
 declare type DeleteRecords = {
-  whenConditions: Condition[];
-  joinCondition: "AND" | "OR";
+  partitionTimestamp: Date;
+  granularity: Granularity;
 };
 
-declare type WhenClause = "=" | "<>" | ">" | "<" | ">=" | "<=";
-/**
- * SQL Condition for clearing the data, see
- */
-declare type Condition = {
-  /**
-   * Condition field name
-   */
-  field: string;
-  /**
-   * Field value
-   */
-  value: any;
-
-  clause: WhenClause;
-};
+declare type Granularity = "HOUR" | "DAY" | "MONTH" | "QUARTER" | "YEAR";
 
 declare type StreamInstance<StreamConfig = Record<string, any>> = {
   type: string;
@@ -173,7 +169,7 @@ declare type StreamSink = {
   /**
    * Alias for DeleteRecordsMessage
    */
-  deleteRecords(field: string, clause: WhenClause, value: any);
+  deleteRecords(partitionTimestamp: Date, granularity: Granularity);
 };
 
 declare type SourceCatalog<Config = Record<string, any>, StreamConfig = Record<string, any>> = (

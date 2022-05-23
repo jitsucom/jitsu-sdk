@@ -1,6 +1,6 @@
 import {
-  Condition,
   DataRecord,
+  Granularity,
   JitsuDataMessage,
   JitsuDataMessageType,
   JitsuLogLevel,
@@ -8,7 +8,6 @@ import {
   StreamConfiguration,
   StreamReader,
   StreamSink,
-  WhenClause,
 } from "@jitsu/types/sources";
 const hash = require("object-hash");
 
@@ -41,7 +40,7 @@ export function makeStreamSink(msg: Pick<StreamSink, "msg">): StreamSink {
       }
       this.msg({ type: "clear_stream" });
     },
-    deleteRecords(field: string, clause: WhenClause, value: any) {
+    deleteRecords(partitionTimestamp: Date, granularity: Granularity) {
       if (recordsAdded > 0) {
         throw new Error('"delete_records" message must precede any "record" message in transaction.');
       }
@@ -52,8 +51,8 @@ export function makeStreamSink(msg: Pick<StreamSink, "msg">): StreamSink {
       this.msg({
         type: "delete_records",
         message: {
-          joinCondition: "AND",
-          whenConditions: [{ field: field, clause: clause, value: value }],
+          partitionTimestamp: partitionTimestamp,
+          granularity: granularity,
         },
       });
     },

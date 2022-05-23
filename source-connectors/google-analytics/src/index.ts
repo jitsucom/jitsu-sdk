@@ -8,7 +8,7 @@ import type { GAnalyticsReport, GAnalyticsReportRow } from "./client";
 import type { StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
 import { buildSignatureId } from "@jitsu/jlib/lib/sources-lib";
 import { chunkedStreamSink } from "@jitsu/jlib/lib";
-import { add, sub, isBefore, startOfDay, format } from "date-fns";
+import { add, sub, isBefore, startOfDay, parse, format } from "date-fns";
 
 const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamConfig> = async (
   sourceConfig: GoogleAnalyticsConfig,
@@ -20,24 +20,24 @@ const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamCon
   if (streamType !== "report") {
     throw new Error(`${streamType} streams is not supported`);
   }
-  const chunkedSink = chunkedStreamSink(streamSink);
+  const chunkedSink = chunkedStreamSink(streamSink, "DAY");
 
   const gaClient = await getGoogleAnalyticsReportingClient(sourceConfig);
 
+  let startDate = startOfDay(sub(new Date(), { years: 1 }));
   const endDate = startOfDay(add(new Date(), { days: 1 }));
   let previousEndDate = endDate;
   const previousEndDateState = services.state.get("previous_end_date");
   if (previousEndDateState) {
     previousEndDate = new Date(previousEndDateState);
     chunkedSink.log("INFO", "Previous end date from state: " + previousEndDate.toISOString());
+    // not the first run. Refresh 30-day window
+    startDate = startOfDay(sub(previousEndDate, { days: sourceConfig.refresh_window_days || 30 }));
   }
-  let startDate = startOfDay(sub(previousEndDate, { days: sourceConfig.refresh_window_days || 30 }));
   /**
    * Report in the format the same as in GO implementation
    */
   do {
-    const chunk = format(startDate, "yyyyMMdd");
-    chunkedSink.log("INFO", "Loading chunk " + chunk);
     const report: GAnalyticsEvent[] = await loadReport(
       gaClient,
       sourceConfig,
@@ -45,10 +45,10 @@ const streamReader: StreamReader<GoogleAnalyticsConfig, GoogleAnalyticsStreamCon
       startDate,
       startDate
     );
-    chunkedSink.startChunk(chunk);
     report.forEach(r => {
       chunkedSink.addRecord({
-        __id: buildSignatureId(r),
+        $id: buildSignatureId(r),
+        $recordTimestamp: startDate,
         ...r,
       });
     });

@@ -4,15 +4,15 @@ import { JitsuDestinationHints, CanonicalSqlTypeHint, SqlTypeHint, TableObject }
 import { JitsuToSegmentMapper, JitsuToSegmentOpts, SegmentEventType, SegmentTableObject } from "@jitsu/types/segment";
 import pkg from "../package.json";
 import {
-  Condition,
   DataRecord,
   DeleteRecords,
+  Granularity,
   JitsuDataMessage,
   JitsuDataMessageType,
   JitsuLogLevel,
   StreamSink,
-  WhenClause,
 } from "@jitsu/types/sources";
+import { startOfDay, startOfHour, startOfMonth, startOfQuarter, startOfYear } from "date-fns";
 
 export const segmentEventsTypes: Record<SegmentEventType, boolean> = {
   alias: true,
@@ -259,13 +259,13 @@ export const stdoutStreamSink: StreamSink = {
   clearStream() {
     this.msg({ type: "clear_stream" });
   },
-  deleteRecords(field: string, clause: WhenClause, value: any) {
+  deleteRecords(partitionTimestamp: Date, granularity: Granularity) {
     this.msg({
       type: "delete_records",
       message: {
         whenCondition: {
-          joinCondition: "AND",
-          whenConditions: [{ field: field, clause: clause, value: value }],
+          partitionTimestamp: partitionTimestamp,
+          granularity: granularity,
         },
       },
     });
@@ -278,23 +278,39 @@ export const stdoutStreamSink: StreamSink = {
   },
 };
 
-export const chunkedStreamSink = (streamSink: StreamSink, _chunkNameParameter?: string) => {
+function startOfPartition(date: Date, granularity: Granularity) {
+  switch (granularity) {
+    case "HOUR":
+      return startOfHour(date);
+    case "DAY":
+      return startOfDay(date);
+    case "MONTH":
+      return startOfMonth(date);
+    case "QUARTER":
+      return startOfQuarter(date);
+    case "YEAR":
+      return startOfYear(date);
+    default:
+      throw new Error("Unknown granularity: " + granularity);
+  }
+}
+
+export const chunkedStreamSink = (streamSink: StreamSink, granularity: Granularity) => {
   return {
     ...streamSink,
-    currentChunk: "",
-    chunkNameParameter: _chunkNameParameter || "__chunk",
+    currentChunk: new Date(0),
     addRecord(record: DataRecord) {
-      if (this.currentChunk) {
-        return streamSink.addRecord({ ...record, [this.chunkNameParameter]: this.currentChunk });
-      } else {
-        return streamSink.addRecord(record);
+      if (typeof record.$recordTimestamp === "undefined") {
+        throw new Error("chunkedStreamSink requires all record to have $recordTimestamp parameter set.");
       }
-    },
-
-    startChunk(chunk: string) {
-      this.currentChunk = chunk;
-      streamSink.newTransaction();
-      streamSink.deleteRecords(this.chunkNameParameter, "=", chunk);
+      const chunkStart = startOfPartition(record.$recordTimestamp, granularity);
+      if (this.currentChunk.getTime() !== chunkStart.getTime()) {
+        this.currentChunk = chunkStart;
+        streamSink.log("INFO", "Loading chunk for " + granularity + " of " + chunkStart.toISOString());
+        streamSink.newTransaction();
+        streamSink.deleteRecords(record.$recordTimestamp, granularity);
+      }
+      return streamSink.addRecord(record);
     },
   };
 };

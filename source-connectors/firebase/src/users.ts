@@ -22,7 +22,7 @@ export async function streamUsers(firebaseApp: App, streamSink: StreamSink) {
     streamSink.clearStream();
     listResult.users.forEach(user => {
       streamSink.addRecord({
-        __id: user.uid,
+        $id: user.uid,
         email: user.email,
         uid: user.uid, //duplicated, for backward compatibility,
         phone: user.phone,

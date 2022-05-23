@@ -38,12 +38,12 @@ const streamReader: StreamReader<TestingConfig, TestingConfig> = async (
   streamSink: StreamSink
 ) => {
   streamSink.addRecord({
-    __id: "1",
+    $id: "1",
     data: sourceConfig.data,
   });
 
   streamSink.addRecord({
-    __id: "2",
+    $id: "2",
     data: sourceConfig.data,
   });
 };

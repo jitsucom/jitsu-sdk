@@ -38,7 +38,7 @@ export async function streamFirestore(firebaseApp: App, streamConfiguration: Fir
           () => doc.ref.collection(subCollection),
           subDoc => {
             sink.addRecord({
-              __id: doc.id + "/" + subDoc.id,
+              $id: doc.id + "/" + subDoc.id,
               _firestore_document_id: doc.id,
               [`_firestore_document_id_${subCollection.toLocaleLowerCase()}`]: subDoc.id,
               ...doc.data(),
@@ -49,7 +49,7 @@ export async function streamFirestore(firebaseApp: App, streamConfiguration: Fir
         doc.ref.collection(subCollection);
       } else {
         sink.addRecord({
-          __id: doc.id,
+          $id: doc.id,
           _firestore_document_id: doc.id,
           ...doc.data(),
         });
