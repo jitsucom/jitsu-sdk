@@ -160,5 +160,5 @@ export declare type ExtensionDescriptor<Config = Record<string, any>> = {
   /**
    * List of configuration parameters
    */
-  configurationParameters: ConfigurationParameter<keyof Config | string>[];
+  configurationParameters: ConfigurationParameter<keyof Config>[];
 };

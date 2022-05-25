@@ -1,13 +1,11 @@
 interface GoogleAnalyticsConfig {
   view_id: string;
   refresh_window_days?: number;
-  auth: {
-    type: "OAuth" | "Service Account";
-    client_secret?: string;
-    refresh_token?: string;
-    client_id?: string;
-    service_account_key?: string;
-  };
+  auth_type: "OAuth" | "Service Account";
+  client_secret?: string;
+  refresh_token?: string;
+  client_id?: string;
+  service_account_key?: string;
 }
 interface GoogleAnalyticsStreamConfig {
   dimensions: string[];

@@ -11,7 +11,7 @@ import { extensionProjectTemplate } from "./template";
 
 export async function create(args: string[]): Promise<CommandResult> {
   const program = new commander.Command();
-  program.option("-t, --type <project type>", "project type (destination or transform)");
+  program.option("-t, --type <project type>", "project type (destination or source)");
   program.option("-d, --dir <project_dir>", "project dir");
   program.option("-n, --name <project_name>", "project name");
   program.option("-j, --jitsu-version <jitsu_version>", "Jitsu version");
@@ -35,9 +35,9 @@ export async function create(args: string[]): Promise<CommandResult> {
           message: [
             `What is the type of extension?`,
             ` ${chalk.bold("destination")} adds a new type of HTTP-based destination to Jitsu`,
-            ` ${chalk.bold("transform")}   adds a transformation logic`,
+            ` ${chalk.bold("source")}   adds a new source extension to Jitsu`,
           ].join("\n"),
-          choices: ["destination", "transform"],
+          choices: ["destination", "source"],
         },
       ])
     ).package;

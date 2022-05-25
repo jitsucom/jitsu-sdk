@@ -1,32 +1,33 @@
 import { ProjectTemplate } from "../../lib/template";
 import { jitsuCliVersion } from "../../lib/version";
 
-export type DestinationTemplateVars = {
+export type TemplateVars = {
   license?: "MIT" | "Other";
   packageName: string;
-  type: "destination" | "transform";
+  type: "destination" | "source" | "transform";
   jitsuVersion?: string;
 };
 
-export const packageJsonTemplate = ({ packageName, type, jitsuVersion = undefined }: DestinationTemplateVars) => ({
+export const packageJsonTemplate = ({ packageName, type, jitsuVersion = undefined }: TemplateVars) => ({
   name: `${packageName}`,
   version: "0.0.1",
   description: `Jitsu ${type} - ${packageName}`,
   main: `dist/${packageName}.js`,
   scripts: {
+    clean: "rm -rf ./dist",
     build: "jitsu-cli extension build",
     test: "jitsu-cli extension test",
     "validate-config": "jitsu-cli extension validate-config",
-    execute: "jitsu-cli extension exec",
+    execute: `jitsu-cli extension ${type == "destination" ? "exec" : "exec-src"}`,
   },
   devDependencies: {
     "@jitsu/types": `${jitsuVersion || "^" + jitsuCliVersion}`,
-    typescript: "^4.5.2",
-  },
-  dependencies: {
+    "@jitsu/jlib": `${jitsuVersion || "^" + jitsuCliVersion}`,
     "jitsu-cli": `${jitsuVersion || "^" + jitsuCliVersion}`,
     tslib: "^2.3.1",
+    typescript: "^4.5.2",
   },
+  dependencies: {},
 });
 
 let destinationTest = ({ type = "destination" }) => {
@@ -81,6 +82,101 @@ let destinationCode = () => {
 `;
 };
 
+let sourceCode = () => {
+  return `
+    import { SourceCatalog, StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
+    import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
+    
+    export interface SourceConfig {
+      user_id: string
+      my_source_param: string;
+    }
+    
+    export interface StreamConfig {
+      my_stream_param: string;
+    }
+    
+    async function validator(config: SourceConfig): Promise<ConfigValidationResult> {
+      //TODO: Check that provided config data allows to connect to third party API 
+      console.log("validator is not yet implemented");
+      return true;
+    }
+    
+    const descriptor: ExtensionDescriptor<SourceConfig> = {
+      id: "my_source",
+      displayName: "Source Example",
+      description:
+        "Example source that produces row with run number and source/stream configuration.",
+      configurationParameters: [
+        {
+          displayName: "User ID",
+          id: "user_id",
+          type: "string",
+          required: true,
+          documentation: "User Id",
+        },
+        {
+          displayName: "Example Parameter",
+          id: "my_source_param",
+          required: true,
+          type: "string",
+          documentation: \`
+            <div>
+                Example Parameter
+            </div>
+            \`,
+        }
+      ],
+    };
+    
+    const sourceCatalog: SourceCatalog<SourceConfig, StreamConfig> = async config => {
+      return [
+        {
+          type: "my_source_runs",
+          supportedModes: ["incremental"],
+          params: [
+            {
+              id: "my_stream_param",
+              displayName: "Stream Parameter",
+              type: "string",
+              documentation: \`
+                <div>
+                  Stream Parameter example.
+                </div>
+              \`,
+              required: true,
+            },
+          ]
+        }
+      ];
+    };
+    
+    const streamReader: StreamReader<SourceConfig, StreamConfig> = async (
+      sourceConfig: SourceConfig,
+      streamType: string,
+      streamConfiguration: StreamConfiguration<StreamConfig>,
+      streamSink: StreamSink,
+      services: { state: StateService }
+    ) => {
+        //Example of saved state usage. Read previous run number:
+        let runNumber = services.state.get("run_number") || 0;
+        runNumber++ 
+        streamSink.log("INFO", "Run number: " + runNumber);
+        streamSink.addRecord({
+            $id: runNumber,
+            $recordTimestamp: new Date(),
+            type: streamType,
+            ...sourceConfig,
+            ...streamConfiguration.parameters
+        });
+        //Save last run number to state
+        services.state.set("run_number", runNumber);
+    };
+    
+    export { streamReader, sourceCatalog, descriptor, validator };
+`;
+};
+
 let transformCode = () => {
   return `
     import {Destination, DestinationMessage, JitsuDestinationContext} from "@jitsu/types/destination";
@@ -97,7 +193,7 @@ let transformCode = () => {
 
 let descriptor = {};
 
-descriptor["destination"] = (vars: DestinationTemplateVars) => `
+descriptor["destination"] = (vars: TemplateVars) => `
   import {ExtensionDescriptor} from "@jitsu/types/extension";
   import {destination, validator, DestinationConfig} from "./destination";
 
@@ -114,7 +210,7 @@ descriptor["destination"] = (vars: DestinationTemplateVars) => `
   export { descriptor, destination, validator };
 `;
 
-descriptor["transform"] = (vars: DestinationTemplateVars) =>
+descriptor["transform"] = (vars: TemplateVars) =>
   `
   import {DestinationAdapter, DestinationDescriptor} from "@jitsu/types/destination";
   import jitsuAdapter from "./adapter";
@@ -133,11 +229,11 @@ descriptor["transform"] = (vars: DestinationTemplateVars) =>
 
   export {descriptor, adapter}
 `;
-export const extensionProjectTemplate: ProjectTemplate<DestinationTemplateVars> = {
+export const extensionProjectTemplate: ProjectTemplate<TemplateVars> = {
   "__test__/destination.test.ts": destinationTest,
   "src/destination.ts": vars => vars.type == "destination" && destinationCode(),
   "src/transform.ts": vars => vars.type == "transform" && transformCode(),
-  "src/index.ts": vars => descriptor[vars.type](vars),
+  "src/index.ts": vars => (vars.type == "source" ? sourceCode() : descriptor[vars.type](vars)),
   "package.json": packageJsonTemplate,
   "tsconfig.json": {
     compilerOptions: {

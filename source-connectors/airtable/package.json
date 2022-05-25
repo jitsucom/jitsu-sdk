@@ -22,6 +22,7 @@
     "validate-config": "jitsu-cli extension validate-config"
   },
   "devDependencies": {
+    "@jitsu/types": "^0.7.3",
     "@jitsu/jlib": "^0.7.3",
     "jitsu-cli": "^0.7.3",
     "tslib": "^2.3.1",

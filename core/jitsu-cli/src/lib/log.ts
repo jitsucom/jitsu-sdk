@@ -3,6 +3,7 @@ import chalk from "chalk";
 export type Log = {
   debug: (msg?: string, ...args: any[]) => void;
   info: (msg?: string, ...args: any[]) => void;
+  warn: (msg?: string, ...args: any[]) => void;
   spinInfo: (...args: string[]) => void;
   error: (...args: string[]) => void;
 };
@@ -29,6 +30,9 @@ export default function getLog(): Log {
   return {
     error(msg?: string, ...args: any[]): void {
       log(console.error, { prefix: "error", color: "red" }, msg, args);
+    },
+    warn(msg?: string, ...args: any[]): void {
+      log(console.warn, { prefix: "warn ", color: "yellow" }, msg, args);
     },
     spinInfo(args: string): void {},
     info(msg?: string, ...args: any[]): void {

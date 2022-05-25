@@ -5,7 +5,7 @@ import chalk from "chalk";
 import path from "path";
 import * as JSON5 from "json5";
 import fs from "fs";
-import { getDistFile, loadBuild } from "./index";
+import { getConfigJson, getDistFile, loadBuild } from "./index";
 import { align, jsonify } from "../../lib/indent";
 import { chalkCode } from "../../lib/chalk-code-highlight";
 import { appendError } from "../../lib/errors";
@@ -15,7 +15,7 @@ import { DataRecord, JitsuDataMessage, JitsuDataMessageType } from "@jitsu/types
 import { build } from "./build";
 
 import Table from "cli-table";
-import { makeStreamSink } from "@jitsu/jlib/lib/sources-lib";
+import { makeStreamSink, stateService } from "@jitsu/jlib/lib/sources-lib";
 
 function getJson(json: string, file: string) {
   if (json) {
@@ -67,12 +67,13 @@ async function loadExtension(directory: string): Promise<{
 
 export async function execSourceExtension(args: string[]): Promise<CommandResult> {
   const program = new commander.Command();
-  program.option("-c, --config <json>", "Connector configuration as JSON object");
-  program.option("-d, --dir <project_dir>", "project dir");
   program.option(
-    "-s, --stream-config <json>",
-    "Stream configuration as an object. If connector exports one stream, this can be omitted"
+    "-c, --config <config_file_or_json>",
+    "Configuration file path or inline extension configuration JSON"
   );
+  program.option("-d, --dir <project_dir>", "project dir");
+  program.option("-s, --stream-config <json>", "Stream configuration as an object.");
+  program.option("-t, --state <json>", "Saved state object.");
   program.parse(["dummy", "dummy", ...args]);
   let cliOpts = program.opts();
 
@@ -90,12 +91,24 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
 
   let configObject: any;
   try {
-    configObject = JSON5.parse(cliOpts.config);
+    configObject = getConfigJson(cliOpts.config);
   } catch (e: any) {
     return {
       success: false,
       message: `Can't parse config JSON: '${cliOpts.config}' ${e.message})`,
     };
+  }
+
+  let stateObject: any;
+  if (cliOpts.state) {
+    try {
+      stateObject = JSON5.parse(cliOpts.state);
+    } catch (e: any) {
+      return {
+        success: false,
+        message: `Can't parse state JSON: '${cliOpts.state}' ${e.message})`,
+      };
+    }
   }
 
   if (!extension.validator) {
@@ -145,30 +158,26 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   }
 
   const resultTable = newTable();
+  const sink = makeStreamSink({
+    msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
+      if (msg.type === "record") {
+        getLog().info("[" + msg.type + "] " + (msg.message ? JSON.stringify(msg.message) : ""));
+        add(resultTable, msg.message);
+      } else if (msg.type === "log") {
+        getLog()[msg.message?.["level"].toLowerCase()]?.("[" + msg.type + "] " + msg.message?.["message"]);
+      } else if (msg.type === "state") {
+        getLog().info("[" + msg.type + "] " + (msg.message ? JSON.stringify(msg.message) : ""));
+        getLog().info("💾 State was modified. New value: " + JSON.stringify(msg.message));
+      } else {
+        getLog().info("[" + msg.type + "] " + (msg.message ? JSON.stringify(msg.message) : ""));
+      }
+    },
+  });
+  await extension.streamReader(configObject, stream.type, { parameters: streamConfigObject }, sink, {
+    state: stateService(stateObject, sink),
+  });
 
-  await extension.streamReader(
-    configObject,
-    stream.type,
-    { parameters: streamConfigObject },
-    makeStreamSink({
-      msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
-        if (msg.type === "record") {
-          add(resultTable, msg.message);
-        } else if (msg.type === "log") {
-          console[msg.message?.["level"].toLowerCase()]?.(msg.message?.["message"]);
-        }
-      },
-    }),
-    {
-      state: {
-        set(key: string, object: any) {},
-        get(key: string): any {
-          return undefined;
-        },
-      },
-    }
-  );
-
+  getLog().info("🏁 Result data:");
   console.log(JSON.stringify(resultTable.rows, null, 2));
 
   console.log(
@@ -227,8 +236,10 @@ export async function execDestinationExtension(args: string[]): Promise<CommandR
     "-f, --file <file path>",
     "Path to file with jitsu events. Could be either on object, or array of objects"
   );
-  program.option("-c, --config <file path>", "Path to file with config ");
-  program.option("-o, --config-object <file path>", "Config json");
+  program.option(
+    "-c, --config <config_file_or_json>",
+    "Configuration file path or inline extension configuration JSON"
+  );
   program.option(
     "-j, --json <event json>",
     "Events JSON for processing (alternative to -f). Could be one object, or array of objects"
@@ -245,16 +256,21 @@ export async function execDestinationExtension(args: string[]): Promise<CommandR
   if (cliOpts.json && cliOpts.file) {
     return { success: false, message: "Both options -f and -j are provided. You should use either, not both" };
   }
-  if (cliOpts.config && cliOpts.configObject) {
-    return { success: false, message: "Both options -o and -c are provided. You should use either, not both" };
+  if (!cliOpts.config) {
+    return { success: false, message: "Please define config object -c json_file_path or -c '{json_object:}'" };
   }
-  if (!cliOpts.config && !cliOpts.configObject) {
-    return { success: false, message: "Please specify -o or -c" };
+  let config: any;
+  try {
+    config = getConfigJson(cliOpts.config);
+  } catch (e: any) {
+    return {
+      success: false,
+      message: `Can't parse config JSON: '${cliOpts.config}' ${e.message})`,
+    };
   }
   const { extension, projectBase } = await loadExtension(directory);
   getLog().info("🛂 Executing tests destination on " + chalk.bold(projectBase));
   let events: any[] = toArray(getJson(cliOpts.json, cliOpts.file));
-  let config = getJson(cliOpts.configObject, cliOpts.config);
 
   if (!extension.destination) {
     return { success: false, message: "Extension doesn't export destination function" };

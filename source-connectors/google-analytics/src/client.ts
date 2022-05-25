@@ -19,15 +19,15 @@ export const getGoogleAnalyticsReportingClient = async (
 
 const getAuth = async (config: GoogleAnalyticsConfig) => {
   const errorPrefix = `Failed to initialize Google Analytics Reporting API client auth.`;
-  const authType = config["auth_type"];
+  const authType = config.auth_type;
   switch (authType) {
     case "OAuth":
       const oauth = new ga.auth.OAuth2({
-        clientId: config["client_id"],
-        clientSecret: config["client_secret"],
+        clientId: config.client_id,
+        clientSecret: config.client_secret,
       });
       await oauth.setCredentials({
-        refresh_token: config["refresh_token"],
+        refresh_token: config.refresh_token,
       });
       return oauth;
 

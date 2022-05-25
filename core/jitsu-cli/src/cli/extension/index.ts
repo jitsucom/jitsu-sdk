@@ -139,6 +139,17 @@ async function getFirstLine(pathToFile): Promise<string> {
   return line;
 }
 
+export function getConfigJson(jsonOrFile: string) {
+  if (jsonOrFile.trim().startsWith("{") && jsonOrFile.trim().endsWith("}")) {
+    return JSON5.parse(jsonOrFile.trim());
+  } else {
+    if (!fs.existsSync(jsonOrFile)) {
+      throw new Error(`File ${jsonOrFile} does not exist!`);
+    }
+    return JSON5.parse(fs.readFileSync(jsonOrFile, "utf8"));
+  }
+}
+
 export async function loadBuild(file: string): Promise<Partial<JitsuExtensionExport>> {
   let formatDefinition = await getFirstLine(file);
   if (formatDefinition.trim() === "//format=es" || formatDefinition.trim() === "//format=esm") {

@@ -47,5 +47,5 @@ export type ConfigParameterType =
   | "password"
   | "oauthSecret"
   | "isoUtcDate"
-  | { oneOf: Readonly<string[]> } // not yet implemented by the extension runner engine and front-end
-  | { severalOf: Readonly<string[]>; max?: number }; // not yet implemented by the extension runner engine and front-end
+  | { oneOf: Readonly<string[]> }
+  | { severalOf: Readonly<string[]>; max?: number };

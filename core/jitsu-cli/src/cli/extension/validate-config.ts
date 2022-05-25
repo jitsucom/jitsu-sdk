@@ -5,41 +5,35 @@ import path from "path";
 import fs from "fs";
 import JSON5 from "json5";
 import getLog from "../../lib/log";
-import { getDistFile, loadBuild } from "./index";
+import { getDistFile, loadBuild, getConfigJson } from "./index";
 import { validateConfiguration } from "../../lib/validation";
 
 export async function validateConfig(args: string[]): Promise<CommandResult> {
   const program = new commander.Command();
   program.option("-d, --dir <project_dir>", "Project directory");
-  program.option("-c, --config <config_file>", "Configuration file");
-  program.option("-o, --config-object <config_json>", "Inline extension configuration JSON");
+  program.option(
+    "-c, --config <config_file_or_json>",
+    "Configuration file path or inline extension configuration JSON"
+  );
   program.argument("[project_dir]");
 
   program.parse(["dummy", "dummy", ...args]);
   const opts = program.opts();
 
-  if (!opts.configObject && !opts.config) {
+  if (!opts.config) {
     return {
       success: false,
-      message: 'Please define config object either with -j "{embedded json}", or with -f json_file',
+      message: "Please define config object -c json_file_path or -c '{json_object:}'",
     };
   }
-  let configObj;
-  if (opts.configObject) {
-    try {
-      configObj = JSON5.parse(opts.configObject);
-    } catch (e: any) {
-      return { success: false, message: `Malformed json (-j): ${e.message}` };
-    }
-  } else {
-    if (!fs.existsSync(opts.config)) {
-      return { success: false, message: `${opts.config} (-f) doesn't exist!` };
-    }
-    try {
-      configObj = JSON5.parse(fs.readFileSync(opts.config, "utf8"));
-    } catch (e: any) {
-      return { success: false, message: `Malformed json in file ${opts.config} (-f): ${e.message}` };
-    }
+  let configObj: any;
+  try {
+    configObj = getConfigJson(opts.config);
+  } catch (e: any) {
+    return {
+      success: false,
+      message: `Can't parse config JSON: '${opts.config}' ${e.message})`,
+    };
   }
   let projectDir = opts.dir || ".";
   getLog().info("Project dir: " + projectDir);
@@ -60,10 +54,7 @@ export async function validateConfig(args: string[]): Promise<CommandResult> {
   if (!build.validator) {
     return { success: false, message: "Build doesn't export validator symbol" };
   }
-  getLog().info(
-    "🤔 Validating configuration " +
-      (opts.config ? `from file ${path.resolve(projectDir, opts.config)}` : JSON.stringify(configObj))
-  );
+  getLog().info("🤔 Validating configuration " + JSON.stringify(configObj));
   let validationError = await validateConfiguration(configObj, build.validator);
   if (validationError) {
     return { success: false, message: `❌ ${validationError}` };

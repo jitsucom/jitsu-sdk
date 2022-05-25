@@ -11,10 +11,10 @@
  *
  *  - Configuration (see Config template parameter). Configuration usually contains credentials (example: Redis login password)
  *  - Streams (aka collections). Each stream will be mapped to a table in destination. Each source might expose multiple stream.
- *    Example, firebase exposes two streams: users, and firestore. Stream has a unique name
+ *    Example, firebase exposes two streams: users, and firestore. Stream has a unique type
  *  - Stream configuration (see StreamConfiguration template variable). Stream might be configurable. Example: firebase 'users'
  *    is not configurable stream, but firestore is parameterized by collection (equivalent to table in SQL terms)
- *  - A pair of stream and it's configuration makes a "stream instance"
+ *  - A pair of stream type and it's configuration makes a "stream instance"
  *  - Each stream can have multiple instances
  *  - Each stream instance will be mapped to a table in destination database
  *
@@ -26,6 +26,21 @@
  */
 import { ConfigurationParameter } from "./parameters";
 import { SqlTypeHint, SqlTypeHintKey } from "./sql-hints";
+
+declare type SourceCatalog<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
+  config: Config
+) => Promise<StreamInstance<StreamConfig>[]>;
+
+/**
+ * The main function that pulls data and convert it to the messages send to streamSink.
+ */
+declare type StreamReader<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
+  sourceConfig: Config,
+  streamType: string,
+  streamConfiguration: StreamConfiguration<StreamConfig>,
+  streamSink: StreamSink,
+  services: { state: StateService }
+) => Promise<void>;
 
 declare type JitsuDataMessageType = "record" | "clear_stream" | "delete_records" | "new_transaction" | "state" | "log";
 
@@ -41,14 +56,14 @@ declare type StreamSyncMode = "full_sync" | "incremental";
  * DataRecord represents data object that Jitsu will send to a destination.
  * Jitsu may apply additional transforms and type mappings before saving object to a destination, e.g.:
  * for SQL based data warehouse Jitsu will flatten hierarchical object structure to a single row object
- * while __id field value will be used to fill eventn_ctx_event_id primary key
+ * while $id field value will be used to fill eventn_ctx_event_id primary key
  */
 declare type DataRecord = {
   /**
    * Unique id of the record. The id of the same record should persist between run
    * Jitsu runs deduplication based on this record.
    *
-   * If uniqueId cannot be obtained naturally, please use buildSignatureId() helper function (TODO: implement)
+   * If uniqueId cannot be obtained naturally, please use buildSignatureId() helper function
    * that builds ID based on sorted field values of the record
    */
   $id: string;
@@ -66,7 +81,7 @@ declare type DataRecord = {
    */
   [hints: SqlTypeHintKey]: SqlTypeHint;
   /**
-   * Values. Nested values are not allowed
+   * Values.
    */
   [propName: string]: any;
 };
@@ -110,7 +125,7 @@ declare type JitsuDataMessage<T extends JitsuDataMessageType, P> = {
 
 /**
  * Adds a record to an underlying stream. Records are UPSERT'ed, meaning that
- * the record with same id will be replaced. Id is DataRecord.__id
+ * the record with same id will be replaced. Id is DataRecord.$id
  */
 declare type AddRecordMessage = JitsuDataMessage<"record", DataRecord>;
 
@@ -171,21 +186,6 @@ declare type StreamSink = {
    */
   deleteRecords(partitionTimestamp: Date, granularity: Granularity);
 };
-
-declare type SourceCatalog<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
-  config: Config
-) => Promise<StreamInstance<StreamConfig>[]>;
-
-/**
- * The main function that pulls data and convert it to the messages send to streamSink.
- */
-declare type StreamReader<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
-  sourceConfig: Config,
-  streamType: string,
-  streamConfiguration: StreamConfiguration<StreamConfig>,
-  streamSink: StreamSink,
-  services: { state: StateService }
-) => Promise<void>;
 
 /**
  * (For future implementation) function that is called when source triggers a webhook, and the

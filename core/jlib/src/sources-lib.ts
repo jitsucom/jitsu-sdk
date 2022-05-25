@@ -87,7 +87,7 @@ declare type StdoutStreamReaderFacade<Config = Record<string, any>, StreamConfig
   state: Record<string, any>
 ) => Promise<void>;
 
-function stateService(state: Record<string, any>, sink: StreamSink): StateService {
+export function stateService(state: Record<string, any>, sink: StreamSink): StateService {
   const currentState = state || {};
   return {
     set(key: string, object: any) {
