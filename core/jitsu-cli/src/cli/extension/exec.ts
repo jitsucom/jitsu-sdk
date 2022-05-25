@@ -73,7 +73,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   );
   program.option("-d, --dir <project_dir>", "project dir");
   program.option("-s, --stream-config <json>", "Stream configuration as an object.");
-  program.option("-t, --state <json>", "Saved state object.");
+  program.option("-t, --state <file>", "Saved state object to file");
   program.parse(["dummy", "dummy", ...args]);
   let cliOpts = program.opts();
 
@@ -99,17 +99,16 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
     };
   }
 
-  let stateObject: any;
-  if (cliOpts.state) {
-    try {
-      stateObject = JSON5.parse(cliOpts.state);
-    } catch (e: any) {
-      return {
-        success: false,
-        message: `Can't parse state JSON: '${cliOpts.state}' ${e.message})`,
-      };
-    }
+  const stateFile = path.resolve(cliOpts.state || `./src-${extension?.descriptor?.id || ""}-state.json`);
+
+
+  const stateFilePresent = fs.existsSync(stateFile);
+  if (stateFilePresent) {
+    getLog().info(`Loading state from ${chalk.bold(path.isAbsolute(stateFile))}`);
+  } else {
+    getLog().info(`State file is missing, starting with empty state ${chalk.bold(stateFile)}`);
   }
+  const stateObject = stateFilePresent ? JSON5.parse(fs.readFileSync(stateFile, "utf-8")) : {};
 
   if (!extension.validator) {
     getLog().info("⚠️ Extension doesn't support connection validation");
@@ -167,7 +166,8 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
         getLog()[msg.message?.["level"].toLowerCase()]?.("[" + msg.type + "] " + msg.message?.["message"]);
       } else if (msg.type === "state") {
         getLog().info("[" + msg.type + "] " + (msg.message ? JSON.stringify(msg.message) : ""));
-        getLog().info("💾 State was modified. New value: " + JSON.stringify(msg.message));
+        getLog().info(`💾 State was modified. Saving to: ${chalk.bold(path.isAbsolute(stateFile))}`);
+        fs.writeFileSync(stateFile, JSON.stringify(msg.message, null, 2));
       } else {
         getLog().info("[" + msg.type + "] " + (msg.message ? JSON.stringify(msg.message) : ""));
       }

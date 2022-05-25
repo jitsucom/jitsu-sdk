@@ -1,0 +1,34 @@
+{
+  "name": "jitsu-helpscout-source",
+  "version": "0.7.3",
+  "description": "Helpscout Source for Jitsu",
+  "main": "dist/helpscout-source.js",
+  "author": "Jitsu Dev Team <dev@jitsu.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jitsucom/jitsu-sdk",
+    "directory": "source-connectors/hepscout"
+  },
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "clean": "rm -rf ./dist",
+    "build": "jitsu-cli extension build",
+    "test": "jitsu-cli extension test",
+    "execute": "jitsu-cli extension exec-src",
+    "validate-config": "jitsu-cli extension validate-config"
+  },
+  "devDependencies": {
+    "@jitsu/types": "^0.7.3",
+    "@jitsu/jlib": "^0.7.3",
+    "jitsu-cli": "^0.7.3",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "airtable": "0.11.3"
+  }
+}

@@ -47,6 +47,8 @@ function sandbox({ globals = {}, file } = {}) {
       queueMicrotask: queueMicrotask,
       self: {},
       process: processOverloads,
+      fetch: fetch,
+      URLSearchParams: URLSearchParams,
       ...globals,
     },
     require: {
