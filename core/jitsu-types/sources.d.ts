@@ -106,7 +106,7 @@ declare type Granularity = "HOUR" | "DAY" | "MONTH" | "QUARTER" | "YEAR";
 
 declare type StreamInstance<StreamConfig = Record<string, any>> = {
   type: string;
-  supportedModes?: StreamSyncMode[];
+  supportedModes: ["full_sync"] | ["incremental"] | ["full_sync", "incremental"];
   params?: ConfigurationParameter<keyof StreamConfig>[];
 };
 

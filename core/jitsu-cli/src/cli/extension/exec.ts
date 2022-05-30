@@ -11,7 +11,14 @@ import { chalkCode } from "../../lib/chalk-code-highlight";
 import { appendError } from "../../lib/errors";
 import { DestinationMessage, JitsuExtensionExport } from "@jitsu/types/extension";
 import { validateConfiguration } from "../../lib/validation";
-import { DataRecord, JitsuDataMessage, JitsuDataMessageType } from "@jitsu/types/sources";
+import {
+  DataRecord,
+  JitsuDataMessage,
+  JitsuDataMessageType,
+  StreamConfiguration,
+  StreamInstance,
+  StreamSyncMode,
+} from "@jitsu/types/sources";
 import { build } from "./build";
 
 import Table from "cli-table";
@@ -101,7 +108,6 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
 
   const stateFile = path.resolve(cliOpts.state || `./src-${extension?.descriptor?.id || ""}-state.json`);
 
-
   const stateFilePresent = fs.existsSync(stateFile);
   if (stateFilePresent) {
     getLog().info(`Loading state from ${chalk.bold(path.isAbsolute(stateFile))}`);
@@ -133,6 +139,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   });
   let stream;
   let streamConfigObject = cliOpts.streamConfig && JSON5.parse(cliOpts.streamConfig);
+  let mode = streamConfigObject?.mode as string;
   if (streams.length > 1) {
     if (!streamConfigObject) {
       return {
@@ -155,6 +162,21 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   } else {
     stream = streams[0];
   }
+  const modes = (stream as StreamInstance).supportedModes;
+  if (!mode && modes.length > 1) {
+    return {
+      success: false,
+      message: `Stream ${stream.type} supports multiple modes (${modes.join(
+        ", "
+      )}). Please specify mode as -s {mode: '${modes[0]}', ...}`,
+    };
+  }
+  if (mode && !(modes as string[]).includes(mode)) {
+    return {
+      success: false,
+      message: `Stream ${stream.type} doesn't support mode ${mode}. Supported modes: ${modes.join(", ")}`,
+    };
+  }
 
   const resultTable = newTable();
   const sink = makeStreamSink({
@@ -173,7 +195,11 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
       }
     },
   });
-  await extension.streamReader(configObject, stream.type, { parameters: streamConfigObject }, sink, {
+  let streamConfiguration = { parameters: streamConfigObject } as StreamConfiguration;
+  if (mode) {
+    streamConfiguration.mode = mode as StreamSyncMode;
+  }
+  await extension.streamReader(configObject, stream.type, streamConfiguration, sink, {
     state: stateService(stateObject, sink),
   });
 
