@@ -1,4 +1,4 @@
-import path from "path/posix";
+import path from "path";
 import * as fs from "fs";
 import getLog from "./log";
 import { align, removeIndentation } from "./indent";
