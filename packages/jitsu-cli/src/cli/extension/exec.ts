@@ -3,7 +3,7 @@ import commander from "commander";
 import getLog from "../../lib/log";
 import chalk from "chalk";
 import path from "path";
-import JSON5 from "JSON5";
+import JSON5 from "json5";
 import fs from "fs";
 import { getDistFile, loadBuild } from "./index";
 import { doc } from "prettier";

@@ -11,7 +11,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import { jitsuCliVersion, jitsuPackageName } from "../../lib/version";
 import { getDistFile, loadBuild, validateTsConfig } from "./";
-import JSON5 from "JSON5";
+import JSON5 from "json5";
 
 export async function build(args: string[]): Promise<CommandResult> {
   const directory = args?.[0] || "";

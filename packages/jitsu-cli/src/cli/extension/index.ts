@@ -10,7 +10,7 @@ import { validateConfig } from "./validate-config";
 import { packageJsonTemplate } from "./template";
 import { JitsuExtensionExport } from "@jitsu/types/extension";
 import { Partial } from "rollup-plugin-typescript2/dist/partial";
-import JSON5 from "JSON5";
+import JSON5 from "json5";
 import { execExtension } from "./exec";
 //For new Function to get access to fetch
 global.fetch = require("cross-fetch");
