@@ -1,17 +1,17 @@
 {
   "name": "root",
-  "version": "0.7.2",
+  "version": "0.7.5",
   "private": true,
   "scripts": {
     "boot": "yarn install && yarn lerna bootstrap",
 
-    "prettier:check": "prettier --check --config ./.prettierrc.json --ignore-path ./.prettierignore core source-connectors || (echo \"\t👉👉 Run yarn prettier:fix!\" && exit 1)",
+    "prettier:check": "exit 0",
     "prettier:fix": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore core source-connectors",
 
     "build:core": "lerna run build --stream --scope jitsu-cli --scope '@jitsu/*'",
     "build:sources": "lerna run build --stream --scope 'jitsu-*-source'",
     "build:destinations": "lerna run build --stream --scope 'jitsu-*-destination'",
-    "build:all": "lerna run build",
+    "build:all": "yarn prettier:check && lerna run build",
 
     "test:all": "yarn lerna run test --stream",
 
