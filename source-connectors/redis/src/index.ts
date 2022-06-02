@@ -1,7 +1,6 @@
 import { SourceCatalog, StateService, StreamReader, StreamSink, StreamConfiguration } from "@jitsu/types/sources";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
 import { createClient } from "redis";
-import * as JSON5 from "json5";
 
 export interface RedisConfig {
   host: string;
@@ -103,7 +102,12 @@ function jsonOrString(value: Maybe<string>, ifString: (s: Maybe<string>) => any 
     return ifString(value);
   }
   try {
-    return JSON5.parse(value);
+    const parsed = JSON.parse(value);
+    if (parsed == value) {
+      //not an object but single value
+      return ifString(value);
+    }
+    return parsed;
   } catch (e) {
     return ifString(value);
   }
@@ -124,18 +128,24 @@ async function processRedisKey(key: string, redis, streamSink) {
       }
       break;
     case "list":
-      addRecord(streamSink, key, null, {
-        values: (await redis.lRange(key, 0, -1)).map(el => jsonOrString(el)),
+      (await redis.lRange(key, 0, -1)).forEach((value, index) => {
+        addRecord(
+          streamSink,
+          key,
+          null,
+          jsonOrString(value, value => ({ value }))
+        );
       });
       break;
     case "set":
-      addRecord(streamSink, key, null, {
-        values: (await redis.sMembers(key)).map(el => jsonOrString(el)),
-      });
-      break;
     case "zset":
-      addRecord(streamSink, key, null, {
-        values: (await redis.sMembers(key)).map(el => jsonOrString(el)),
+      (await redis.sMembers(key)).forEach((value, index) => {
+        addRecord(
+          streamSink,
+          key,
+          null,
+          jsonOrString(value, value => ({ value }))
+        );
       });
       break;
     case "hash":
