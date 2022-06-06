@@ -177,24 +177,27 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
       message: `Stream ${stream.type} doesn't support mode ${mode}. Supported modes: ${modes.join(", ")}`,
     };
   }
-
+  const effectiveMode = mode || modes[0];
   const resultTable = newTable();
-  const sink = makeStreamSink({
-    msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
-      if (msg.type === "record") {
-        getLog().info("[" + msg.type + "] " + (msg.message ? JSON.stringify(msg.message) : ""));
-        add(resultTable, msg.message);
-      } else if (msg.type === "log") {
-        getLog()[msg.message?.["level"].toLowerCase()]?.("[" + msg.type + "] " + msg.message?.["message"]);
-      } else if (msg.type === "state") {
-        getLog().info("[" + msg.type + "] " + (msg.message ? JSON.stringify(msg.message) : ""));
-        getLog().info(`💾 State was modified. Saving to: ${chalk.bold(path.isAbsolute(stateFile))}`);
-        fs.writeFileSync(stateFile, JSON.stringify(msg.message, null, 2));
-      } else {
-        getLog().info("[" + msg.type + "] " + (msg.message ? JSON.stringify(msg.message) : ""));
-      }
+  const sink = makeStreamSink(
+    {
+      msg<T extends JitsuDataMessageType, P>(msg: JitsuDataMessage<T, P>) {
+        if (msg.type === "record") {
+          getLog().info("[" + msg.type + "] " + (msg.message ? JSON.stringify(msg.message) : ""));
+          add(resultTable, msg.message);
+        } else if (msg.type === "log") {
+          getLog()[msg.message?.["level"].toLowerCase()]?.("[" + msg.type + "] " + msg.message?.["message"]);
+        } else if (msg.type === "state") {
+          getLog().info("[" + msg.type + "] " + (msg.message ? JSON.stringify(msg.message) : ""));
+          getLog().info(`💾 State was modified. Saving to: ${chalk.bold(path.isAbsolute(stateFile))}`);
+          fs.writeFileSync(stateFile, JSON.stringify(msg.message, null, 2));
+        } else {
+          getLog().info("[" + msg.type + "] " + (msg.message ? JSON.stringify(msg.message) : ""));
+        }
+      },
     },
-  });
+    effectiveMode as StreamSyncMode
+  );
   let streamConfiguration = { parameters: streamConfigObject } as StreamConfiguration;
   if (mode) {
     streamConfiguration.mode = mode as StreamSyncMode;

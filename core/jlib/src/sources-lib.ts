@@ -8,19 +8,16 @@ import {
   StreamConfiguration,
   StreamReader,
   StreamSink,
+  StreamSyncMode,
 } from "@jitsu/types/sources";
 const hash = require("object-hash");
 
-export function makeStreamSink(msg: Pick<StreamSink, "msg">): StreamSink {
+export function makeStreamSink(msg: Pick<StreamSink, "msg">, mode?: StreamSyncMode): StreamSink {
   let recordsAdded = 0;
   let transactionNumber = 0;
 
   return {
     addRecord(record: DataRecord) {
-      if (transactionNumber == 0) {
-        //implicit transaction creation
-        transactionNumber = 1;
-      }
       this.msg({ type: "record", message: record });
     },
     changeState(newState: Record<string, any>) {
@@ -30,24 +27,9 @@ export function makeStreamSink(msg: Pick<StreamSink, "msg">): StreamSink {
       this.msg({ type: "log", message: { level: level, message: message } });
     },
     clearStream() {
-      if (transactionNumber > 1 || recordsAdded > 0) {
-        throw new Error(
-          '"clear_stream" message allowed only in the first transaction and before any "record" message added. Current transaction number: ' +
-            transactionNumber +
-            " Records added: " +
-            recordsAdded
-        );
-      }
       this.msg({ type: "clear_stream" });
     },
     deleteRecords(partitionTimestamp: Date, granularity: Granularity) {
-      if (recordsAdded > 0) {
-        throw new Error('"delete_records" message must precede any "record" message in transaction.');
-      }
-      if (transactionNumber == 0) {
-        //implicit transaction creation
-        transactionNumber = 1;
-      }
       this.msg({
         type: "delete_records",
         message: {
@@ -57,13 +39,53 @@ export function makeStreamSink(msg: Pick<StreamSink, "msg">): StreamSink {
       });
     },
     newTransaction() {
-      recordsAdded = 0;
-      transactionNumber++;
       this.msg({ type: "new_transaction" });
     },
     msg<T extends JitsuDataMessageType, P>(m: JitsuDataMessage<T, P>) {
-      if (m.type === "record") {
-        recordsAdded++;
+      switch (m.type) {
+        case "record":
+          if (transactionNumber == 0) {
+            //implicit transaction creation
+            transactionNumber = 1;
+          }
+          recordsAdded++;
+          break;
+        case "state":
+          break;
+        case "log":
+          break;
+        case "clear_stream":
+          if (mode == "full_sync") {
+            throw new Error('"clear_stream" message is not supported in full_sync mode');
+          }
+          if (transactionNumber > 1 || recordsAdded > 0) {
+            throw new Error(
+              '"clear_stream" message allowed only in the first transaction and before any "record" message added. Current transaction number: ' +
+                transactionNumber +
+                " Records added: " +
+                recordsAdded
+            );
+          }
+          break;
+        case "delete_records":
+          if (mode == "full_sync") {
+            throw new Error('"delete_records" message is not supported in full_sync mode');
+          }
+          if (recordsAdded > 0) {
+            throw new Error('"delete_records" message must precede any "record" message in transaction.');
+          }
+          if (transactionNumber == 0) {
+            //implicit transaction creation
+            transactionNumber = 1;
+          }
+          break;
+        case "new_transaction":
+          if (mode == "full_sync") {
+            throw new Error('"new_transaction" message is not supported in full_sync mode');
+          }
+          recordsAdded = 0;
+          transactionNumber++;
+          break;
       }
       msg.msg(m);
     },

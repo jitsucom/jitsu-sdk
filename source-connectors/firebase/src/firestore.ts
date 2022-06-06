@@ -27,7 +27,6 @@ export async function streamFirestore(firebaseApp: App, streamConfiguration: Fir
   let collectionName = streamConfiguration.collection;
 
   const [collection, subCollection] = collectionName.split("/*/");
-  sink.clearStream();
   sink.log("INFO", `Reading firestore collection ${collection}`);
   await readCollection(
     () => getFirestore(firebaseApp).collection(collection),

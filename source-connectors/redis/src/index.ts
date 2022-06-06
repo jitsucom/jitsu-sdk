@@ -195,7 +195,6 @@ const streamReader: StreamReader<RedisConfig, HashStreamConfig> = async (
         let scanRes = await redis.scan(cursor, { MATCH: redisKeyPattern, COUNT: redisScanCount });
         scanIterations++;
         if (scanRes.keys.length > 0) {
-          streamSink.newTransaction();
           streamSink.log(
             "INFO",
             `Scanned ${formatNum(Math.min(scanIterations * redisScanCount, keys))} / ${formatNum(

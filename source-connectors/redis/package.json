@@ -1,6 +1,6 @@
 {
   "name": "jitsu-redis-source",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Redis Source for Jitsu",
   "main": "dist/redis-source.js",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
@@ -27,6 +27,6 @@
     "typescript": "^4.5.2"
   },
   "dependencies": {
-    "redis": "4.0.6"
+    "redis": "^4.1.0"
   }
 }
