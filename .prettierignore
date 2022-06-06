@@ -11,8 +11,8 @@ jitsu
 package.json
 tsconfig.json
 tsconfig.paths.json
-packages/jitsu-cli/lib
-packages/jitsu-types/lib
-packages/pipeline-helpers/lib
-packages/segment-transform/dist
-packages/test-destination/dist
+core/jitsu-cli/lib
+core/node-bridge/bin
+core/jitsu-types/lib
+core/jlib/lib
+core/test-destination/dist

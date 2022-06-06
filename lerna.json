@@ -1,8 +1,19 @@
 {
   "packages": [
-    "packages/*"
+    "core/*",
+    "source-connectors/*",
+    "destinations/*"
   ],
   "version": "0.7.5",
   "npmClient": "yarn",
-  "useWorkspaces": true
+  "useWorkspaces": true,
+  "command": {
+    "version": {
+      "allowBranch": [
+        "main",
+        "feature/693_sources_sdk"
+      ],
+      "message": "chore: update to version %s, auto-commit by lerna [ci skip] "
+    }
+  }
 }

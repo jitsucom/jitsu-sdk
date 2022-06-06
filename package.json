@@ -1,16 +1,28 @@
 {
   "name": "root",
+  "version": "0.7.5",
   "private": true,
   "scripts": {
+    "boot": "yarn install && yarn lerna bootstrap",
+
     "prettier:check": "exit 0",
-    "prettier:fix": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore packages",
-    "build": "yarn prettier:check && lerna run build && lerna run test",
-    "build-only": "lerna run build",
+    "prettier:fix": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore core source-connectors",
+
+    "build:core": "lerna run build --stream --scope jitsu-cli --scope '@jitsu/*'",
+    "build:sources": "lerna run build --stream --scope 'jitsu-*-source'",
+    "build:destinations": "lerna run build --stream --scope 'jitsu-*-destination'",
+    "build:all": "yarn prettier:check && lerna run build",
+
+    "test:all": "yarn lerna run test --stream",
+
+    "jitsu-cli": "yarn build:core && node core/jitsu-cli/lib/index.js",
+    "jitsu-cli:dev": "node core/jitsu-cli/lib/index.js",
+
+    "ci": "yarn prettier:check && yarn build:all && yarn test:all",
+
     "lerna": "lerna",
-    "lerna:boot": "lerna bootstrap",
-    "ci:check-env-var": "[ -z \"$NPM_TOKEN\" ] && echo \"❌ NPM_TOKEN env var must be set to run CI pipeline\" && exit 1 || exit 0",
-    "ci": "yarn ci:check-env-var && yarn build && echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc && lerna publish --canary --yes && rm .npmrc  ",
-    "link-all": "lerna exec -- yarn link"
+    "clean:modules": "rm -rf `find . -type d -name node_modules`",
+    "clean": "lerna run clean --stream"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",
@@ -20,7 +32,8 @@
     "typescript": "^4.5.2"
   },
   "workspaces": [
-    "packages/*"
-  ],
-  "version": "0.0.0"
+    "core/*",
+    "source-connectors/*",
+    "destinations/*"
+  ]
 }
