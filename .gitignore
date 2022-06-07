@@ -1,5 +1,6 @@
 *.idea
 cue.mod
+.turbo
 *node_modules
 core/jitsu-cli/lib
 core/jitsu-types/lib
