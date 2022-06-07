@@ -15,14 +15,14 @@ jobs:
       - name: Init dagger (dagger project init)
         uses: dagger/dagger-for-github@v3
         with:
-          args: project init
+          cmds: project init
 
       - name: Update dagger (dagger project update)
         uses: dagger/dagger-for-github@v3
         with:
-          args: project update
+          cmds: project update
 
-      - name: Build with dagger (dagger do build)
+      - name: Build & test with dagger (dagger do test)
         uses: dagger/dagger-for-github@v3
         with:
-          args: do test
+          cmds: do test
