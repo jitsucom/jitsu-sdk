@@ -1,6 +1,6 @@
 {
   "name": "jitsu-facebook-marketing-source",
-  "version": "0.7.3",
+  "version": "0.0.0",
   "description": "Google Ads Source for Jitsu",
   "main": "dist/facebook-marketing-source.js",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
@@ -21,9 +21,12 @@
     "execute": "jitsu-cli extension exec-src",
     "validate-config": "jitsu-cli extension validate-config"
   },
+  "dependencies": {
+    "@jitsu/jlib": "workspace:*"
+  },
   "devDependencies": {
-    "@jitsu/jlib": "^0.7.3",
-    "jitsu-cli": "^0.7.3",
+    "@jitsu/types": "workspace:*",
+    "jitsu-cli": "workspace:*",
     "tslib": "^2.3.1",
     "typescript": "^4.5.2"
   }

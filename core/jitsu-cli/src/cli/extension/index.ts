@@ -13,9 +13,6 @@ import { Partial } from "rollup-plugin-typescript2/dist/partial";
 import JSON5 from "json5";
 import { execDestinationExtension, execSourceExtension } from "./exec";
 import * as readline from "readline";
-import getLog from "../../lib/log";
-import { NodeVM } from "vm2";
-import * as os from "os";
 import { sandbox } from "@jitsu/node-bridge/sandbox";
 //For new Function to get access to fetch
 global.fetch = require("cross-fetch");

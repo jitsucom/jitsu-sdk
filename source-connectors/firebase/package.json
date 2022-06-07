@@ -1,6 +1,6 @@
 {
   "name": "jitsu-firebase-source",
-  "version": "0.7.3",
+  "version": "0.0.0",
   "description": "Airtable Source for Jitsu",
   "main": "dist/firebase-source.js",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
@@ -22,8 +22,11 @@
     "validate-config": "jitsu-cli extension validate-config"
   },
   "devDependencies": {
-    "jitsu-cli": "^0.7.3",
+    "@jitsu/types": "workspace:*",
+    "@jitsu/jlib": "workspace:*",
+    "jitsu-cli": "workspace:*",
     "tslib": "^2.3.1",
+    "json5": "latest",
     "typescript": "^4.5.2"
   },
   "dependencies": {

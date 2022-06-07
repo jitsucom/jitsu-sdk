@@ -23,6 +23,7 @@ export const packageJsonTemplate = ({ packageName, type, jitsuVersion = undefine
   devDependencies: {
     "@jitsu/types": `${jitsuVersion || "^" + jitsuCliVersion}`,
     "@jitsu/jlib": `${jitsuVersion || "^" + jitsuCliVersion}`,
+    "ts-jest": "^27.0.7",
     "jitsu-cli": `${jitsuVersion || "^" + jitsuCliVersion}`,
     tslib: "^2.3.1",
     typescript: "^4.5.2",

@@ -75,6 +75,15 @@ function amendJson(file: string, callback: (json: any) => any) {
   fs.writeFileSync(file, JSON.stringify(callback(JSON.parse(fs.readFileSync(file, "utf-8"))), null, 2));
 }
 
+function changeDep(pkg: any, name: string, version: string) {
+  if (pkg["dependencies"][name]) {
+    pkg["dependencies"][name] = version;
+  }
+  if (pkg["devDependencies"][name]) {
+    pkg["devDependencies"][name] = version;
+  }
+}
+
 test("jitsu-cli extension create -t destination", async () => {
   let projectBase = path.resolve(__dirname, "../../../test-projects/create-result");
   if (fs.existsSync(projectBase)) {
@@ -82,18 +91,17 @@ test("jitsu-cli extension create -t destination", async () => {
   }
   let result = await cmd(`extension create -d ${projectBase} -n testprj -j latest -t destination`);
   expect(result.exitCode).toBe(0);
-  amendJson(path.resolve(projectBase, "package.json"), pkg => ({
-    ...pkg,
-    resolutions: {
-      "@jitsu/jlib": `file:${path.resolve(__dirname, "../../jlib")}`,
-      "jitsu-cli": `file:${path.resolve(__dirname, "../../jitsu-cli")}`,
-    },
-  }));
-  expect(await exec(`yarn install --force`, { dir: projectBase })).toBe(0);
-  expect(await exec(`yarn build`, { dir: projectBase })).toBe(0);
-  expect(await exec(`yarn test`, { dir: projectBase })).toBe(0);
-  expect(await exec(`yarn validate-config -o "{exampleParam: true}"`, { dir: projectBase })).toBe(1);
-  expect(await exec(`yarn validate-config -o "{exampleParam: 'valid-config'}"`, { dir: projectBase })).toBe(0);
+  amendJson(path.resolve(projectBase, "package.json"), pkg => {
+    changeDep(pkg, "@jitsu/types", "file:/" + path.resolve(__dirname, "../../jitsu-types"));
+    changeDep(pkg, "@jitsu/jlib", "file:/" + path.resolve(__dirname, "../../jlib"));
+    changeDep(pkg, "jitsu-cli", "file:/" + path.resolve(__dirname, "../../jitsu-cli"));
+    return pkg;
+  });
+  expect(await exec(`npm install --force`, { dir: projectBase })).toBe(0);
+  expect(await exec(`npm run build`, { dir: projectBase })).toBe(0);
+  expect(await exec(`npm run test`, { dir: projectBase })).toBe(0);
+  expect(await exec(`npm run validate-config -- -c "{exampleParam: true}"`, { dir: projectBase })).toBe(1);
+  expect(await exec(`npm run validate-config -- -c "{exampleParam: 'valid-config'}"`, { dir: projectBase })).toBe(0);
   fs.writeFileSync(path.resolve(projectBase, "test-config.json"), "{exampleParam: 'valid-config'}");
-  expect(await exec(`yarn validate-config -c test-config.json`, { dir: projectBase })).toBe(0);
+  expect(await exec(`npm run validate-config -- -c test-config.json`, { dir: projectBase })).toBe(0);
 });

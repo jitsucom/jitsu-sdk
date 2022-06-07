@@ -123,7 +123,7 @@ const fetchReport = async (
       ],
     },
   });
-  return response.data.reports?.[0];
+  return (response as any).data?.reports?.[0];
 };
 
 const getGAEventWithDimensions = (row: GAnalyticsReportRow, dimHeaders: string[]): GAnalyticsEvent => {

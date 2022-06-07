@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/node-bridge",
-  "version": "0.7.3",
+  "version": "0.0.0",
   "description": "Node Bridge untilty",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
   "publishConfig": {
@@ -33,6 +33,7 @@
     "vm2": "^3.9.9"
   },
   "devDependencies": {
+    "rollup": "~2.75.5",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-inject": "^4.0.4",
     "@rollup/plugin-json": "^4.1.0",

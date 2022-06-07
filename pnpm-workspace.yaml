@@ -1,0 +1,4 @@
+packages:
+  - 'core/*'
+  - 'destinations/*'
+  - 'source-connectors/*'

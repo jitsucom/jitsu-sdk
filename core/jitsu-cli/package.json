@@ -1,6 +1,6 @@
 {
   "name": "jitsu-cli",
-  "version": "0.7.3",
+  "version": "0.0.0",
   "publishConfig": {
     "access": "public"
   },
@@ -22,14 +22,14 @@
     "bin"
   ],
   "scripts": {
-    "build": "yarn clean && tsc -p . && mv ./lib/src/* ./lib/ && rmdir ./lib/src/",
-    "global": "yarn install -g",
+    "build": "tsc -p . && mv ./lib/src/* ./lib/ && rmdir ./lib/src/",
     "clean": "rm -rf ./lib",
     "start": "ts-node src/index.ts",
     "cli": "node lib/index.js",
     "test": "jest --verbose ./__tests__"
   },
   "devDependencies": {
+    "@jitsu/types": "workspace:*",
     "@babel/preset-env": "^7.16.4",
     "@babel/preset-typescript": "^7.16.0",
     "@types/commander": "^2.12.2",
@@ -38,11 +38,11 @@
     "@types/jest-cli": "^24.3.0",
     "@types/validate-npm-package-name": "^3.0.3",
     "child_process": "^1.0.2",
-    "lerna": "^4.0.0",
     "ts-node": "^10.4.0"
   },
   "dependencies": {
-    "@jitsu/jlib": "^0.7.3",
+    "@jitsu/jlib": "workspace:*",
+    "@jitsu/node-bridge": "workspace:*",
     "@rollup/plugin-commonjs": "^22.0.0-14",
     "@rollup/plugin-inject": "^4.0.4",
     "@rollup/plugin-json": "^4.1.0",

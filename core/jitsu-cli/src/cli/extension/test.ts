@@ -23,7 +23,7 @@ export async function test(args: string[]): Promise<CommandResult> {
     };
   }
   validateTsConfig(tsConfigPath);
-  let jestArgs = ["--passWithNoTests", "--projects", projectBase];
+  const jestArgs = ["--passWithNoTests", "--projects", projectBase];
   if (typescriptEnabled) {
     jestArgs.push("--preset", "ts-jest");
   }

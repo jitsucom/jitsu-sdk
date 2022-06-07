@@ -1,39 +1,44 @@
 {
   "name": "root",
-  "version": "0.7.5",
-  "private": true,
+  "version": "0.0.0",
+  "private": false,
   "scripts": {
-    "boot": "yarn install && yarn lerna bootstrap",
+    "format:check": "prettier --check --config ./.prettierrc.json --ignore-path ./.prettierignore core source-connectors",
+    "format": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore core source-connectors",
+    "prepare": "husky install",
+    "pre-commit": "pnpm format:check",
 
-    "prettier:check": "exit 0",
-    "prettier:fix": "prettier --write --config ./.prettierrc.json --ignore-path ./.prettierignore core source-connectors",
+    "build": "turbo run build",
+    "test": "turbo run test",
 
-    "build:core": "lerna run build --stream --scope jitsu-cli --scope '@jitsu/*'",
-    "build:sources": "lerna run build --stream --scope 'jitsu-*-source'",
-    "build:destinations": "lerna run build --stream --scope 'jitsu-*-destination'",
-    "build:all": "yarn prettier:check && lerna run build",
+    "ci": "(pnpm format:check || echo 'Code is not formatted property!' && exit 1) && pnpm build && pnpm release --canary 0.9.0 --publish",
 
-    "test:all": "yarn lerna run test --stream",
+    "factory-reset": "rm -rf `find . -type d -name node_modules` && rm -rf `find . -type d -name .turbo`",
+    "clean": "turbo run clean",
 
-    "jitsu-cli": "yarn build:core && node core/jitsu-cli/lib/index.js",
-    "jitsu-cli:dev": "node core/jitsu-cli/lib/index.js",
-
-    "ci": "yarn prettier:check && yarn build:all && yarn test:all",
-
-    "lerna": "lerna",
-    "clean:modules": "rm -rf `find . -type d -name node_modules`",
-    "clean": "lerna run clean --stream"
+    "release": "ts-node --skipProject ./scripts/release.ts",
+    "release:canary": "pnpm release --canary 0.9.0 --filter './core/*' --filter=!./core/node-bridge --filter './source-connectors/*' --filter './destinations/*'"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",
+    "husky": "^8.0.1",
     "jest": "^27.3.1",
-    "lerna": "^4.0.0",
     "prettier": "latest",
-    "typescript": "^4.5.2"
+    "turbo": "~1.2.11",
+    "json5": "^2.1.0",
+    "typescript": "^4.5.2",
+    "ts-node": "~10.8.1"
   },
+  "engines": {
+    "yarn": ">=1000",
+    "pnpm": ">=3",
+    "npm": ">=1000",
+    "node": ">=14"
+  },
+  "packageManager": "pnpm",
   "workspaces": [
     "core/*",
-    "source-connectors/*",
-    "destinations/*"
+    "destinations/*",
+    "source-connectors/*"
   ]
 }

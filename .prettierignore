@@ -5,6 +5,7 @@
 .run
 # bundle stats
 *.mdx
+*.md
 jitsu
 # configs -- will keep multi-line json arrays
 .eslintrc.json

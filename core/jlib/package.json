@@ -1,6 +1,6 @@
 {
   "name": "@jitsu/jlib",
-  "version": "0.7.3",
+  "version": "0.0.0",
   "description": "Utility functions designed to outsource some processing logic from Server to JS",
   "author": "Jitsu Dev Team <dev@jitsu.com>",
   "publishConfig": {
@@ -21,19 +21,20 @@
   },
   "scripts": {
     "clean": "rm -rf ./lib",
-    "build": "yarn clean && tsc -p . && mv ./lib/src/* ./lib && rmdir ./lib/src",
+    "build": "tsc -p . && mv ./lib/src/* ./lib && rmdir ./lib/src",
     "test": "jest"
   },
   "bugs": {
     "url": "https://github.com/jitsucom/jitsu/issues"
   },
   "devDependencies": {
-    "@jitsu/node-bridge": "^0.7.3",
+    "@jitsu/node-bridge": "workspace:*",
     "@rollup/plugin-json": "^4.1.0",
     "@segment/analytics-next": "^1.32.1",
     "@types/jquery": "^3.5.10"
   },
   "dependencies": {
+    "@jitsu/types": "workspace:*",
     "date-fns": "^2.28.0",
     "object-hash": "^3.0.0"
   }

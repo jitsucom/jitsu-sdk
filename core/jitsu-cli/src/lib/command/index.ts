@@ -87,9 +87,11 @@ export const executeCommand = async (
   args: string[],
   helpOpts: HelpOptions
 ): Promise<CommandResult> => {
-  let newVersion = await hasNewerVersion();
-  if (newVersion) {
-    console.log(getUpgradeMessage(newVersion, jitsuCliVersion));
+  if (jitsuCliVersion !== "0.0.0") {
+    const newVersion = await hasNewerVersion();
+    if (newVersion) {
+      console.log(getUpgradeMessage(newVersion, jitsuCliVersion));
+    }
   }
   if (args.length === 0 || isHelpOption(args[0])) {
     displayHelp(commands, helpOpts);

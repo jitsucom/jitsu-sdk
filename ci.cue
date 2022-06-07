@@ -2,7 +2,7 @@ package todoapp
 
 import (
 	"dagger.io/dagger"
-	"dagger.io/dagger/core"
+
 	"universe.dagger.io/alpine"
 	"universe.dagger.io/bash"
 	"universe.dagger.io/docker"
@@ -31,7 +31,6 @@ dagger.#Plan & {
 						bash: {}
 						//we do not need npm for build, but it's required for test
 						npm: {}
-						yarn: {}
 						git: {}
 					}
 				},
@@ -41,18 +40,9 @@ dagger.#Plan & {
 				},
 				bash.#Run & {
 					workdir: "/src"
-					mounts: {
-						"/cache/yarn": {
-							dest:     "/cache/yarn"
-							type:     "cache"
-							contents: core.#CacheDir & {
-								id: "jitsu-sdk-yarn-cache"
-							}
-						}
-					}
 
 					script: contents: #"""
-						yarn boot
+						npm i -g pnpm && pnpm i
 					"""#
 				}
 			]
@@ -62,7 +52,7 @@ dagger.#Plan & {
 			input:   deps.output
 			workdir: "/src"
 			script: contents: #"""
-					yarn prettier:check
+					yarn format:check
 				"""#
 		}
 
@@ -70,7 +60,7 @@ dagger.#Plan & {
 			input:   deps.output
 			workdir: "/src"
 			script: contents: #"""
-					yarn build:all
+					pnpm build
 				"""#
 		}
 
@@ -78,7 +68,15 @@ dagger.#Plan & {
 			input:   build.output
 			workdir: "/src"
 			script: contents: #"""
-					yarn test:all
+					pnpm test
+				"""#
+		}
+
+		"canary-release": bash.#Run & {
+			input:   build.output
+			workdir: "/src"
+			script: contents: #"""
+					pnpm release:canary ---publish
 				"""#
 		}
 	}

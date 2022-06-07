@@ -1,0 +1,24 @@
+{
+  "pipeline": {
+    "test": {
+      "dependsOn": [
+        "build",
+        "^test"
+      ]
+    },
+    "clean": {
+      "dependsOn": [
+        "^clean"
+      ]
+    },
+    "build": {
+      "dependsOn": [
+        "clean",
+        "^build"
+      ]
+    },
+    "dev": {
+      "cache": false
+    }
+  }
+}
