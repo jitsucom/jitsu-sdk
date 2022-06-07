@@ -16,8 +16,8 @@
     "factory-reset": "rm -rf `find . -type d -name node_modules` && rm -rf `find . -type d -name .turbo`",
     "clean": "turbo run clean",
 
-    "release": "ts-node --skipProject ./scripts/release.ts",
-    "release:canary": "pnpm release --canary 0.9.0 --filter './core/*' --filter=!./core/node-bridge --filter './source-connectors/*' --filter './destinations/*'"
+    "release": "ts-node --skipProject ./scripts/release.ts --filter './core/*' --filter=!./core/node-bridge --filter './source-connectors/*' --filter './destinations/*'",
+    "release:canary": "pnpm release --canary 0.9.0"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",

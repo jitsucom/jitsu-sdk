@@ -35,14 +35,14 @@ function runProjectCommand(
   if (status !== 0) {
     const errorMsg = opts.error ? opts.error(command, status || 0) : `Command ${command} failed with status ${status}`;
     if (print === "error" || print === "all") {
-      console.log(printStdout(stderr, `  > `));
-      console.log(printStdout(stdout, `  > `));
+      console.log(printStdout(stderr, ` > `));
+      console.log(printStdout(stdout, ` > `));
     }
     throw new Error(errorMsg);
   }
   if (print === "all") {
-    console.log(printStdout(stdout, `  > `));
-    console.error();
+    console.log(printStdout(stderr, ` > `));
+    console.log(printStdout(stdout, ` > `));
   }
   return { stdout, stderr };
 }

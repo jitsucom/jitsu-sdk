@@ -1,4 +1,2 @@
-dist/
-lib/
 #Keep it here since file is used by NPM too, and NPM can't read .gitignore at root level
 .turbo
