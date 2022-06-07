@@ -86,10 +86,12 @@ async function run(args: any) {
       console.warn('⚠️⚠️⚠️ No NPM_TOKEN environment variable set. Since --publish is not specified, the script is going to proceed. Please, make sure you have set the NPM_TOKEN environment before running it with --publish.');
     }
   }
-  runProjectCommand(`pnpm whoami`, {
-    error: () =>
-      `Please make sure you are logged in to NPM Registry. Run \`pnpm login\` and then make sure you are logged in with \`pnpm whoami\``,
-  });
+  if (process.env.NPM_TOKEN) {
+    runProjectCommand(`pnpm whoami`, {
+      error: () =>
+        `Please make sure you are logged in to NPM Registry. Run \`pnpm login\` and then make sure you are logged in with \`pnpm whoami\``,
+    });
+  }
 
   const releaseVersion = args.canary ? `${args.canary}-alpha.${getRevision()}` : args.stable;
   const gitTag = `v${releaseVersion}`;

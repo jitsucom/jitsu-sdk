@@ -9,5 +9,7 @@ a detailed guide on extending Jitsu below
 ### [Extending Jitsu →](https://jitsu.com/docs/extending)
 
 
+## Contributing
 
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
