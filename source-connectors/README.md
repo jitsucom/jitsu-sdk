@@ -5,6 +5,7 @@
 
 * `firebase` - in progress (90%)
 * `helpscout` - in progress (90%)
+* `google-analytics` - in progress (90%)
 
 * `amplitude` - in progress
 * `facebook-marketing` - in progress (10%)
