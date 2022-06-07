@@ -27,10 +27,10 @@ Internally, Jitsu SDK uses:
 
 ### Release
 
-Make sure you are logged in to npm with `npm whoami`
+Obtain an **automation** [npm token](https://docs.npmjs.com/creating-and-viewing-access-tokens). Use `jitsuhq` account, not an individual one.
 
-* `pnpm release --stable X.Y.Z --publish` - to make a stable release 
-* `pnpm release:canary --publish` - to make a canary release. The version will be `X.Y.Z.alpha.N`. See the current value for `X.Y.Z` in `package.json`
+* `NPN_TOKEN=XXX pnpm release --stable X.Y.Z --publish` - to make a stable release 
+* `NPN_TOKEN=XXX pnpm release:canary --publish` - to make a canary release. The version will be `X.Y.Z.alpha.N`. See the current value for `X.Y.Z` in `package.json`
 
 Run without `--publish` to dry run.
 

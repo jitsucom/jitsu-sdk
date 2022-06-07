@@ -27,7 +27,7 @@ function runProjectCommand(
   } = {}
 ) {
   const print = opts?.print || "all";
-  console.log(`Running \`${command}\`...`);
+  console.log(`Running \`${command}\``);
   const { status, stderr, stdout } = child_process.spawnSync(command, {
     cwd: path.resolve(__dirname, ".."),
     shell: true,
@@ -69,7 +69,6 @@ function buildFilterArgs(filter: string | string[] | undefined | null): string {
 }
 
 async function run(args: any) {
-  console.log(args.filter);
   if (!args.filter) {
     console.warn("No filter specified, running release for all packages");
   }
@@ -80,7 +79,13 @@ async function run(args: any) {
   } else {
     throw new Error("Please specify either --canary or --stable");
   }
-
+  if (!process.env.NPM_TOKEN) {
+    if (args.publish) {
+      throw new Error('Please obtain an automation(!) npm token (https://docs.npmjs.com/creating-and-viewing-access-tokens) and set the NPM_TOKEN env var to publish packages. Note: npm login is not going to work');
+    } else {
+      console.warn('⚠️⚠️⚠️ No NPM_TOKEN environment variable set. Since --publish is not specified, the script is going to proceed. Please, make sure you have set the NPM_TOKEN environment before running it with --publish.');
+    }
+  }
   runProjectCommand(`pnpm whoami`, {
     error: () =>
       `Please make sure you are logged in to NPM Registry. Run \`pnpm login\` and then make sure you are logged in with \`pnpm whoami\``,
@@ -98,7 +103,7 @@ async function run(args: any) {
       console.warn("Skipping publish, making a dry run. Add --publish to make a real release.");
     }
     runProjectCommand(
-      `pnpm publish --tag ${npmTag} ${buildFilterArgs(args.filter)} --no-git-checks ${args.publish ? "" : "--dry-run"}`
+      `pnpm publish --tag ${npmTag} ${buildFilterArgs(args.filter)} --access public --force --no-git-checks ${args.publish ? "" : "--dry-run"}`
     );
     const tagCommand = `git tag -a v${releaseVersion} -m "Release ${releaseVersion}"`;
     if (args.publish) {
