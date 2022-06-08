@@ -16,7 +16,7 @@ import {
   JitsuDataMessage,
   JitsuDataMessageType,
   StreamConfiguration,
-  StreamInstance,
+  StreamPrototype,
   StreamSyncMode,
 } from "@jitsu/types/sources";
 import { build } from "./build";
@@ -162,7 +162,7 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
   } else {
     stream = streams[0];
   }
-  const modes = (stream as StreamInstance).supportedModes;
+  const modes = (stream as StreamPrototype).supportedModes;
   if (!mode && modes.length > 1) {
     return {
       success: false,

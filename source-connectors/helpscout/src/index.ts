@@ -4,7 +4,7 @@ import {
   StreamReader,
   StreamSink,
   StreamConfiguration,
-  StreamInstance,
+  StreamPrototype,
 } from "@jitsu/types/sources";
 import { ConfigValidationResult, ExtensionDescriptor } from "@jitsu/types/extension";
 
@@ -79,11 +79,11 @@ const reports: Record<string, HelpscoutReport> = {
 };
 
 const sourceCatalog: SourceCatalog<HelpscoutConfig> = async () => {
-  const entitiesIds: StreamInstance[] = Object.keys(entities).map(entity => ({
+  const entitiesIds: StreamPrototype[] = Object.keys(entities).map(entity => ({
     type: entity,
     supportedModes: ["full_sync"],
   }));
-  const reportsIds: StreamInstance[] = Object.keys(reports).map(report => ({
+  const reportsIds: StreamPrototype[] = Object.keys(reports).map(report => ({
     type: `report_${report}`,
     supportedModes: ["full_sync"],
   }));

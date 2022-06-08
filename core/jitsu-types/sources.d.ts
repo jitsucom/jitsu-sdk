@@ -29,7 +29,7 @@ import { SqlTypeHint, SqlTypeHintKey } from "./sql-hints";
 
 declare type SourceCatalog<Config = Record<string, any>, StreamConfig = Record<string, any>> = (
   config: Config
-) => Promise<StreamInstance<StreamConfig>[]>;
+) => Promise<StreamPrototype<StreamConfig>[]>;
 
 /**
  * The main function that pulls data and convert it to the messages send to streamSink.
@@ -104,7 +104,7 @@ declare type DeleteRecords = {
 
 declare type Granularity = "HOUR" | "DAY" | "MONTH" | "QUARTER" | "YEAR";
 
-declare type StreamInstance<StreamConfig = Record<string, any>> = {
+declare type StreamPrototype<StreamConfig = Record<string, any>> = {
   type: string;
   supportedModes: ["full_sync"] | ["incremental"] | ["full_sync", "incremental"];
   params?: ConfigurationParameter<keyof StreamConfig>[];
