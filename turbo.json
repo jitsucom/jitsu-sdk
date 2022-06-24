@@ -16,9 +16,6 @@
         "clean",
         "^build"
       ]
-    },
-    "dev": {
-      "cache": false
     }
   }
 }

@@ -42,7 +42,14 @@ declare type StreamReader<Config = Record<string, any>, StreamConfig = Record<st
   services: { state: StateService }
 ) => Promise<void>;
 
-declare type JitsuDataMessageType = "record" | "clear_stream" | "delete_records" | "new_transaction" | "state" | "log";
+declare type JitsuDataMessageType =
+  | "record"
+  | "clear_stream"
+  | "delete_records"
+  | "new_transaction"
+  | "state"
+  | "log"
+  | "schema";
 
 declare type JitsuLogLevel = "INFO" | "WARN" | "DEBUG" | "ERROR";
 
@@ -76,14 +83,13 @@ declare type DataRecord = {
    */
   $recordTimestamp?: Date;
   /**
-   * Each field may have an optional SQL type hint to help
-   * executor to create SQL table column and properly convert the value
-   */
-  [hints: SqlTypeHintKey]: SqlTypeHint;
-  /**
    * Values.
    */
   [propName: string]: any;
+};
+
+declare type StreamSchema = {
+  [prop: string]: SqlTypeHint | StreamSchema;
 };
 
 declare type LogRecord = {
@@ -129,6 +135,17 @@ declare type JitsuDataMessage<T extends JitsuDataMessageType, P> = {
  */
 declare type AddRecordMessage = JitsuDataMessage<"record", DataRecord>;
 
+/**
+ * Declares a schema for stream. Schema is merely a suggestion for Jitsu how
+ * to treat the data. If field is not present in schema, the data type will
+ * be inferred automatically.
+ *
+ * During the executing of streamReader, the source can send several "schema" messages,
+ * however those messages shouldn't contradict each other (e.g. first message defines 'a' as VARCHAR(100),
+ * and the next message defines it as NUMERIC)
+ */
+declare type SchemaMessage = JitsuDataMessage<"schema", StreamSchema>;
+
 declare type LogMessage = JitsuDataMessage<"log", LogRecord>;
 /**
  * Clears underlying table. Removes all records. Equivalent of 'TRUNCATE TABLE'
@@ -167,6 +184,11 @@ declare type StreamSink = {
    * @param record record
    */
   addRecord(record: DataRecord);
+
+  /**
+   * See SchemaMessage
+   */
+  schema(schema: StreamSchema);
   /**
    * Report that persistent state was changed and provide an object representing current state.
    */

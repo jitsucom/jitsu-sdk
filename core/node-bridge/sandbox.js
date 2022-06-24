@@ -1,6 +1,7 @@
 const NodeVM = require("vm2").NodeVM;
 
 const os = require("os");
+const stream = require("stream");
 
 function mockModule(moduleName, knownSymbols) {
   return new Proxy(
@@ -53,9 +54,7 @@ function sandbox({ globals = {}, file } = {}) {
     },
     require: {
       context: "sandbox",
-      external: false,
       builtin: [
-        "stream",
         "http",
         "url",
         "http2",
@@ -76,9 +75,11 @@ function sandbox({ globals = {}, file } = {}) {
         "querystring",
         "console",
       ],
+      external: ["stream"],
       root: "./",
 
       mock: {
+        stream,
         fs: mockModule("fs", { ...throwOnMethods("fs", ["readFile", "realpath", "lstat"]) }),
         os: mockModule("os", { platform: os.platform, EOL: os.EOL }),
         process: mockModule("process", processOverloads),

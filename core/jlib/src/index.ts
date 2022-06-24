@@ -10,6 +10,7 @@ import {
   JitsuDataMessage,
   JitsuDataMessageType,
   JitsuLogLevel,
+  StreamSchema,
   StreamSink,
 } from "@jitsu/types/sources";
 import { startOfDay, startOfHour, startOfMonth, startOfQuarter, startOfYear } from "date-fns";
@@ -247,6 +248,9 @@ export function flatten(obj: any, { separator = "_", skipArrays = false } = {}, 
 }
 
 export const stdoutStreamSink: StreamSink = {
+  schema(schema: StreamSchema) {
+    this.msg({ type: "schema", message: schema });
+  },
   addRecord(record: DataRecord) {
     this.msg({ type: "record", message: record });
   },

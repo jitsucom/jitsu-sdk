@@ -10,6 +10,7 @@
 
     "build": "turbo run build",
     "test": "turbo run test",
+    "jitsu-cli": "turbo run build --filter=jitsu-cli && node --enable-source-maps core/jitsu-cli/lib/index.js",
 
     "ci": "(pnpm format:check || echo 'Code is not formatted property!' && exit 1) && pnpm build && pnpm release --canary 0.9.0 --publish",
 

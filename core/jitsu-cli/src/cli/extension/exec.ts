@@ -1,5 +1,4 @@
 import { CommandResult } from "../../lib/command/types";
-import commander from "commander";
 import getLog from "../../lib/log";
 import chalk from "chalk";
 import path from "path";
@@ -23,6 +22,8 @@ import { build } from "./build";
 
 import Table from "cli-table";
 import { makeStreamSink, stateService } from "@jitsu/jlib/lib/sources-lib";
+import { PassThrough } from "stream";
+import minimist from "minimist";
 
 function getJson(json: string, file: string) {
   if (json) {
@@ -53,12 +54,12 @@ async function loadExtension(directory: string): Promise<{
   distFile: string;
   projectBase: string;
 }> {
-  let projectBase = path.isAbsolute(directory) ? directory : path.resolve(process.cwd() + "/" + directory);
-  let packageFile = path.resolve(projectBase, "package.json");
+  const projectBase = path.isAbsolute(directory) ? directory : path.resolve(process.cwd() + "/" + directory);
+  const packageFile = path.resolve(projectBase, "package.json");
   if (!fs.existsSync(packageFile)) {
     throw new Error("Can't find package.json in " + projectBase);
   }
-  let distFile = path.resolve(projectBase, getDistFile(JSON5.parse(fs.readFileSync(packageFile, "utf-8"))));
+  const distFile = path.resolve(projectBase, getDistFile(JSON5.parse(fs.readFileSync(packageFile, "utf-8"))));
   getLog().info(
     "⌛️ Loading extension (don't forget to build it before running exec!). Source: " + chalk.bold(distFile)
   );
@@ -67,26 +68,27 @@ async function loadExtension(directory: string): Promise<{
       `Can't find dist file ${chalk.bold(distFile)}. Does this dir contains jitsu extension? Have you run yarn build? `
     );
   }
-  let extension = await loadBuild(distFile);
+  const extension = await loadBuild(distFile);
 
   return { extension, distFile, projectBase };
 }
 
-export async function execSourceExtension(args: string[]): Promise<CommandResult> {
-  const program = new commander.Command();
-  program.option(
-    "-c, --config <config_file_or_json>",
-    "Configuration file path or inline extension configuration JSON"
-  );
-  program.option("-d, --dir <project_dir>", "project dir");
-  program.option("-s, --stream-config <json>", "Stream configuration as an object.");
-  program.option("-t, --state <file>", "Saved state object to file");
-  program.parse(["dummy", "dummy", ...args]);
-  let cliOpts = program.opts();
+function parseJson5(json: string) {
+  try {
+    return JSON5.parse(json);
+  } catch (e: any) {
+    throw new Error(`Invalid JSON5: ${e?.message}. JSON: ${json}`);
+  }
+}
 
-  let directory = cliOpts.dir || ".";
-  await build([directory]);
-  const { extension } = await loadExtension(directory);
+export async function execSourceExtension(
+  args: minimist.ParsedArgs,
+  extension: Partial<JitsuExtensionExport>
+): Promise<CommandResult> {
+  const config = args.config || args.c;
+  const dir = args.dir || args.d;
+  const state = args.state || args.s;
+  const streamConfig = args["stream-config"] || args.s;
 
   if (!extension.streamReader) {
     return { success: false, message: `Extension doesn't export ${chalk.bold("streamReader")} symbol` };
@@ -96,17 +98,24 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
     return { success: false, message: `Extension doesn't export ${chalk.bold("sourceCatalog")} symbol` };
   }
 
-  let configObject: any;
-  try {
-    configObject = getConfigJson(cliOpts.config);
-  } catch (e: any) {
+  if (!config) {
     return {
       success: false,
-      message: `Can't parse config JSON: '${cliOpts.config}' ${e.message})`,
+      message: `Missing required option ${chalk.bold("-c <file | json object>")}`,
     };
   }
 
-  const stateFile = path.resolve(cliOpts.state || `./src-${extension?.descriptor?.id || ""}-state.json`);
+  let configObject: any;
+  try {
+    configObject = getConfigJson(config);
+  } catch (e: any) {
+    return {
+      success: false,
+      message: `Can't parse config JSON: '${config}' ${e.message})`,
+    };
+  }
+
+  const stateFile = path.resolve(state || `./src-${extension?.descriptor?.id || ""}-state.json`);
 
   const stateFilePresent = fs.existsSync(stateFile);
   if (stateFilePresent) {
@@ -127,24 +136,23 @@ export async function execSourceExtension(args: string[]): Promise<CommandResult
         message: `Configuration validation failed: ${validationError}`,
       };
     }
-    getLog().info("🙌️ Configuration is valid!");
+    getLog().info("🙌 Configuration is valid!");
   }
   getLog().info("🏃 Getting available streams...");
-
-  let streams = await extension.sourceCatalog(configObject);
+  const streams = await extension.sourceCatalog(configObject);
 
   streams.forEach(stream => {
     let paramsDocs = (stream.params ?? []).map(param => `${param.id} - ${param.displayName}`).join(", ");
     getLog().info(`🌊 Stream: ${chalk.bold(stream.type)}. Parameters: ${paramsDocs.length > 0 ? paramsDocs : "none"}`);
   });
   let stream;
-  let streamConfigObject = cliOpts.streamConfig && JSON5.parse(cliOpts.streamConfig);
-  let mode = streamConfigObject?.mode as string;
+  const streamConfigObject = streamConfig && parseJson5(streamConfig);
+  const mode = streamConfigObject?.mode as string;
   if (streams.length > 1) {
     if (!streamConfigObject) {
       return {
         success: false,
-        message: `The connector exports more than one (${streams.length}) streams. Please specify stream name and config as -s {stream: 'name', ...}`,
+        message: `The connector exports more than one (${streams.length}) streams. Please specify stream name and config as -s {name: 'name', ...}`,
       };
     }
     if (!streamConfigObject?.name) {
@@ -259,52 +267,53 @@ function add(t: Table, rec: any) {
   t.rows.push(newRow);
 }
 
-export async function execDestinationExtension(args: string[]): Promise<CommandResult> {
-  const program = new commander.Command();
-  program.option(
-    "-f, --file <file path>",
-    "Path to file with jitsu events. Could be either on object, or array of objects"
-  );
-  program.option(
-    "-c, --config <config_file_or_json>",
-    "Configuration file path or inline extension configuration JSON"
-  );
-  program.option(
-    "-j, --json <event json>",
-    "Events JSON for processing (alternative to -f). Could be one object, or array of objects"
-  );
-  program.option("-d, --dir <project_dir>", "project dir");
-  program.option("-v, --skip-validation", "To skip config validation");
-  //We need those two 'dummies', commander expect to see all argv's here
-  program.parse(["dummy", "dummy", ...args]);
-  let cliOpts = program.opts();
-  let directory = cliOpts.dir || ".";
-  if (!cliOpts.json && !cliOpts.file) {
+export async function exec(args: minimist.ParsedArgs) {
+  const dir = args.dir || args.d;
+  const directory = dir || ".";
+  await build(args);
+  const { extension, projectBase } = await loadExtension(directory);
+  if (extension.destination) {
+    return execDestinationExtension(args, extension, projectBase);
+  } else {
+    return execSourceExtension(args, extension);
+  }
+}
+
+export async function execDestinationExtension(
+  args: minimist.ParsedArgs,
+  extension: Partial<JitsuExtensionExport>,
+  projectBase: string
+): Promise<CommandResult> {
+  const cfg = args.config || args.c;
+  const file = args.file || args.f;
+  const json = args.json || args.j;
+  const skipValidation = args["skip-validation"] || args.v;
+
+  if (!json && !file) {
     return { success: false, message: "Please specify -j or -f" };
   }
-  if (cliOpts.json && cliOpts.file) {
+  if (json && file) {
     return { success: false, message: "Both options -f and -j are provided. You should use either, not both" };
   }
-  if (!cliOpts.config) {
+  if (!cfg) {
     return { success: false, message: "Please define config object -c json_file_path or -c '{json_object:}'" };
   }
   let config: any;
   try {
-    config = getConfigJson(cliOpts.config);
+    config = getConfigJson(cfg);
   } catch (e: any) {
     return {
       success: false,
-      message: `Can't parse config JSON: '${cliOpts.config}' ${e.message})`,
+      message: `Can't parse config JSON: '${cfg}' ${e.message})`,
     };
   }
-  const { extension, projectBase } = await loadExtension(directory);
   getLog().info("🛂 Executing tests destination on " + chalk.bold(projectBase));
-  let events: any[] = toArray(getJson(cliOpts.json, cliOpts.file));
+  let events: any[] = toArray(getJson(json, file));
 
   if (!extension.destination) {
     return { success: false, message: "Extension doesn't export destination function" };
   }
-  if (!cliOpts.skipValidation && extension.validator) {
+  if (!skipValidation && extension.validator) {
     getLog().info(
       `Validating configuration:${chalkCode.json(
         align(JSON.stringify(config, null, 2), { indent: 4, lnBefore: 1, lnAfter: 1 })
@@ -318,7 +327,7 @@ export async function execDestinationExtension(args: string[]): Promise<CommandR
   } else {
     getLog().info(
       "💡 Config validation will be skipped " +
-        (cliOpts.skipValidation ? " as per requested by -v flag" : ": extension does not have an exported validator")
+        (skipValidation ? " as per requested by -v flag" : ": extension does not have an exported validator")
     );
   }
 

@@ -1,6 +1,5 @@
-import { run } from "./run";
+import { cliEntryPoint } from "./cli/cli";
 
 (async function (): Promise<any> {
-  const args = [...process.argv.slice(2)];
-  process.exit(await run(args));
+  process.exit(await cliEntryPoint(process.argv.slice(2)));
 })();

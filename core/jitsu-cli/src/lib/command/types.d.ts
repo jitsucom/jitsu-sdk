@@ -10,6 +10,7 @@ export type Command = {
   exec: (args: string[]) => Promise<CommandResult>;
   description: string;
   help: string;
+  aliases?: string[];
 };
 
 export type CommandRegistry<C extends string = string> = Record<C, Command>;

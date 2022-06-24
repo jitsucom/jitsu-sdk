@@ -2,6 +2,7 @@ import { Command, CommandRegistry, CommandResult, HelpOptions } from "./types";
 import getLog from "../log";
 import chalk from "chalk";
 import { getUpgradeMessage, hasNewerVersion, jitsuCliVersion } from "../version";
+import { binName } from "../../cli/router";
 
 function captureCommand(command: string, args: string[]): string[] | undefined {
   let commandParts = command.split(" ");
@@ -35,7 +36,7 @@ function displayHelp(
   }
   if (!cmd) {
     console.error("");
-    console.error(chalk.bold(`${helpOpts.binPrefix} <command> ...args — `) + `${helpOpts.description}`);
+    console.error("Usage: " + chalk.bold(`${helpOpts.binPrefix} <command> ...args — `) + `${helpOpts.description}`);
     console.error("");
     console.error("Available commands: ");
     console.error("");
@@ -66,7 +67,7 @@ function displayHelp(
     } else {
       console.error(chalk.bold(`SYNOPSIS`));
       console.error("");
-      console.error(chalk.bold(`  jitsu-cli ${cmd}`) + " - " + command.description);
+      console.error(chalk.bold(`  ${binName} ${cmd}`) + " - " + command.description);
       if (command.help) {
         console.error("");
         console.error(

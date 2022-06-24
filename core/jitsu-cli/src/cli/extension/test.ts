@@ -5,9 +5,10 @@ import chalk from "chalk";
 import fs from "fs";
 import { run as jest } from "jest-cli";
 import { validateTsConfig } from "./";
+import minimist from "minimist";
 
-export async function test(args: string[]): Promise<CommandResult> {
-  const directory = args?.[0] || "";
+export async function test(args: minimist.ParsedArgs): Promise<CommandResult> {
+  const directory = args.dir || args.d || "";
   let projectBase = path.isAbsolute(directory) ? directory : path.resolve(process.cwd() + "/" + directory);
   getLog().info("🛂 Running tests for " + chalk.bold(projectBase));
   let tsConfigPath = path.resolve(projectBase, "tsconfig.json");

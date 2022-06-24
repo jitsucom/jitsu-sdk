@@ -14,6 +14,7 @@ import { jitsuCliVersion, jitsuPackageName } from "../../lib/version";
 import { getDistFile, loadBuild, validateTsConfig } from "./";
 import * as JSON5 from "json5";
 import inject from "@rollup/plugin-inject";
+import minimist from "minimist";
 
 function fixNodeFetch(code: string) {
   /**
@@ -45,9 +46,10 @@ function insertStreamReaderFacade(targetFile) {
   };
 }
 
-export async function build(args: string[]): Promise<CommandResult> {
-  const directory = args?.[0] || "";
-  let projectBase = path.isAbsolute(directory) ? directory : path.resolve(process.cwd() + "/" + directory);
+export async function build(args: minimist.ParsedArgs): Promise<CommandResult> {
+  const directory = args.dir || args.d || "";
+
+  const projectBase = path.isAbsolute(directory) ? directory : path.resolve(process.cwd() + "/" + directory);
   getLog().info("🔨 Building project in " + chalk.bold(projectBase) + ` with ${jitsuPackageName}@${jitsuCliVersion} `);
   if (!fs.existsSync(projectBase)) {
     throw new Error(`Path ${projectBase} does not exist`);

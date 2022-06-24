@@ -8,3 +8,4 @@ core/node-bridge/bin
 test-projects
 *yarn-error.log
 *dist
+.local*

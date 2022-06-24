@@ -1,5 +1,4 @@
 import { CommandResult } from "../../lib/command/types";
-import commander from "commander";
 import validateNpmPackage from "validate-npm-package-name";
 import inquirer from "inquirer";
 import chalk from "chalk";
@@ -8,25 +7,25 @@ import fs from "fs";
 import getLog from "../../lib/log";
 import { write } from "../../lib/template";
 import { extensionProjectTemplate } from "./template";
+import type minimist from "minimist";
 
-export async function create(args: string[]): Promise<CommandResult> {
-  const program = new commander.Command();
-  program.option("-t, --type <project type>", "project type (destination or source)");
-  program.option("-d, --dir <project_dir>", "project dir");
-  program.option("-n, --name <project_name>", "project name");
-  program.option("-j, --jitsu-version <jitsu_version>", "Jitsu version");
+export async function create(args: minimist.ParsedArgs): Promise<CommandResult> {
   //We need those two 'dummies', commander expect to see all argv's here
-  program.parse(["dummy", "dummy", ...args]);
-  let cliOpts = program.opts();
-  if (cliOpts.name) {
-    let isValid = validateNpmPackage(cliOpts.name);
+  const dir = args.dir || args.d;
+
+  const jitsuVersion = args["jitsu-version"] || args.j;
+  const name = args.name || args.n;
+  const type = args.type || args.t;
+
+  if (name) {
+    let isValid = validateNpmPackage(name);
     if (!isValid.validForNewPackages) {
-      return { success: false, message: `Can't use ${cliOpts.name} as package name: ${isValid.errors}` };
+      return { success: false, message: `Can't use ${name} as package name: ${isValid.errors}` };
     }
   }
 
   let packageType =
-    cliOpts.type ||
+    type ||
     (
       await inquirer.prompt([
         {
@@ -43,7 +42,7 @@ export async function create(args: string[]): Promise<CommandResult> {
     ).package;
 
   let packageName =
-    cliOpts.name ||
+    name ||
     (
       await inquirer.prompt([
         {
@@ -62,7 +61,7 @@ export async function create(args: string[]): Promise<CommandResult> {
     ).package;
 
   let projectDir =
-    cliOpts.dir ||
+    dir ||
     (
       await inquirer.prompt([
         {
@@ -96,7 +95,7 @@ export async function create(args: string[]): Promise<CommandResult> {
 
   write(projectDir, extensionProjectTemplate, {
     packageName: packageName,
-    jitsuVersion: cliOpts.jitsuVersion,
+    jitsuVersion: jitsuVersion,
     type: packageType,
   });
 

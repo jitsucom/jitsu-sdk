@@ -7,6 +7,7 @@ import {
   StateService,
   StreamConfiguration,
   StreamReader,
+  StreamSchema,
   StreamSink,
   StreamSyncMode,
 } from "@jitsu/types/sources";
@@ -17,6 +18,9 @@ export function makeStreamSink(msg: Pick<StreamSink, "msg">, mode?: StreamSyncMo
   let transactionNumber = 0;
 
   return {
+    schema(schema: StreamSchema) {
+      this.msg({ type: "schema", message: schema });
+    },
     addRecord(record: DataRecord) {
       this.msg({ type: "record", message: record });
     },

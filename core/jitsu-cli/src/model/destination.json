@@ -1,0 +1,123 @@
+{
+  "$id": "https://example.com/person.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DestinationProperties",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/PostgresDestinationProperties"
+    },
+    {
+      "$ref": "#/$defs/BigQueryDestinationProperties"
+    }
+  ],
+  "$defs": {
+    "BaseDestinationProperties": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "documentation": "Destination type. Core destination types are: postgres, bigquery, redshift, clickhouse and snowflake.\nIn addition to them, Jitsu cluster can support other destination provided with extensions"
+        },
+        "name": {
+          "type": "string",
+          "documentation": "Destination name. Should not contain spaces. Should be unique within the project"
+        }
+      },
+      "required": ["name", "type"]
+    },
+    "PostgresDestinationProperties": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseDestinationProperties"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "host": {
+              "legacyNode": "_formData.pghost",
+              "type": "string",
+              "documentation": "Host",
+              "required": true
+            },
+            "port": {
+              "legacyNode": "_formData.pgport",
+              "required": true,
+              "type": "number",
+              "documentation": "Database server port",
+              "default": 5432
+            },
+            "db": {
+              "legacyNode": "_formData.pgdatabase",
+              "required": true,
+              "secret": true,
+              "type": "string",
+              "documentation": "Database name"
+            },
+            "pgschema": {
+              "legacyNode": "_formData.pgschema",
+              "documentation": "Schema",
+              "default": "public",
+              "required": true,
+              "type": "string"
+            },
+            "user": {
+              "legacyNode": "_formData.pguser",
+              "documentation": "Username",
+              "required": true,
+              "secret": true,
+              "type": "string"
+            },
+            "password": {
+              "legacyNode": "_formData.pgpassword",
+              "documentation": "Password",
+              "required": true,
+              "type": "string",
+              "secret": true,
+              "ui": {
+                "displayAs": "password"
+              }
+            },
+            "pgssl": {
+              "type": "string",
+              "enum": ["require", "verify-ca", "verify-full", "disable"],
+              "default": "require",
+              "documentation": "SSL Mode of the connection"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "BigQueryDestinationProperties": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/BaseDestinationProperties"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "projectId": {
+              "type": "string"
+            },
+            "accessKey": {
+              "oneOf": [
+                {
+                  "type": "object"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "dataset": {
+              "type": "string"
+            }
+          },
+          "required": ["projectId"]
+        }
+      ]
+    }
+  }
+}

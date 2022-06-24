@@ -1,5 +1,4 @@
 import { CommandResult } from "../../lib/command/types";
-import commander from "commander";
 import chalk from "chalk";
 import path from "path";
 import fs from "fs";
@@ -7,20 +6,14 @@ import JSON5 from "json5";
 import getLog from "../../lib/log";
 import { getDistFile, loadBuild, getConfigJson } from "./index";
 import { validateConfiguration } from "../../lib/validation";
+import minimist from "minimist";
+import { binName } from "../router";
 
-export async function validateConfig(args: string[]): Promise<CommandResult> {
-  const program = new commander.Command();
-  program.option("-d, --dir <project_dir>", "Project directory");
-  program.option(
-    "-c, --config <config_file_or_json>",
-    "Configuration file path or inline extension configuration JSON"
-  );
-  program.argument("[project_dir]");
+export async function validateConfig(args: minimist.ParsedArgs): Promise<CommandResult> {
+  const config = args.config || args.c;
+  const dir = args.dir || args.d || "";
 
-  program.parse(["dummy", "dummy", ...args]);
-  const opts = program.opts();
-
-  if (!opts.config) {
+  if (!config) {
     return {
       success: false,
       message: "Please define config object -c json_file_path or -c '{json_object:}'",
@@ -28,14 +21,14 @@ export async function validateConfig(args: string[]): Promise<CommandResult> {
   }
   let configObj: any;
   try {
-    configObj = getConfigJson(opts.config);
+    configObj = getConfigJson(config);
   } catch (e: any) {
     return {
       success: false,
-      message: `Can't parse config JSON: '${opts.config}' ${e.message})`,
+      message: `Can't parse config JSON: '${config}' ${e.message})`,
     };
   }
-  let projectDir = opts.dir || ".";
+  let projectDir = dir || ".";
   getLog().info("Project dir: " + projectDir);
 
   let packageFile = path.resolve(projectDir, "package.json");
@@ -46,7 +39,10 @@ export async function validateConfig(args: string[]): Promise<CommandResult> {
   let distFile = path.resolve(projectDir, getDistFile(packageObj));
   getLog().info("Dist file: " + distFile);
   if (!fs.existsSync(distFile)) {
-    return { success: false, message: `Can't find dist file (${distFile}). Forgot to run jitsu-cli extension build ?` };
+    return {
+      success: false,
+      message: `Can't find dist file (${distFile}). Forgot to run \`${binName} extension build\`?`,
+    };
   }
   getLog().info("🤔 Loading build from " + chalk.bold(distFile));
   let build = await loadBuild(distFile);

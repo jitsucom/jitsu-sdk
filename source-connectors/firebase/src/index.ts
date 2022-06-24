@@ -7,7 +7,8 @@ import { streamUsers } from "./users";
 import { streamFirestore } from "./firestore";
 
 export interface FirebaseConfig {
-  service_account_key: string | any;
+  "auth.type": "Service Account";
+  key: string | any;
   project_id: string;
 }
 
@@ -23,9 +24,15 @@ const descriptor: ExtensionDescriptor<FirebaseConfig> = {
   description: "Pulls data from Redis database",
   configurationParameters: [
     {
-      id: "service_account_key",
-      displayName: "Service Account Key JSON",
-      type: "json",
+      id: "auth.type",
+      required: true,
+      type: { oneOf: ["Service Account"] },
+      defaultValue: "Service Account",
+      displayName: "Auth Type",
+    },
+    {
+      id: "key",
+      displayName: "Project ID",
       documentation:
         "Read how to get an account here: https://cloud.google.com/iam/docs/creating-managing-service-account-keys",
       required: true,
@@ -40,10 +47,7 @@ const descriptor: ExtensionDescriptor<FirebaseConfig> = {
 };
 
 function getFirebaseApp(config: FirebaseConfig): App {
-  const jsonCredentials =
-    typeof config.service_account_key === "string"
-      ? JSON5.parse(config.service_account_key)
-      : config.service_account_key;
+  const jsonCredentials = typeof config.key === "string" ? JSON5.parse(config.key) : config.key;
   return initializeApp({ credential: cert(jsonCredentials), projectId: config.project_id });
 }
 
@@ -86,6 +90,9 @@ const streamReader: StreamReader<FirebaseConfig, FirestoreStreamConfig | UsersSt
     if (streamType === "users") {
       await streamUsers(firebaseApp, streamSink);
     } else {
+      if (!streamConfiguration.parameters) {
+        throw new Error(`Missing stream ${streamType} configuration parameters parameters`);
+      }
       await streamFirestore(firebaseApp, streamConfiguration.parameters as FirestoreStreamConfig, streamSink);
     }
   } finally {

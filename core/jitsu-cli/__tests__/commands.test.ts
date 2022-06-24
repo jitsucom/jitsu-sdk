@@ -1,9 +1,10 @@
-import { run } from "../src/run";
 import * as fs from "fs";
 import path from "path";
 import { spawn, spawnSync } from "child_process";
 import chalk from "chalk";
 import getLog from "../src/lib/log";
+import { binName } from "../src/cli/router";
+import { cliEntryPoint } from "../src/cli/cli";
 
 async function cmd(args?: string): Promise<{ exitCode: number; stderr: string }> {
   let originalError = console.error;
@@ -15,8 +16,8 @@ async function cmd(args?: string): Promise<{ exitCode: number; stderr: string }>
   });
   let exitCode: number;
   try {
-    exitCode = await run(args ? args.split(" ") : []);
-    let header = `   jitsu-cli ${args || ""}, code: ${exitCode} `;
+    exitCode = await cliEntryPoint(args ? args.split(" ") : []);
+    let header = `   ${binName} ${args || ""}, code: ${exitCode} `;
     originalInfo(
       [
         chalk.bgBlue.white(header),
@@ -33,22 +34,22 @@ async function cmd(args?: string): Promise<{ exitCode: number; stderr: string }>
   return { exitCode, stderr: consoleOutput.map(ln => `| ${ln}`).join("\n") };
 }
 
-test("jitsu-cli", async () => {
+test(binName, async () => {
   let result = await cmd();
-  expect(result.exitCode).toBe(0);
+  expect(result.exitCode).toBe(1);
 });
 
-test("jitsu-cli help", async () => {
+test(`${binName} help`, async () => {
   let result = await cmd("help");
   expect(result.exitCode).toBe(0);
 });
 
-test("jitsu-cli extension", async () => {
+test(`${binName} extension`, async () => {
   let result = await cmd("extension");
   expect(result.exitCode).toBe(0);
 });
 
-test("jitsu-cli extension help", async () => {
+test(`${binName} extension help`, async () => {
   let result = await cmd("extension help");
   expect(result.exitCode).toBe(0);
 });
@@ -66,7 +67,7 @@ function summary(cmd, cmdResult) {
 
 async function exec(cmd: string, opts: { dir?: string } = {}) {
   getLog().info(`Running ${cmd} in dir ${opts.dir || path.resolve(process.cwd())}`);
-  let cmdResult = await spawnSync(cmd, { cwd: opts.dir || ".", shell: true });
+  const cmdResult = await spawnSync(cmd, { cwd: opts.dir || ".", shell: true });
   summary(cmd, cmdResult);
   return cmdResult.status;
 }
@@ -83,20 +84,35 @@ function changeDep(pkg: any, name: string, version: string) {
     pkg["devDependencies"][name] = version;
   }
 }
-
-test("jitsu-cli extension create -t destination", async () => {
-  let projectBase = path.resolve(__dirname, "../../../test-projects/create-result");
+test(`${binName} extension create -t source`, async () => {
+  const projectBase = path.resolve(__dirname, "../../../test-projects/test-source-project");
   if (fs.existsSync(projectBase)) {
     fs.rmSync(projectBase, { recursive: true });
   }
-  let result = await cmd(`extension create -d ${projectBase} -n testprj -j latest -t destination`);
-  expect(result.exitCode).toBe(0);
+  const result = await cmd(`extension create -d ${projectBase} -n testsrc -j latest -t source`);
+  patchTestProjectDependencies(projectBase);
+  expect(await exec(`npm install --force`, { dir: projectBase })).toBe(0);
+  expect(await exec(`npm run build`, { dir: projectBase })).toBe(0);
+  expect(await exec(`npm run test`, { dir: projectBase })).toBe(0);
+});
+
+function patchTestProjectDependencies(projectBase: string) {
   amendJson(path.resolve(projectBase, "package.json"), pkg => {
     changeDep(pkg, "@jitsu/types", "file:/" + path.resolve(__dirname, "../../jitsu-types"));
     changeDep(pkg, "@jitsu/jlib", "file:/" + path.resolve(__dirname, "../../jlib"));
-    changeDep(pkg, "jitsu-cli", "file:/" + path.resolve(__dirname, "../../jitsu-cli"));
+    changeDep(pkg, binName, "file:/" + path.resolve(__dirname, "../../" + binName));
     return pkg;
   });
+}
+
+test(`${binName} extension create -t destination`, async () => {
+  const projectBase = path.resolve(__dirname, "../../../test-projects/test-destination-project");
+  if (fs.existsSync(projectBase)) {
+    fs.rmSync(projectBase, { recursive: true });
+  }
+  const result = await cmd(`extension create -d ${projectBase} -n testprj -j latest -t destination`);
+  expect(result.exitCode).toBe(0);
+  patchTestProjectDependencies(projectBase);
   expect(await exec(`npm install --force`, { dir: projectBase })).toBe(0);
   expect(await exec(`npm run build`, { dir: projectBase })).toBe(0);
   expect(await exec(`npm run test`, { dir: projectBase })).toBe(0);

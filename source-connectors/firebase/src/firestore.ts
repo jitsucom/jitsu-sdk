@@ -16,7 +16,8 @@ const readCollection = async (
     sink.log("INFO", `Processing ${docs.size} documents`);
     docs.forEach(callback);
     offset += docs.size;
-    docs = await collection().limit(limit).offset(offset).get();
+    docs = await collection().startAt().limit(limit).offset(offset).get();
+    docs[0].id;
     if (docs.size === 0) {
       sink.log("INFO", `Processing finished. Processed ${offset} docs in total`);
     }
@@ -24,7 +25,12 @@ const readCollection = async (
 };
 
 export async function streamFirestore(firebaseApp: App, streamConfiguration: FirestoreStreamConfig, sink: StreamSink) {
-  let collectionName = streamConfiguration.collection;
+  const collectionName = streamConfiguration.collection;
+  if (!collectionName) {
+    throw new Error(
+      `Missing required stream parameter collection. Configuration: ${JSON.stringify(streamConfiguration)}`
+    );
+  }
 
   const [collection, subCollection] = collectionName.split("/*/");
   sink.log("INFO", `Reading firestore collection ${collection}`);

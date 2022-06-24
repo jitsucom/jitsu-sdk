@@ -1,0 +1,45 @@
+{
+  "$id": "EventStreamProperties",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EventStreamProperties",
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "documentation": "Name of the key"
+    },
+
+    "type": {
+      "type": "string",
+      "enum": ["server", "client"],
+      "documentation": "Type of the key. 'client' keys should be used in frontend apps, they are inherently visible to users. 'server' keys are used to send data server-2-server. For 'client' keys it's highly recommended to set up a CORS domains"
+    },
+    "apiKeys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "keyId": {
+            "type": "string",
+            "documentation": "Unique ID of the key"
+          },
+          "hash": {
+            "type": "string",
+            "documentation": "Key hash"
+          },
+          "hint": {
+            "type": "string",
+            "documentation": "Hint to the key. Example abcdefh => ab***fh"
+          }
+        },
+        "required": ["keyId", "hash"]
+      }
+    },
+    "domains": {
+      "type": "array",
+      "item": "string",
+      "documentation": "List of domains from where the data can be send. Wildcards are supported. `*.abc.com` means both `sub.abc.com` and `abc.com`"
+    },
+    "required": ["name", "type", "apiKeys"]
+  }
+}
