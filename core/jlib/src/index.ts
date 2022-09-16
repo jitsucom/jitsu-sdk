@@ -234,14 +234,18 @@ export function flatten(obj: any, { separator = "_", skipArrays = false } = {}, 
   }
   const res = {};
   for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === "object") {
-      Object.entries(flatten(value, { separator, skipArrays }, [...path, key])).forEach(
-        ([subKey, subValue]) => (res[key + separator + subKey] = subValue)
-      );
-    } else if (typeof value == "function") {
-      throw new Error(`Can't flatten object with function as a value of ${key}. Path to node: ${path.join(".")}`);
-    } else {
+    if (value == null) {
       res[key] = value;
+    } else {
+      if (typeof value === "object") {
+        Object.entries(flatten(value, { separator, skipArrays }, [...path, key])).forEach(
+          ([subKey, subValue]) => (res[key + separator + subKey] = subValue)
+        );
+      } else if (typeof value == "function") {
+        throw new Error(`Can't flatten object with function as a value of ${key}. Path to node: ${path.join(".")}`);
+      } else {
+        res[key] = value;
+      }
     }
   }
   return res;
