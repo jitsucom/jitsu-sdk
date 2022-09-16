@@ -88,16 +88,25 @@ export async function build(args: minimist.ParsedArgs): Promise<CommandResult> {
     if (!fs.existsSync(indexFile)) {
       return { success: false, message: `Project should have src/index.ts file. Can't find it at ${indexFile}` };
     }
+    const rollupPlugins = [
+      typescriptEnabled && rollupTypescript({ cwd: projectBase }),
+      multi(),
+      resolve({ preferBuiltins: false }),
+      commonjs(),
+      rollupJson(),
+    ];
+    const outro = [
+      `exports.buildInfo = {sdkVersion: "${jitsuCliVersion}", sdkPackage: "${jitsuPackageName}", buildTimestamp: "${new Date().toISOString()}"};`,
+    ];
+    if (packageJson.keywords?.includes("jitsu-source-extension")) {
+      rollupPlugins.push(insertStreamReaderFacade(indexFile));
+      outro.push(
+        `exports.streamReader$StdoutFacade = exports.streamReader && __$srcLib.stdoutStreamReader(exports.streamReader);`
+      );
+    }
     const bundle = await rollup({
       input: [indexFile],
-      plugins: [
-        typescriptEnabled && rollupTypescript({ cwd: projectBase }),
-        insertStreamReaderFacade(indexFile),
-        multi(),
-        resolve({ preferBuiltins: false }),
-        commonjs(),
-        rollupJson(),
-      ],
+      plugins: rollupPlugins,
     });
 
     let format: ModuleFormat = "cjs";
@@ -106,10 +115,7 @@ export async function build(args: minimist.ParsedArgs): Promise<CommandResult> {
       format: format,
       exports: "named",
       banner: `//format=${format}`,
-      outro: [
-        `exports.buildInfo = {sdkVersion: "${jitsuCliVersion}", sdkPackage: "${jitsuPackageName}", buildTimestamp: "${new Date().toISOString()}"};`,
-        `exports.streamReader$StdoutFacade = exports.streamReader && __$srcLib.stdoutStreamReader(exports.streamReader);`,
-      ].join("\n"),
+      outro: outro.join("\n"),
       //preserveModules: true,
     });
 

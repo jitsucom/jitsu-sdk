@@ -36,7 +36,7 @@ export async function create(args: minimist.ParsedArgs): Promise<CommandResult> 
             ` ${chalk.bold("destination")} adds a new type of HTTP-based destination to Jitsu`,
             ` ${chalk.bold("source")}   adds a new source extension to Jitsu`,
           ].join("\n"),
-          choices: ["destination", "source"],
+          choices: ["destination", "source", "transform"],
         },
       ])
     ).package;

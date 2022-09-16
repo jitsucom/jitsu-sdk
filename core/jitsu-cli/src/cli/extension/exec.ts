@@ -274,6 +274,9 @@ export async function exec(args: minimist.ParsedArgs) {
   const { extension, projectBase } = await loadExtension(directory);
   if (extension.destination) {
     return execDestinationExtension(args, extension, projectBase);
+  }
+  if (extension.transform) {
+    return execTransformExtension(args, extension, projectBase);
   } else {
     return execSourceExtension(args, extension);
   }
@@ -359,6 +362,54 @@ export async function execDestinationExtension(
             "    Body:\n" + chalkCode.json(align(JSON.stringify(jsonify(msg.body), null, 2), { indent: 8 }))
           );
         }
+      });
+    } catch (e) {
+      getLog().info(
+        chalk.red(
+          appendError("❌ Failed to process event", e) +
+            align(JSON.stringify(ev, null, 2), { lnBefore: 1, lnAfter: 1, indent: 0 })
+        )
+      );
+    }
+  }
+  return { success: true };
+}
+
+export async function execTransformExtension(
+  args: minimist.ParsedArgs,
+  extension: Partial<JitsuExtensionExport>,
+  projectBase: string
+): Promise<CommandResult> {
+  const file = args.file || args.f;
+  const json = args.json || args.j;
+
+  if (!json && !file) {
+    return { success: false, message: "Please specify -j or -f" };
+  }
+  if (json && file) {
+    return { success: false, message: "Both options -f and -j are provided. You should use either, not both" };
+  }
+  getLog().info("🛂 Executing tests transformation on " + chalk.bold(projectBase));
+  let events: any[] = toArray(getJson(json, file));
+
+  if (!extension.transform) {
+    return { success: false, message: "Extension doesn't export transform function" };
+  }
+
+  getLog().info("🏃 Running transform plugin on " + events.length + " events");
+  for (const ev of events) {
+    try {
+      let messages = await extension.transform(ev);
+      if (!messages) {
+        getLog().info("⚽ Event is skipped: " + ellipsis(JSON.stringify(ev)));
+        continue;
+      }
+      const messagesArray: any = Array.isArray(messages) ? messages : [messages];
+      getLog().info(
+        `✅ Event emitted ${messagesArray.length} messages. Event JSON: ` + chalk.italic(ellipsis(JSON.stringify(ev)))
+      );
+      messagesArray.forEach(msg => {
+        getLog().info(chalk.italic(JSON.stringify(msg)));
       });
     } catch (e) {
       getLog().info(

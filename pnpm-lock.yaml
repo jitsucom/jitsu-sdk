@@ -298,6 +298,23 @@ importers:
       tslib: 2.4.0
       typescript: 4.7.3
 
+  source-connectors/mongodb:
+    specifiers:
+      '@jitsu/jlib': workspace:*
+      '@jitsu/types': workspace:*
+      jitsu-cli: workspace:*
+      redis: ^4.1.0
+      tslib: ^2.3.1
+      typescript: ^4.5.2
+    dependencies:
+      redis: 4.1.0
+    devDependencies:
+      '@jitsu/jlib': link:../../core/jlib
+      '@jitsu/types': link:../../core/jitsu-types
+      jitsu-cli: link:../../core/jitsu-cli
+      tslib: 2.4.0
+      typescript: 4.7.3
+
   source-connectors/redis:
     specifiers:
       '@jitsu/jlib': workspace:*

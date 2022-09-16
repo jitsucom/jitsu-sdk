@@ -8,7 +8,7 @@ function mockModule(moduleName, knownSymbols) {
     {},
     {
       set(target, prop, value, receiver) {
-        throw new Error(`Called ${moduleName}.${prop.toString()} with ${value} & ${receiver}`)
+        throw new Error(`Called ${moduleName}.${prop.toString()} with ${value} & ${receiver}`);
       },
       get: (target, prop) => {
         let known = knownSymbols[prop.toString()];
