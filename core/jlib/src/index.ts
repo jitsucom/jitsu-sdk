@@ -237,7 +237,11 @@ export function flatten(obj: any, { separator = "_", skipArrays = false } = {}, 
     if (value == null) {
       res[key] = value;
     } else {
-      if (typeof value === "object") {
+      if (Array.isArray(value)) {
+        if (!skipArrays) {
+          res[key] = JSON.stringify(value);
+        }
+      } else if (typeof value === "object") {
         Object.entries(flatten(value, { separator, skipArrays }, [...path, key])).forEach(
           ([subKey, subValue]) => (res[key + separator + subKey] = subValue)
         );
